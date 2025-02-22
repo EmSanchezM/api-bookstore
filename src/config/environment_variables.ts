@@ -1,6 +1,8 @@
 import * as valibot from 'valibot';
 
-export const ENVORAMENT_VARIABLES = {
+export const ENVIRONMENT_VARIABLES = {
+  NODE_ENV: 'NODE_ENV',
+  PORT: 'PORT',
   DATABASE_URL: 'DATABASE_URL',
   DATABASE_NAMESPACE: 'DATABASE_NAMESPACE',
   DATABASE_NAME: 'DATABASE_NAME',
@@ -9,6 +11,8 @@ export const ENVORAMENT_VARIABLES = {
 };
 
 const environmentSchema = valibot.object({
+  NODE_ENV: valibot.string(),
+  PORT: valibot.string(),
   DATABASE_URL: valibot.string(),
   DATABASE_NAMESPACE: valibot.string(),
   DATABASE_NAME: valibot.string(),
@@ -19,7 +23,7 @@ const environmentSchema = valibot.object({
 export const getEnvironmentVariables = () => {
   const envVariables: Record<string, string> = {};
 
-  for (const [key, value] of Object.entries(ENVORAMENT_VARIABLES)) {
+  for (const [key, value] of Object.entries(ENVIRONMENT_VARIABLES)) {
     const envValue = process.env[value];
     if (envValue) {
       envVariables[key] = envValue;

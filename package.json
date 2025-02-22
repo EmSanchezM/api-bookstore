@@ -1,0 +1,27 @@
+{
+  "name": "template-node-ts-surrealdb",
+  "version": "1.0.0",
+  "description": "Template for Node.js projects using TypeScript and SurrealDB",
+  "main": "index.js",
+  "scripts": {
+    "start:dev": "node --watch -r ts-node/register src/app.ts",
+    "start": "node dist/app.js",
+    "lint": "biome check src",
+    "format": "biome format --write src",
+    "build": "tsc"
+  },
+  "keywords": [],
+  "author": "Elvin Sanchez | emsanchez891@gmail.com",
+  "license": "ISC",
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@types/node": "22.13.5",
+    "ts-node": "10.9.2",
+    "typescript": "5.7.3"
+  },
+  "dependencies": {
+    "dotenv": "16.4.7",
+    "surrealdb": "1.2.1",
+    "valibot": "1.0.0-rc.1"
+  }
+}

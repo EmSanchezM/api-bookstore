@@ -1,0 +1,63 @@
+services:
+  pd:
+    image: pingcap/pd:latest
+    container_name: pd
+    ports:
+      - "${PD_CLIENT_PORT}:${PD_CLIENT_PORT}"
+    volumes:
+      - pd_data:/data
+    command: >
+      --name="pd" 
+      --client-urls="${PD_CLIENT_URL}" 
+      --advertise-client-urls="${PD_ADVERTISE_CLIENT_URL}" 
+      --peer-urls="${PD_PEER_URL}"
+      --advertise-peer-urls="${PD_ADVERTISE_PEER_URL}"
+      --initial-cluster="pd=${PD_ADVERTISE_PEER_URL}"
+    environment:
+      - PD_CLIENT_PORT=${PD_CLIENT_PORT}
+      - PD_CLIENT_URL=${PD_CLIENT_URL}
+      - PD_ADVERTISE_CLIENT_URL=${PD_ADVERTISE_CLIENT_URL}
+      - PD_PEER_URL=${PD_PEER_URL}
+      - PD_ADVERTISE_PEER_URL=${PD_ADVERTISE_PEER_URL}
+    restart: unless-stopped
+
+  tikv:
+    image: pingcap/tikv:latest
+    container_name: tikv
+    depends_on:
+      - pd
+    ports:
+      - "${TIKV_PORT}:${TIKV_PORT}"
+    volumes:
+      - tikv_data:/data
+    command: >
+      --pd="pd:${PD_CLIENT_PORT}" 
+      --addr="${TIKV_ADDR}" 
+      --advertise-addr="${TIKV_ADVERTISE_ADDR}"
+    environment:
+      - TIKV_PORT=${TIKV_PORT}
+      - TIKV_ADDR=${TIKV_ADDR}
+      - TIKV_ADVERTISE_ADDR=${TIKV_ADVERTISE_ADDR}
+    restart: unless-stopped
+  surrealdb:
+    image: surrealdb/surrealdb:latest
+    container_name: surrealdb_database
+    depends_on:
+      - tikv
+    command: start --username ${DATABASE_USERNAME} --password ${DATABASE_PASSWORD} tikv://${PD_NAME}:${PD_CLIENT_PORT}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./resources:/app/resources
+    environment:
+      - SURREAL_USER=${DATABASE_USERNAME}
+      - SURREAL_PASS=${DATABASE_PASSWORD}
+      - OTEL_SDK_DISABLED=true
+      - PD_NAME=${PD_NAME}
+      - PD_CLIENT_PORT=${PD_CLIENT_PORT}
+    restart: unless-stopped
+
+volumes:
+  pd_data:
+  tikv_data:
+  surrealdb_data:

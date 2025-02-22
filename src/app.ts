@@ -1,7 +1,7 @@
 import { envVariables } from './config';
 import { getDatabaseConnection } from './database/connection';
 
-const app = async () => {
+async function main() {
   console.log({ envVariables });
 
   // connect to database
@@ -9,10 +9,10 @@ const app = async () => {
   // test health check
   const healthcheck = await db.ping();
   if (db.status === 'connected' && healthcheck) {
-    console.info(' 🟢 SurrealDB is connected and healthy');
+    console.info('🟢 SurrealDB is connected and healthy');
   } else {
-    console.error(' 🔴 SurrealDB is not connected or healthy');
+    console.error('🔴 SurrealDB is not connected or healthy');
   }
 };
 
-app();
+main();

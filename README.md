@@ -1,7 +1,8 @@
 # Template Node.js TypeScript SurrealDB
+# API Bookstore
 
 ## Description
-A template for Node.js projects using TypeScript, Biome for code formatting/linting, and SurrealDB as the database. This template provides a solid foundation for building scalable backend applications with the freedom to implement any architecture or folder structure.
+A REST API for managing a bookstore or library system, built with Node.js, TypeScript, and SurrealDB. This API allows you to handle book inventory, customer management, sales, and library operations with features like book cataloging, borrowing tracking, and inventory management.
 
 ## Prerequisites
 - Node.js (v20.x or higher)
@@ -9,13 +10,43 @@ A template for Node.js projects using TypeScript, Biome for code formatting/lint
 - pnpm (recommended) or npm
 
 ## Features
+
+### Technical Stack
 - TypeScript support
-- SurrealDB integration
+- SurrealDB as database
 - Biome for code formatting and linting
 - Environment variables configuration
 - Docker support
 - Type-safe database operations
-- Flexible project structure - organize it your way!
+- REST API endpoints with Express.js
+
+### API Functionalities
+- Books Management
+  - CRUD operations for books
+  - Search books by title, author, genre, or ISBN
+  - Track book inventory and stock levels
+  - Manage book categories and genres
+
+- Authors Management
+  - CRUD operations for authors
+  - Author details and bibliography
+  - Link authors with their books
+
+- Users & Authentication
+  - User registration and authentication
+  - Role-based access control (Admin, Staff, Customer)
+  - User profile management
+
+- Orders & Sales
+  - Process book purchases
+  - Order history tracking
+  - Shopping cart functionality
+  - Generate sales reports
+
+- Reviews & Ratings
+  - Allow users to rate books
+  - Book reviews management
+  - Average rating calculation
 
 ## Getting Started
 

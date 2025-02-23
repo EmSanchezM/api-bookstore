@@ -5,7 +5,7 @@ import { getDatabaseConnection } from './database/connection';
 async function main() {
   const server = createServer();
 
-  server.listen(envVariables.PORT, async() => {
+  server.listen(envVariables.PORT, async () => {
     const db = await getDatabaseConnection();
     const healCheck = await db.ping();
     const isConnected = db.status === ConnectionStatus.Connected && healCheck;
@@ -18,6 +18,6 @@ async function main() {
     logger.info('🚀 Datatabase is up and running!');
     logger.info(`🚀 Server is running on port ${envVariables.PORT}`);
   });
-};
+}
 
 main();

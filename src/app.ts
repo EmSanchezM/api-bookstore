@@ -1,23 +1,26 @@
-import { ConnectionStatus } from 'surrealdb';
-import { envVariables, createServer, logger } from './config';
-import { getDatabaseConnection } from './database/connection';
+import { envVariables, createServer, logger } from './core/config';
+import { database } from './core/database';
 
 async function main() {
-  const server = createServer();
+  try {
+    const server = await createServer();
 
-  server.listen(envVariables.PORT, async () => {
-    const db = await getDatabaseConnection();
-    const healCheck = await db.ping();
-    const isConnected = db.status === ConnectionStatus.Connected && healCheck;
+    server.listen(envVariables.PORT, () => {
+      logger.info(`🌎 API Bookstore is running on ${envVariables.HOST_URL}:${envVariables.PORT}`);
+    });
 
-    if (!isConnected) {
-      logger.error('Failed to connect to SurrealDB:', db.status);
-      process.exit(1);
-    }
+    const shutdown = async () => {
+      logger.info('🚀 Shutting down API Bookstore...');
+      await database.closeConnection();
+      process.exit(0);
+    };
 
-    logger.info('🚀 Datatabase is up and running!');
-    logger.info(`🚀 Server is running on port ${envVariables.PORT}`);
-  });
+    process.on('SIGINT', shutdown);
+    process.on('SIGTERM', shutdown);
+  } catch (error) {
+    logger.error('Failed to start server:', error);
+    process.exit(1);
+  }
 }
 
 main();

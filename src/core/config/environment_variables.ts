@@ -3,6 +3,7 @@ import * as valibot from 'valibot';
 export const ENVIRONMENT_VARIABLES = {
   NODE_ENV: 'NODE_ENV',
   PORT: 'PORT',
+  HOST_URL: 'HOST_URL',
   DATABASE_URL: 'DATABASE_URL',
   DATABASE_NAMESPACE: 'DATABASE_NAMESPACE',
   DATABASE_NAME: 'DATABASE_NAME',
@@ -13,6 +14,7 @@ export const ENVIRONMENT_VARIABLES = {
 const environmentSchema = valibot.object({
   NODE_ENV: valibot.string(),
   PORT: valibot.string(),
+  HOST_URL: valibot.string(),
   DATABASE_URL: valibot.string(),
   DATABASE_NAMESPACE: valibot.string(),
   DATABASE_NAME: valibot.string(),

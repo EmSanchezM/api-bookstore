@@ -1,6 +1,6 @@
 import Surreal, { ConnectionStatus } from 'surrealdb';
 
-import { envVariables, logger } from '../config';
+import { getEnvironmentVariables, logger } from '../config';
 import { defineTables } from './define-tables';
 
 interface DbConfig {
@@ -10,6 +10,8 @@ interface DbConfig {
   username: string;
   password: string;
 }
+
+const envVariables = getEnvironmentVariables();
 
 const DEFAULT_CONFIG: DbConfig = {
   url: envVariables.DATABASE_URL,

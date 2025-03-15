@@ -1,5 +1,5 @@
-import { DatabaseErrorException } from "@/modules/shared/exceptions";
-import { RecordId } from "surrealdb";
+import { DatabaseErrorException } from '@/modules/shared/exceptions';
+import { RecordId } from 'surrealdb';
 
 export class SurrealRecordIdMapper {
   static toRecordId(tableName: string, id: string) {

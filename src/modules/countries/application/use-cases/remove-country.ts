@@ -6,9 +6,7 @@ import { InternalServerErrorException, NotFoundException } from '@/modules/share
 
 @injectable()
 export class RemoveCountryUseCase {
-  constructor(
-    @inject(TYPES.CountryRepository) private countryRepositoty: CountryRepository,
-  ) {}
+  constructor(@inject(TYPES.CountryRepository) private countryRepositoty: CountryRepository) {}
 
   async execute(id: string) {
     const country = await this.countryRepositoty.getCountryById(id);

@@ -23,9 +23,7 @@ interface CountryRecord {
 
 @injectable()
 export class SurrealCountryRepository implements CountryRepository {
-  constructor(
-    @inject(TYPES.DatabaseConnection) private readonly db: Surreal
-  ) {}
+  constructor(@inject(TYPES.DatabaseConnection) private readonly db: Surreal) {}
 
   async getCountryById(id: string): Promise<Country | null> {
     try {
@@ -99,7 +97,7 @@ export class SurrealCountryRepository implements CountryRepository {
       Object.keys(payload).forEach((key) => {
         if (payload[key] === undefined) delete payload[key];
       });
-      
+
       const updatedCountryRecord = await this.db.update(countryRecordId, payload);
       console.log(updatedCountryRecord);
       if (!updatedCountryRecord) return null;
@@ -114,7 +112,7 @@ export class SurrealCountryRepository implements CountryRepository {
     try {
       const countryRecordId = SurrealRecordIdMapper.toRecordId('country', id);
       const removedCountryRecord = await this.db.delete<CountryRecord>(countryRecordId);
-      
+
       if (!removedCountryRecord) return false;
 
       return removedCountryRecord.id ? true : false;
@@ -135,7 +133,7 @@ export class SurrealCountryRepository implements CountryRepository {
         is_active: !currentCountry.is_active,
         updated_at: new Date(),
       });
-      
+
       if (!updatedCountryRecord) return false;
 
       return true;

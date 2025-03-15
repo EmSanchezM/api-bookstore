@@ -10,9 +10,7 @@ import { generateUUID } from '@/modules/shared/generate-uuid';
 
 @injectable()
 export class CreateCountryUseCase {
-  constructor(
-    @inject(TYPES.CountryRepository) private countryRepositoty: CountryRepository,
-  ) {}
+  constructor(@inject(TYPES.CountryRepository) private countryRepositoty: CountryRepository) {}
 
   async execute(createCountryDto: CreateCountryDto) {
     const country = new Country({

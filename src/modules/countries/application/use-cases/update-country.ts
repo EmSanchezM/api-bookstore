@@ -9,9 +9,7 @@ import { DatabaseErrorException, NotFoundException } from '@/modules/shared/exce
 
 @injectable()
 export class UpdateCountryUseCase {
-  constructor(
-    @inject(TYPES.CountryRepository) private countryRepositoty: CountryRepository,
-  ) {}
+  constructor(@inject(TYPES.CountryRepository) private countryRepositoty: CountryRepository) {}
 
   async execute(id: string, updateCountryDto: UpdateCountryDto) {
     const existingCountry = await this.countryRepositoty.getCountryById(id);
@@ -20,11 +18,14 @@ export class UpdateCountryUseCase {
 
     existingCountry.update({
       ...updateCountryDto,
-    })
+    });
 
     console.log(existingCountry.properties());
 
-    const updatedCountry = await this.countryRepositoty.updateCountry(existingCountry.properties().id!, existingCountry);
+    const updatedCountry = await this.countryRepositoty.updateCountry(
+      existingCountry.properties().id!,
+      existingCountry,
+    );
 
     if (!updatedCountry) throw new DatabaseErrorException('Error updating country');
 

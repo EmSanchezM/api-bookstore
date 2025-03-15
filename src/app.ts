@@ -8,7 +8,7 @@ async function main() {
     server.listen(envVariables.PORT, () => {
       logger.info(`🌎 API Bookstore is running on ${envVariables.HOST_URL}:${envVariables.PORT}`);
     });
-  
+
     const shutdown = async () => {
       logger.info('🚀 Shutting down API Bookstore...');
       await database.closeConnection();

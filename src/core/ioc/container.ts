@@ -9,6 +9,6 @@ export const loadContainer = async () => {
   await container.loadAsync(databaseModule);
   container.load(countryModule);
   container.load(errorHandleModule);
-  
+
   return container;
 };

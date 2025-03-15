@@ -15,7 +15,7 @@ import { ErrorHandlerMiddleware } from '@/modules/shared/middlewares/error-handl
 export const createServer = async () => {
   try {
     dotenv.config();
-  
+
     await database.getConnection();
 
     if (!database.isConnected()) {
@@ -36,7 +36,7 @@ export const createServer = async () => {
       const errorHandlerMiddleware = container.get<ErrorHandlerMiddleware>(TYPES.ErrorHandlerMiddleware);
       app.use(errorHandlerMiddleware.catchAll.bind(errorHandlerMiddleware));
     });
-    
+
     return server.build();
   } catch (error) {
     logger.error('Failed to create server:', error);

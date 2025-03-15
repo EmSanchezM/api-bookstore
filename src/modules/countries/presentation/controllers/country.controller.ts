@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { inject } from 'inversify';
 import { controller, httpPost, httpGet, httpPut, httpDelete } from 'inversify-express-utils';
 import { TYPES } from '@/core/common/constants/types';
@@ -33,7 +33,7 @@ export class CountryController {
   ) {}
 
   @httpPost('/')
-  async create(req: Request, res: Response) {
+  async create(req: Request, res: Response, next: NextFunction) {
     try {
       const validationSchema = ValidationService.validate(CreateCountrySchema, req.body);
 
@@ -47,11 +47,7 @@ export class CountryController {
 
       res.status(HttpStatus.CREATED).json(country.properties());
     } catch (error: unknown) {
-      if (error instanceof BadRequestException) throw error;
-
-      if (error instanceof HttpException) throw error;
-
-      throw new InternalServerErrorException(error);
+      next(error);
     }
   }
 

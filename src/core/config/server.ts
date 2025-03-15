@@ -7,8 +7,10 @@ import { InversifyExpressServer } from 'inversify-express-utils';
 import { logger } from './logger';
 import { database } from '../database';
 
-import '../ioc/registry';
-import { loadContainer } from '../ioc/container';
+import '@/core/ioc/registry';
+import { loadContainer } from '@/core/ioc/container';
+import { TYPES } from '@/core/common/constants/types';
+import { ErrorHandlerMiddleware } from '@/modules/shared/middlewares/error-handlers';
 
 export const createServer = async () => {
   try {
@@ -30,6 +32,11 @@ export const createServer = async () => {
       app.use(cors());
     });
 
+    server.setErrorConfig((app) => {
+      const errorHandlerMiddleware = container.get<ErrorHandlerMiddleware>(TYPES.ErrorHandlerMiddleware);
+      app.use(errorHandlerMiddleware.catchAll.bind(errorHandlerMiddleware));
+    });
+    
     return server.build();
   } catch (error) {
     logger.error('Failed to create server:', error);

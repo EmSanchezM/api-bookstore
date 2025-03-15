@@ -5,7 +5,6 @@ import { BadRequestException } from './bad-request.exception';
 import { InternalServerErrorException } from './internal-server-error.exception';
 import { ForbiddenException } from './forbidden.exception';
 import { ConflictException } from './conflict.exception';
-import { BadConfigurationAccountRequestException } from './bad-configuration-account-request.exception';
 import { NotFoundException } from './not-found.exception';
 import { UnauthorizedException } from './unauthorized.exception';
 import { ServiceUnavailableException } from './service-unavailable.exception';
@@ -22,6 +21,5 @@ export {
   ConflictException,
   InternalServerErrorException,
   ServiceUnavailableException,
-  BadConfigurationAccountRequestException,
   RequestTimeoutException,
 };

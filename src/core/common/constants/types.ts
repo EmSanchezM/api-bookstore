@@ -1,8 +1,7 @@
-import { Database } from "@/core/database";
-
 export const TYPES = {
   Database: Symbol.for('Database'),
   DatabaseConnection: Symbol.for('DatabaseConnection'),
+  ErrorHandlerMiddleware: Symbol.for('ErrorHandlerMiddleware'),
   CountryRepository: Symbol.for('CountryRepository'),
   CreateCountryUseCase: Symbol.for('CreateCountryUseCase'),
   FindAllCountriesUseCase: Symbol.for('FindAllCountriesUseCase'),

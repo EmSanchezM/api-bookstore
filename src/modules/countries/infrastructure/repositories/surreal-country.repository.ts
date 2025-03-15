@@ -1,3 +1,4 @@
+import { inject, injectable } from 'inversify';
 import Surreal, { RecordId } from 'surrealdb';
 
 import { Country, CountryUpdate } from '@/modules/countries/domain/entities';
@@ -7,6 +8,7 @@ import { SurrealRecordIdMapper } from '@/modules/countries/infrastructure/mapper
 import { CountryRecordId, SurrealRecordId } from '@/modules/shared/types';
 
 import { logger } from 'core/config/logger';
+import { TYPES } from '@/core/common/constants/types';
 
 interface CountryRecord {
   id: SurrealRecordId | RecordId | string;
@@ -18,8 +20,11 @@ interface CountryRecord {
   [key: string]: unknown;
 }
 
+@injectable()
 export class SurrealCountryRepository implements CountryRepository {
-  constructor(private db: Surreal) {}
+  constructor(
+    @inject(TYPES.DatabaseConnection) private readonly db: Surreal
+  ) {}
 
   async getCountryById(id: string): Promise<Country | null> {
     const countryRecordId: CountryRecordId = `country:${id}`;

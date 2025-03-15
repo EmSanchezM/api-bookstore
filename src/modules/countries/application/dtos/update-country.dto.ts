@@ -1,6 +1,6 @@
-import * as v from 'valibot';
+import { partial, type InferInput } from 'valibot';
 import { CreateCountrySchema } from './create-country.dto';
 
-export const UpdateCountrySchema = v.partial(CreateCountrySchema);
+export const UpdateCountrySchema = partial(CreateCountrySchema);
 
-export type UpdateCountryDto = v.InferInput<typeof UpdateCountrySchema>;
+export type UpdateCountryDto = InferInput<typeof UpdateCountrySchema>;

@@ -1,4 +1,5 @@
-import * as valibot from 'valibot';
+import { InternalServerErrorException } from '@/modules/shared/exceptions';
+import { object, string, safeParse } from 'valibot';
 
 export const ENVIRONMENT_VARIABLES = {
   NODE_ENV: 'NODE_ENV',
@@ -11,15 +12,15 @@ export const ENVIRONMENT_VARIABLES = {
   DATABASE_PASSWORD: 'DATABASE_PASSWORD',
 };
 
-const environmentSchema = valibot.object({
-  NODE_ENV: valibot.string(),
-  PORT: valibot.string(),
-  HOST_URL: valibot.string(),
-  DATABASE_URL: valibot.string(),
-  DATABASE_NAMESPACE: valibot.string(),
-  DATABASE_NAME: valibot.string(),
-  DATABASE_USERNAME: valibot.string(),
-  DATABASE_PASSWORD: valibot.string(),
+const environmentSchema = object({
+  NODE_ENV: string(),
+  PORT: string(),
+  HOST_URL: string(),
+  DATABASE_URL: string(),
+  DATABASE_NAMESPACE: string(),
+  DATABASE_NAME: string(),
+  DATABASE_USERNAME: string(),
+  DATABASE_PASSWORD: string(),
 });
 
 export const getEnvironmentVariables = () => {
@@ -32,10 +33,12 @@ export const getEnvironmentVariables = () => {
     }
   }
 
-  const result = valibot.safeParse(environmentSchema, envVariables);
+  const result = safeParse(environmentSchema, envVariables);
 
   if (!result.success) {
-    throw new Error(`Invalid environment variables: ${result.issues.map((issue) => issue.message).join(', ')}`);
+    throw new InternalServerErrorException(
+      `Invalid environment variables: ${result.issues.map((issue) => issue.message).join(', ')}`,
+    );
   }
 
   return result.output;

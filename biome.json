@@ -29,6 +29,9 @@
     "formatter": {
       "quoteStyle": "single",
       "lineWidth": 120
+    },
+    "parser": {
+      "unsafeParameterDecoratorsEnabled": true
     }
   }
 }

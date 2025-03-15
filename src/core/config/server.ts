@@ -1,27 +1,38 @@
-import express from 'express';
+import 'reflect-metadata';
+import { json, urlencoded } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { InversifyExpressServer } from 'inversify-express-utils';
 
 import { logger } from './logger';
 import { database } from '../database';
-import { generateRoutes } from './generate-routes';
+
+import '../ioc/registry';
+import { loadContainer } from '../ioc/container';
 
 export const createServer = async () => {
-  dotenv.config();
-  const server = express();
+  try {
+    dotenv.config();
+  
+    await database.getConnection();
 
-  server.use(express.json());
-  server.use(express.urlencoded({ extended: true }));
-  server.use(cors());
+    if (!database.isConnected()) {
+      logger.error(' 🚫 Failed to connect to database');
+      process.exit(1);
+    }
 
-  await database.getConnection();
+    const container = await loadContainer();
+    const server = new InversifyExpressServer(container);
 
-  if (!database.isConnected()) {
-    logger.error(' 🚫 Failed to connect to database');
-    process.exit(1);
+    server.setConfig((app) => {
+      app.use(json());
+      app.use(urlencoded({ extended: true }));
+      app.use(cors());
+    });
+
+    return server.build();
+  } catch (error) {
+    logger.error('Failed to create server:', error);
+    throw error;
   }
-
-  await generateRoutes(server);
-
-  return server;
 };

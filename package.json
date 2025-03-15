@@ -26,6 +26,9 @@
     "cors": "2.8.5",
     "dotenv": "16.4.7",
     "express": "4.21.2",
+    "inversify": "6.2.2",
+    "inversify-express-utils": "6.4.10",
+    "reflect-metadata": "0.2.2",
     "surrealdb": "1.2.1",
     "valibot": "1.0.0-rc.4",
     "winston": "3.17.0"

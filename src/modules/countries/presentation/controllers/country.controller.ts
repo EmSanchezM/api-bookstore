@@ -1,131 +1,108 @@
 import { Request, Response } from 'express';
+import { inject } from 'inversify';
+import { controller, httpPost, httpGet, httpPut, httpDelete } from 'inversify-express-utils';
+import { TYPES } from '@/core/common/constants/types';
+import { BadRequestException, HttpException, HttpStatus, InternalServerErrorException } from '@/modules/shared/exceptions';
+import { ValidationService } from '@/modules/shared/application/validation/validator-service';
 
 import {
   CreateCountryUseCase,
   FindAllCountriesUseCase,
   FindByIdCountryUseCase,
   FindByIsoCodeCountryUseCase,
-  UpdateCountryUseCase,
   RemoveCountryUseCase,
+  UpdateCountryUseCase,
 } from '@/modules/countries/application/use-cases';
+
 import {
-  CreateCountrySchema,
-  UpdateCountrySchema,
   CreateCountryDto,
+  CreateCountrySchema,
   UpdateCountryDto,
+  UpdateCountrySchema,
 } from '@/modules/countries/application/dtos';
 
-import { ValidationService } from '@/modules/shared/application/validation/validator-service';
-
+@controller('/api/v1/countries')
 export class CountryController {
   constructor(
-    private readonly createCountryUseCase: CreateCountryUseCase,
-    private readonly findCountriesUseCase: FindAllCountriesUseCase,
-    private readonly findCountryByIdUseCase: FindByIdCountryUseCase,
-    private readonly findCountryByIsoCodeUseCase: FindByIsoCodeCountryUseCase,
-    private readonly updateCountryUseCase: UpdateCountryUseCase,
-    private readonly removeCountryUseCase: RemoveCountryUseCase,
-  ) {
-    this.create = this.create.bind(this);
-    this.findAll = this.findAll.bind(this);
-    this.findById = this.findById.bind(this);
-    this.findByIsoCode = this.findByIsoCode.bind(this);
-    this.update = this.update.bind(this);
-    this.remove = this.remove.bind(this);
-  }
+    @inject(TYPES.CreateCountryUseCase) private createCountryUseCase: CreateCountryUseCase,
+    @inject(TYPES.FindAllCountriesUseCase) private findAllCountriesUseCase: FindAllCountriesUseCase,
+    @inject(TYPES.FindByIdCountryUseCase) private findByIdCountryUseCase: FindByIdCountryUseCase,
+    @inject(TYPES.FindByIsoCodeCountryUseCase) private findByIsoCodeCountryUseCase: FindByIsoCodeCountryUseCase,
+    @inject(TYPES.UpdateCountryUseCase) private updateCountryUseCase: UpdateCountryUseCase,
+    @inject(TYPES.RemoveCountryUseCase) private removeCountryUseCase: RemoveCountryUseCase,
+  ) {}
 
+  @httpPost('/')
   async create(req: Request, res: Response) {
     try {
       const validationSchema = ValidationService.validate(CreateCountrySchema, req.body);
 
       if (!validationSchema.success)
-        throw new Error(`Invalid country data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`);
+        throw new BadRequestException(
+          `Invalid country data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`,
+        );
 
       const createCountryDto: CreateCountryDto = validationSchema.output;
       const country = await this.createCountryUseCase.execute(createCountryDto);
 
-      res.status(201).json(country.properties());
-    } catch (error) {
-      return res.status(400).json({
-        message: error instanceof Error ? error.message : String(error),
-      });
+      res.status(HttpStatus.CREATED).json(country.properties());
+    } catch (error: unknown) {
+      if (error instanceof BadRequestException) throw error;
+
+      if (error instanceof HttpException) throw error;
+
+      throw new InternalServerErrorException(error);
     }
   }
 
-  async findAll(req: Request, res: Response) {
-    try {
-      const countries = await this.findCountriesUseCase.execute();
-      res.status(200).json(countries.map((country) => country.properties()));
-    } catch (error) {
-      return res.status(400).json({
-        message: error instanceof Error ? error.message : String(error),
-      });
-    }
+  @httpGet('/')
+  async findAll() {
+    const countries = await this.findAllCountriesUseCase.execute();
+    return countries.map((country) => country.properties());
   }
 
+  @httpGet('/:id')
   async findById(req: Request, res: Response) {
-    try {
-      const country = await this.findCountryByIdUseCase.execute(req.params.id);
-      res.status(200).json(country.properties());
-    } catch (error) {
-      return res.status(400).json({
-        message: error instanceof Error ? error.message : String(error),
-      });
-    }
+    if (!req.params.id) throw new BadRequestException('Country id is required');
+
+    const country = await this.findByIdCountryUseCase.execute(req.params.id);
+
+    res.status(HttpStatus.OK).json(country.properties());
   }
 
+  @httpGet('/:isoCode')
   async findByIsoCode(req: Request, res: Response) {
-    try {
-      const country = await this.findCountryByIsoCodeUseCase.execute(req.params.isoCode);
-      res.status(200).json(country.properties());
-    } catch (error) {
-      return res.status(400).json({
-        message: error instanceof Error ? error.message : String(error),
-      });
-    }
+    if (!req.params.isoCode) throw new BadRequestException('Country iso code is required');
+
+    const country = await this.findByIsoCodeCountryUseCase.execute(req.params.isoCode);
+
+    res.status(HttpStatus.OK).json(country.properties());
   }
 
+  @httpPut('/:id')
   async update(req: Request, res: Response) {
-    try {
-      const { id } = req.params;
+    if (!req.params.id) throw new BadRequestException('Country id is required');
 
-      if (!id) throw new Error('Country id is required');
+    const validationSchema = ValidationService.validate(UpdateCountrySchema, req.body);
+    if (!validationSchema.success)
+      throw new BadRequestException(
+        `Invalid country data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`,
+      );
 
-      const validationSchema = ValidationService.validate(UpdateCountrySchema, req.body);
+    const updateCountryDto: UpdateCountryDto = validationSchema.output;
+    const country = await this.updateCountryUseCase.execute(req.params.id, updateCountryDto);
 
-      if (!validationSchema.success)
-        throw new Error(`Invalid country data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`);
-
-      const updateCountryDto: UpdateCountryDto = validationSchema.output;
-
-      const country = await this.updateCountryUseCase.execute(id, updateCountryDto);
-      res.status(200).json(country.properties());
-    } catch (error) {
-      return res.status(400).json({
-        message: error instanceof Error ? error.message : String(error),
-      });
-    }
+    res.status(HttpStatus.OK).json(country.properties());
   }
 
+  @httpDelete('/:id')
   async remove(req: Request, res: Response) {
-    try {
-      const { id } = req.params;
+    if (!req.params.id) throw new BadRequestException('Country id is required');
 
-      if (!id) throw new Error('Country id is required');
+    const isRemoved = await this.removeCountryUseCase.execute(req.params.id);
 
-      const country = await this.findCountryByIdUseCase.execute(id);
-
-      if (!country) throw new Error('Country not found');
-
-      const isRemoved = await this.removeCountryUseCase.execute(id);
-
-      res.status(200).json({
-        message: isRemoved ? 'Country deleted successfully' : 'Country not found',
-      });
-    } catch (error) {
-      return res.status(400).json({
-        message: error instanceof Error ? error.message : String(error),
-      });
-    }
+    res.status(HttpStatus.OK).json({
+      message: isRemoved ? 'Country deleted successfully' : 'Country not found',
+    });
   }
 }

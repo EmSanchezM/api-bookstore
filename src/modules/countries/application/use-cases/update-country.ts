@@ -1,9 +1,16 @@
+import { inject, injectable } from 'inversify';
+
+import { TYPES } from '@/core/common/constants/types';
+
 import { CountryUpdate } from '@/modules/countries/domain/entities';
 import { CountryRepository } from '@/modules/countries/domain/repositories';
 import { UpdateCountryDto } from '@/modules/countries/application/dtos';
 
+@injectable()
 export class UpdateCountryUseCase {
-  constructor(private countryRepositoty: CountryRepository) {}
+  constructor(
+    @inject(TYPES.CountryRepository) private countryRepositoty: CountryRepository,
+  ) {}
 
   async execute(id: string, updateCountryDto: UpdateCountryDto) {
     const country = await this.countryRepositoty.getCountryById(id);

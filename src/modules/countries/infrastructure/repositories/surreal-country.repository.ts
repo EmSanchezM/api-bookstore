@@ -9,14 +9,15 @@ import { CountryRecordId, SurrealRecordId } from '@/modules/shared/types';
 
 import { logger } from 'core/config/logger';
 import { TYPES } from '@/core/common/constants/types';
+import { DatabaseErrorException } from '@/modules/shared/exceptions';
 
 interface CountryRecord {
   id: SurrealRecordId | RecordId | string;
   name: string;
   iso_code: string;
   is_active: boolean;
-  created_at: string;
-  updated_at: string;
+  created_at: string | Date;
+  updated_at: string | Date;
   [key: string]: unknown;
 }
 
@@ -27,89 +28,108 @@ export class SurrealCountryRepository implements CountryRepository {
   ) {}
 
   async getCountryById(id: string): Promise<Country | null> {
-    const countryRecordId: CountryRecordId = `country:${id}`;
     try {
-      const [result] = await this.db.select<CountryRecord>(countryRecordId);
-      if (!result) return null;
+      const countryRecordId = SurrealRecordIdMapper.toRecordId('country', id);
 
-      return this.mapToCountry(result);
+      const countryRecord = await this.db.select<CountryRecord>(countryRecordId);
+
+      if (!countryRecord) return null;
+
+      return this.mapToCountry(countryRecord);
     } catch (error) {
       logger.error('Error getting country by id:', error);
-      return null;
+      throw new DatabaseErrorException(error);
     }
   }
 
   async getCountryByIsoCode(isoCode: string): Promise<Country | null> {
     try {
-      const [result] = await this.db.query<[CountryRecord[]]>(
+      const [countryRecord] = await this.db.query<[CountryRecord[]]>(
         'SELECT * FROM country WHERE iso_code = $iso_code LIMIT 1',
         { iso_code: isoCode },
       );
 
-      if (!result?.[0]) return null;
-      return this.mapToCountry(result[0]);
+      if (!countryRecord?.[0]) return null;
+
+      return this.mapToCountry(countryRecord[0]);
     } catch (error) {
       logger.error('Error getting country by ISO code:', error);
-      return null;
+      throw new DatabaseErrorException(error);
     }
   }
 
   async getAllCountries(): Promise<Country[]> {
     try {
-      const [result] = await this.db.query<[CountryRecord[]]>('SELECT * FROM country WHERE is_active = true');
+      const response = await this.db.select<CountryRecord>('country');
 
-      if (!result?.length) return [];
-      return result.map((country) => this.mapToCountry(country));
+      if (!response?.length) return [];
+
+      return response.map((country: any) => this.mapToCountry(country));
     } catch (error) {
       logger.error('Error getting all countries:', error);
-      return [];
+      throw new DatabaseErrorException(error);
     }
   }
 
   async createCountry(country: Country): Promise<Country | null> {
     try {
-      const properties = country.properties();
+      const properties = country.propertiesToDatabase();
       const countryRecordId = SurrealRecordIdMapper.toRecordId('country', properties.id!);
-      const result = await this.db.create(countryRecordId, properties);
 
-      if (!result) return null;
-      return this.mapToCountry(result);
+      const newCountryRecord = await this.db.create(countryRecordId, properties);
+
+      if (!newCountryRecord) return null;
+
+      return this.mapToCountry(newCountryRecord);
     } catch (error) {
-      console.error('Error creating country:', error);
-      return null;
+      logger.error('Error creating country:', error);
+      throw new DatabaseErrorException(error);
     }
   }
 
-  async updateCountry(id: string, country: Partial<CountryUpdate>): Promise<Country | null> {
+  async updateCountry(id: string, country: Country): Promise<Country | null> {
     try {
       const countryRecordId = SurrealRecordIdMapper.toRecordId('country', id);
-      const result = await this.db.update(countryRecordId, country);
+      const properties = country.properties();
 
-      if (!result) return null;
-      return this.mapToCountry(result);
-    } catch (error) {
+      const payload: Partial<CountryRecord> = {
+        name: properties.name,
+        iso_code: properties.isoCode,
+        is_active: properties.isActive,
+        created_at: properties.createdAt,
+        updated_at: new Date(),
+      };
+
+      Object.keys(payload).forEach((key) => {
+        if (payload[key] === undefined) delete payload[key];
+      });
+      
+      const updatedCountryRecord = await this.db.update(countryRecordId, payload);
+      console.log(updatedCountryRecord);
+      if (!updatedCountryRecord) return null;
+
+      return this.mapToCountry(updatedCountryRecord);
+    } catch (error: unknown) {
       logger.error('Error updating country:', error);
-      return null;
+      throw new DatabaseErrorException(error);
     }
   }
 
   async deleteCountry(id: string): Promise<boolean> {
     try {
       const countryRecordId = SurrealRecordIdMapper.toRecordId('country', id);
-      const result = await this.db.delete<CountryRecord>(countryRecordId);
+      const removedCountryRecord = await this.db.delete<CountryRecord>(countryRecordId);
 
-      return Array.isArray(result) && result.length > 0;
+      return Array.isArray(removedCountryRecord) && removedCountryRecord.length > 0;
     } catch (error) {
       logger.error('Error deleting country:', error);
-      return false;
+      throw new DatabaseErrorException(error);
     }
   }
 
   private mapToCountry(record: any): Country {
-    const id: string = SurrealRecordIdMapper.fromRecordId(record.id);
-
     return new Country({
-      id,
+      id: SurrealRecordIdMapper.fromRecordId(record.id),
       name: record.name,
       isoCode: record.iso_code,
       isActive: record.is_active,

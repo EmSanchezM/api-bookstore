@@ -9,6 +9,7 @@ import { NotFoundException } from './not-found.exception';
 import { UnauthorizedException } from './unauthorized.exception';
 import { ServiceUnavailableException } from './service-unavailable.exception';
 import { RequestTimeoutException } from './request-timeout.exception';
+import { DatabaseErrorException } from './database-error.exception';
 
 export {
   HttpStatus,
@@ -22,4 +23,5 @@ export {
   InternalServerErrorException,
   ServiceUnavailableException,
   RequestTimeoutException,
+  DatabaseErrorException,
 };

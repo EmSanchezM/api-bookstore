@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
 import { inject } from 'inversify';
-import { controller, httpPost, httpGet, httpPut, httpDelete } from 'inversify-express-utils';
+import { controller, httpPost, httpGet, httpPut, httpDelete, next } from 'inversify-express-utils';
 import { TYPES } from '@/core/common/constants/types';
-import { BadRequestException, HttpException, HttpStatus, InternalServerErrorException } from '@/modules/shared/exceptions';
-import { ValidationService } from '@/modules/shared/application/validation/validator-service';
+import { BadRequestException, HttpStatus } from '@/modules/shared/exceptions';
+import { ValidationService } from '@/modules/shared/validation/validator-service';
 
 import {
   CreateCountryUseCase,
@@ -52,53 +52,74 @@ export class CountryController {
   }
 
   @httpGet('/')
-  async findAll() {
-    const countries = await this.findAllCountriesUseCase.execute();
-    return countries.map((country) => country.properties());
+  async findAll(req: Request, res: Response, next: NextFunction) {
+    try {
+      const countries = await this.findAllCountriesUseCase.execute();
+
+      res.status(HttpStatus.OK).json(countries.map((country) => country.properties()));
+    } catch (error) {
+      next(error);
+    }
   }
 
   @httpGet('/:id')
-  async findById(req: Request, res: Response) {
-    if (!req.params.id) throw new BadRequestException('Country id is required');
+  async findById(req: Request, res: Response, next: NextFunction) {
+    try {
+      if (!req.params.id) throw new BadRequestException('Country id is required');
 
-    const country = await this.findByIdCountryUseCase.execute(req.params.id);
+      const country = await this.findByIdCountryUseCase.execute(req.params.id);
 
-    res.status(HttpStatus.OK).json(country.properties());
+      res.status(HttpStatus.OK).json(country.properties());
+    } catch (error) {
+      next(error);
+    }
   }
 
-  @httpGet('/:isoCode')
-  async findByIsoCode(req: Request, res: Response) {
-    if (!req.params.isoCode) throw new BadRequestException('Country iso code is required');
+  @httpGet('/iso-code/:isoCode')
+  async findByIsoCode(req: Request, res: Response, next: NextFunction) {
+    try {
+      if (!req.params.isoCode) throw new BadRequestException('Country iso code is required');
 
-    const country = await this.findByIsoCodeCountryUseCase.execute(req.params.isoCode);
+      const country = await this.findByIsoCodeCountryUseCase.execute(req.params.isoCode);
 
-    res.status(HttpStatus.OK).json(country.properties());
+      res.status(HttpStatus.OK).json(country.properties());
+    } catch (error) {
+      next(error);
+    }
   }
 
   @httpPut('/:id')
-  async update(req: Request, res: Response) {
-    if (!req.params.id) throw new BadRequestException('Country id is required');
+  async update(req: Request, res: Response, next: NextFunction) {
+    try {
+      if (!req.params.id) throw new BadRequestException('Country id is required');
 
-    const validationSchema = ValidationService.validate(UpdateCountrySchema, req.body);
-    if (!validationSchema.success)
-      throw new BadRequestException(
-        `Invalid country data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`,
-      );
+      const validationSchema = ValidationService.validate(UpdateCountrySchema, req.body);
+      if (!validationSchema.success)
+        throw new BadRequestException(
+          `Invalid country data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`,
+        );
 
-    const updateCountryDto: UpdateCountryDto = validationSchema.output;
-    const country = await this.updateCountryUseCase.execute(req.params.id, updateCountryDto);
+      const updateCountryDto: UpdateCountryDto = validationSchema.output;
+      const country = await this.updateCountryUseCase.execute(req.params.id, updateCountryDto);
 
-    res.status(HttpStatus.OK).json(country.properties());
+      res.status(HttpStatus.OK).json(country.properties());
+    } catch (error: unknown) {
+      next(error);
+    }
   }
 
   @httpDelete('/:id')
-  async remove(req: Request, res: Response) {
-    if (!req.params.id) throw new BadRequestException('Country id is required');
+  async remove(req: Request, res: Response, next: NextFunction) {
+    try {
+      if (!req.params.id) throw new BadRequestException('Country id is required');
 
-    const isRemoved = await this.removeCountryUseCase.execute(req.params.id);
+      const isRemoved = await this.removeCountryUseCase.execute(req.params.id);
 
-    res.status(HttpStatus.OK).json({
-      message: isRemoved ? 'Country deleted successfully' : 'Country not found',
-    });
+      res.status(HttpStatus.OK).json({
+        message: isRemoved ? 'Country deleted successfully' : 'Country not found',
+      });
+    } catch (error) {
+      next(error);
+    }
   }
 }

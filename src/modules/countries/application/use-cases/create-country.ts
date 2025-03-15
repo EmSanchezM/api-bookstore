@@ -6,6 +6,7 @@ import { Country } from '@/modules/countries/domain/entities';
 import { CountryRepository } from '@/modules/countries/domain/repositories';
 import { CreateCountryDto } from '@/modules/countries/application/dtos';
 import { InternalServerErrorException } from '@/modules/shared/exceptions';
+import { generateUUID } from '@/modules/shared/generate-uuid';
 
 @injectable()
 export class CreateCountryUseCase {
@@ -15,10 +16,11 @@ export class CreateCountryUseCase {
 
   async execute(createCountryDto: CreateCountryDto) {
     const country = new Country({
-      id: '1',
+      id: generateUUID(),
       isActive: true,
       ...createCountryDto,
     });
+    console.log(country);
 
     const createdCountry = await this.countryRepositoty.createCountry(country);
 

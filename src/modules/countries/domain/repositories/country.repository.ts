@@ -5,6 +5,6 @@ export interface CountryRepository {
   getCountryByIsoCode(isoCode: string): Promise<Country | null>;
   getAllCountries(): Promise<Country[]>;
   createCountry(country: Country): Promise<Country | null>;
-  updateCountry(id: string, country: Partial<CountryUpdate>): Promise<Country | null>;
+  updateCountry(id: string, country: Country): Promise<Country | null>;
   deleteCountry(id: string): Promise<boolean>;
 }

@@ -51,6 +51,15 @@ export class Country {
     };
   }
 
+  public propertiesToDatabase() {
+    return {
+      id: this.id,
+      name: this.name,
+      iso_code: this.isoCode,
+      is_active: this.isActive,
+    };
+  }
+
   public update(properties: Partial<CountryUpdate>) {
     Object.assign(this, properties);
     this.updatedAt = new Date();

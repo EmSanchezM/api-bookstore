@@ -1,11 +1,11 @@
 import { inject, injectable } from 'inversify';
-import Surreal, { RecordId } from 'surrealdb';
+import Surreal, { RecordId, ResponseError } from 'surrealdb';
 
-import { Country, CountryUpdate } from '@/modules/countries/domain/entities';
+import { Country } from '@/modules/countries/domain/entities';
 import { CountryRepository } from '@/modules/countries/domain/repositories';
 import { SurrealRecordIdMapper } from '@/modules/countries/infrastructure/mappers';
 
-import { CountryRecordId, SurrealRecordId } from '@/modules/shared/types';
+import { SurrealRecordId } from '@/modules/shared/types';
 
 import { logger } from 'core/config/logger';
 import { TYPES } from '@/core/common/constants/types';
@@ -37,8 +37,7 @@ export class SurrealCountryRepository implements CountryRepository {
 
       return this.mapToCountry(countryRecord);
     } catch (error) {
-      logger.error('Error getting country by id:', error);
-      throw new DatabaseErrorException(error);
+      this.handleError(error, 'getCountryById');
     }
   }
 
@@ -53,8 +52,7 @@ export class SurrealCountryRepository implements CountryRepository {
 
       return this.mapToCountry(countryRecord[0]);
     } catch (error) {
-      logger.error('Error getting country by ISO code:', error);
-      throw new DatabaseErrorException(error);
+      this.handleError(error, 'getCountryByIsoCode');
     }
   }
 
@@ -66,8 +64,7 @@ export class SurrealCountryRepository implements CountryRepository {
 
       return response.map((country: any) => this.mapToCountry(country));
     } catch (error) {
-      logger.error('Error getting all countries:', error);
-      throw new DatabaseErrorException(error);
+      this.handleError(error, 'getAllCountries');
     }
   }
 
@@ -82,8 +79,7 @@ export class SurrealCountryRepository implements CountryRepository {
 
       return this.mapToCountry(newCountryRecord);
     } catch (error) {
-      logger.error('Error creating country:', error);
-      throw new DatabaseErrorException(error);
+      this.handleError(error, 'createCountry');
     }
   }
 
@@ -110,8 +106,7 @@ export class SurrealCountryRepository implements CountryRepository {
 
       return this.mapToCountry(updatedCountryRecord);
     } catch (error: unknown) {
-      logger.error('Error updating country:', error);
-      throw new DatabaseErrorException(error);
+      this.handleError(error, 'updateCountry');
     }
   }
 
@@ -119,12 +114,45 @@ export class SurrealCountryRepository implements CountryRepository {
     try {
       const countryRecordId = SurrealRecordIdMapper.toRecordId('country', id);
       const removedCountryRecord = await this.db.delete<CountryRecord>(countryRecordId);
+      
+      if (!removedCountryRecord) return false;
 
-      return Array.isArray(removedCountryRecord) && removedCountryRecord.length > 0;
+      return removedCountryRecord.id ? true : false;
     } catch (error) {
-      logger.error('Error deleting country:', error);
-      throw new DatabaseErrorException(error);
+      this.handleError(error, 'deleteCountry');
     }
+  }
+
+  async toggleCountryStatus(id: string): Promise<boolean> {
+    try {
+      const countryRecordId = SurrealRecordIdMapper.toRecordId('country', id);
+
+      const currentCountry = await this.db.select<CountryRecord>(countryRecordId);
+
+      if (!currentCountry) return false;
+
+      const updatedCountryRecord = await this.db.update(countryRecordId, {
+        is_active: !currentCountry.is_active,
+        updated_at: new Date(),
+      });
+      
+      if (!updatedCountryRecord) return false;
+
+      return true;
+    } catch (error) {
+      this.handleError(error, 'toggleCountryStatus');
+    }
+  }
+
+  private handleError(error: unknown, methodName: string): never {
+    logger.error(`Error ${methodName}:`, error);
+    if (error instanceof ResponseError) {
+      throw new DatabaseErrorException({
+        description: error.message,
+        cause: error.stack,
+      });
+    }
+    throw new DatabaseErrorException(error);
   }
 
   private mapToCountry(record: any): Country {

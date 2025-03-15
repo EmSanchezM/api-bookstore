@@ -13,8 +13,7 @@ export class RemoveCountryUseCase {
   async execute(id: string) {
     const country = await this.countryRepositoty.getCountryById(id);
 
-    if (!country) throw new NotFoundException('Error finding country');
-    if (country === null) throw new NotFoundException('Error finding country');
+    if (!country) throw new NotFoundException('Country not found');
 
     const deletedCountry = await this.countryRepositoty.deleteCountry(country.properties().id!);
 

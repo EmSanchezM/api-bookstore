@@ -1,4 +1,4 @@
-import { Country, CountryUpdate } from '@/modules/countries/domain/entities';
+import { Country } from '@/modules/countries/domain/entities';
 
 export interface CountryRepository {
   getCountryById(id: string): Promise<Country | null>;
@@ -7,4 +7,5 @@ export interface CountryRepository {
   createCountry(country: Country): Promise<Country | null>;
   updateCountry(id: string, country: Country): Promise<Country | null>;
   deleteCountry(id: string): Promise<boolean>;
+  toggleCountryStatus(id: string): Promise<boolean>;
 }

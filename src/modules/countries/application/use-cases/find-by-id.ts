@@ -13,9 +13,8 @@ export class FindByIdCountryUseCase {
   async execute(id: string) {
     const country = await this.countryRepositoty.getCountryById(id);
 
-    if (!country) throw new NotFoundException('Error finding country');
-    if (country === null) throw new NotFoundException('Error finding country');
-
+    if (!country) throw new NotFoundException('Country not found');
+    
     return country;
   }
 }

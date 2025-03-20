@@ -20,6 +20,7 @@ export class ErrorHandlerMiddleware {
       status: HttpStatus.INTERNAL_SERVER_ERROR,
       message: 'Internal Server Error',
       error: 'InternalServerError',
+      stack: envVariables.NODE_ENV !== 'production' ? error.stack : undefined,
     });
   }
 

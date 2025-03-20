@@ -37,8 +37,17 @@ export const defineTables = async (db: Surreal) => {
             FOR update FULL,
             FOR delete FULL;
 
-        DEFINE FIELD name ON author TYPE string;
+        DEFINE FIELD first_name ON author TYPE string;
         DEFINE FIELD last_name ON author TYPE string;
+        DEFINE FIELD nationality ON author TYPE string;
+        DEFINE FIELD biography ON author TYPE string NULL;
+        DEFINE FIELD awards ON author TYPE array<string> NULL;
+        DEFINE FIELD genres ON author TYPE array<string> NULL;
+        DEFINE FIELD notable_works ON author TYPE array<string> NULL;
+        DEFINE FIELD website ON author TYPE string NULL;
+        DEFINE FIELD social_links ON author TYPE record<facebook: string, twitter: string, instagram: string> NULL;
+        DEFINE FIELD birth_date ON author TYPE datetime;
+        DEFINE FIELD date_of_death ON author TYPE datetime NULL;
         DEFINE FIELD is_active ON author TYPE bool DEFAULT true;
         DEFINE FIELD created_at ON author TYPE datetime DEFAULT time::now();
         DEFINE FIELD updated_at ON author TYPE datetime VALUE time::now();

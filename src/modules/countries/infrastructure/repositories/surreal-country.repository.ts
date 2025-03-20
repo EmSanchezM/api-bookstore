@@ -3,16 +3,15 @@ import Surreal, { RecordId, ResponseError } from 'surrealdb';
 
 import { Country } from '@/modules/countries/domain/entities';
 import { CountryRepository } from '@/modules/countries/domain/repositories';
-import { SurrealRecordIdMapper } from '@/modules/countries/infrastructure/mappers';
-
-import { SurrealRecordId } from '@/modules/shared/types';
 
 import { logger } from 'core/config/logger';
 import { TYPES } from '@/core/common/constants/types';
 import { DatabaseErrorException } from '@/modules/shared/exceptions';
+import { CountryFilters } from '../types/country.filters';
+import { SurrealRecordIdMapper } from '@/modules/shared/mappers';
 
 interface CountryRecord {
-  id: SurrealRecordId | RecordId | string;
+  id: RecordId | string;
   name: string;
   iso_code: string;
   is_active: boolean;
@@ -41,14 +40,18 @@ export class SurrealCountryRepository implements CountryRepository {
 
   async getCountryByIsoCode(isoCode: string): Promise<Country | null> {
     try {
-      const [countryRecord] = await this.db.query<[CountryRecord[]]>(
+      const [response] = await this.db.query<CountryRecord[]>(
         'SELECT * FROM country WHERE iso_code = $iso_code LIMIT 1',
         { iso_code: isoCode },
       );
 
-      if (!countryRecord?.[0]) return null;
+      if (!response?.length) return null;
 
-      return this.mapToCountry(countryRecord[0]);
+      if (!response[0]) return null;
+
+      const countryRecord = response[0];
+
+      return this.mapToCountry(countryRecord);
     } catch (error) {
       this.handleError(error, 'getCountryByIsoCode');
     }
@@ -61,6 +64,68 @@ export class SurrealCountryRepository implements CountryRepository {
       if (!response?.length) return [];
 
       return response.map((country: any) => this.mapToCountry(country));
+    } catch (error) {
+      this.handleError(error, 'getAllCountries');
+    }
+  }
+
+  criteriaToQuery(filters: CountryFilters) {
+    const params: {
+      is_active?: boolean;
+      name?: string;
+      iso_code?: string;
+      skip?: number;
+      limit?: number;
+      orderBy?: string;
+      sortBy?: string;
+    } = {};
+    const conditions: string[] = [];
+    let query = 'SELECT * FROM country';
+
+    if (filters.isActive !== undefined) {
+      conditions.push('is_active = $is_active');
+      params.is_active = filters.isActive;
+    }
+
+    if (filters.name) {
+      conditions.push('string::contains(string::lowercase(name), string::lowercase($name))');
+      params.name = filters.name;
+    }
+
+    if (filters.isoCode) {
+      conditions.push('iso_code = $iso_code');
+      params.iso_code = filters.isoCode;
+    }
+
+    if (conditions.length > 0) {
+      query += ` WHERE ${conditions.join(' AND ')}`;
+    }
+
+    const orderBy = filters.orderBy ?? 'created_at';
+    const sortBy = filters.sortBy ?? 'desc';
+    query += ` ORDER BY ${orderBy} ${sortBy}`;
+
+    if (filters.skip && filters.limit) {
+      query += ` LIMIT ${filters.limit} START ${filters.skip}`;
+    }
+
+    return {
+      query,
+      params,
+    };
+  }
+
+  async getCountriesByFilters(filters: CountryFilters): Promise<Country[]> {
+    try {
+      const { query, params } = this.criteriaToQuery(filters);
+
+      const [response] = await this.db.query<CountryRecord[]>(query, params);
+
+      if (!response?.length) return [];
+
+      if (!Array.isArray(response)) return [];
+
+      return response.map((country: CountryRecord) => this.mapToCountry(country));
     } catch (error) {
       this.handleError(error, 'getAllCountries');
     }
@@ -99,7 +164,7 @@ export class SurrealCountryRepository implements CountryRepository {
       });
 
       const updatedCountryRecord = await this.db.update(countryRecordId, payload);
-      console.log(updatedCountryRecord);
+
       if (!updatedCountryRecord) return null;
 
       return this.mapToCountry(updatedCountryRecord);
@@ -116,7 +181,7 @@ export class SurrealCountryRepository implements CountryRepository {
       if (!removedCountryRecord) return false;
 
       return removedCountryRecord.id ? true : false;
-    } catch (error) {
+    } catch (error: unknown) {
       this.handleError(error, 'deleteCountry');
     }
   }
@@ -137,7 +202,7 @@ export class SurrealCountryRepository implements CountryRepository {
       if (!updatedCountryRecord) return false;
 
       return true;
-    } catch (error) {
+    } catch (error: unknown) {
       this.handleError(error, 'toggleCountryStatus');
     }
   }

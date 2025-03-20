@@ -4,6 +4,7 @@ import { SurrealCountryRepository } from '@/modules/countries/infrastructure/rep
 import {
   CreateCountryUseCase,
   FindAllCountriesUseCase,
+  FindByFiltersCountryUseCase,
   FindByIdCountryUseCase,
   FindByIsoCodeCountryUseCase,
   RemoveCountryUseCase,
@@ -14,6 +15,7 @@ export const countryModule = new ContainerModule((bind) => {
   bind(TYPES.CountryRepository).to(SurrealCountryRepository);
   bind(TYPES.CreateCountryUseCase).to(CreateCountryUseCase);
   bind(TYPES.FindAllCountriesUseCase).to(FindAllCountriesUseCase);
+  bind(TYPES.FindByFiltersCountryUseCase).to(FindByFiltersCountryUseCase);
   bind(TYPES.FindByIdCountryUseCase).to(FindByIdCountryUseCase);
   bind(TYPES.FindByIsoCodeCountryUseCase).to(FindByIsoCodeCountryUseCase);
   bind(TYPES.UpdateCountryUseCase).to(UpdateCountryUseCase);

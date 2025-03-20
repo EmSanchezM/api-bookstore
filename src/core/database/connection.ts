@@ -1,7 +1,8 @@
-import Surreal, { ConnectionStatus } from 'surrealdb';
+import Surreal, { ConnectionStatus, ResponseError } from 'surrealdb';
 
 import { getEnvironmentVariables, logger } from '../config';
-import { defineTables } from './define-tables';
+//mport { defineTables } from './define-tables';
+import { DatabaseErrorException } from '@/modules/shared/exceptions';
 
 interface DbConfig {
   url: string;
@@ -33,13 +34,15 @@ export async function getDatabaseConnection(config: DbConfig = DEFAULT_CONFIG): 
       password: config.password,
     });
 
-    if (db.status !== ConnectionStatus.Connected) throw new Error('Failed to connect to SurrealDB');
+    if (db.status !== ConnectionStatus.Connected) throw new DatabaseErrorException('Failed to connect to SurrealDB');
 
-    await defineTables(db);
+    //await defineTables(db);
 
     return db;
-  } catch (err) {
-    logger.error('Failed to connect to SurrealDB:', err instanceof Error ? err.message : String(err));
+  } catch (err: unknown) {
+    if (err instanceof Error || err instanceof DatabaseErrorException || err instanceof ResponseError)
+      logger.error('Failed to connect to SurrealDB:', err.message);
+
     await db.close();
     throw err;
   }

@@ -1,6 +1,7 @@
+import { inject, injectable } from 'inversify';
+
 import { TYPES } from '@/core/common/constants/types';
 import { CountryRepository } from '@/modules/countries/domain/repositories';
-import { inject, injectable } from 'inversify';
 
 @injectable()
 export class FindAllCountriesUseCase {

@@ -2,9 +2,9 @@ import { inject, injectable } from 'inversify';
 
 import { TYPES } from '@/core/common/constants/types';
 
-import { Country, CountryUpdate } from '@/modules/countries/domain/entities';
 import { CountryRepository } from '@/modules/countries/domain/repositories';
 import { UpdateCountryDto } from '@/modules/countries/application/dtos';
+
 import { DatabaseErrorException, NotFoundException } from '@/modules/shared/exceptions';
 
 @injectable()
@@ -19,8 +19,6 @@ export class UpdateCountryUseCase {
     existingCountry.update({
       ...updateCountryDto,
     });
-
-    console.log(existingCountry.properties());
 
     const updatedCountry = await this.countryRepositoty.updateCountry(
       existingCountry.properties().id!,

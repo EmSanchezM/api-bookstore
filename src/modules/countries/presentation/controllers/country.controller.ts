@@ -1,13 +1,14 @@
 import { NextFunction, Request, Response } from 'express';
 import { inject } from 'inversify';
-import { controller, httpPost, httpGet, httpPut, httpDelete, next } from 'inversify-express-utils';
+import { controller, httpPost, httpGet, httpPut, httpDelete } from 'inversify-express-utils';
 import { TYPES } from '@/core/common/constants/types';
-import { BadRequestException, HttpStatus } from '@/modules/shared/exceptions';
+import { BadRequestException, HttpStatus, NotFoundException } from '@/modules/shared/exceptions';
 import { ValidationService } from '@/modules/shared/validation/validator-service';
 
 import {
   CreateCountryUseCase,
   FindAllCountriesUseCase,
+  FindByFiltersCountryUseCase,
   FindByIdCountryUseCase,
   FindByIsoCodeCountryUseCase,
   RemoveCountryUseCase,
@@ -21,11 +22,15 @@ import {
   UpdateCountrySchema,
 } from '@/modules/countries/application/dtos';
 
+import { CountryFilters } from '@/modules/countries/infrastructure/types/country.filters';
+import { Country } from '@/modules/countries/domain/entities';
+
 @controller('/api/v1/countries')
 export class CountryController {
   constructor(
     @inject(TYPES.CreateCountryUseCase) private createCountryUseCase: CreateCountryUseCase,
     @inject(TYPES.FindAllCountriesUseCase) private findAllCountriesUseCase: FindAllCountriesUseCase,
+    @inject(TYPES.FindByFiltersCountryUseCase) private findByFiltersCountryUseCase: FindByFiltersCountryUseCase,
     @inject(TYPES.FindByIdCountryUseCase) private findByIdCountryUseCase: FindByIdCountryUseCase,
     @inject(TYPES.FindByIsoCodeCountryUseCase) private findByIsoCodeCountryUseCase: FindByIsoCodeCountryUseCase,
     @inject(TYPES.UpdateCountryUseCase) private updateCountryUseCase: UpdateCountryUseCase,
@@ -55,6 +60,23 @@ export class CountryController {
   async findAll(req: Request, res: Response, next: NextFunction) {
     try {
       const countries = await this.findAllCountriesUseCase.execute();
+
+      if (!countries.length) return res.status(HttpStatus.OK).json([]);
+
+      res.status(HttpStatus.OK).json(countries.map((country) => country.properties()));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  @httpGet('/filters')
+  async findByFilters(req: Request, res: Response, next: NextFunction) {
+    try {
+      const filters = req.query as CountryFilters;
+      const countries = await this.findByFiltersCountryUseCase.execute(filters);
+
+      if (!countries.length)
+        throw new NotFoundException(`Countries not found with filters: ${JSON.stringify(filters)}`);
 
       res.status(HttpStatus.OK).json(countries.map((country) => country.properties()));
     } catch (error) {

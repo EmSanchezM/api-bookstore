@@ -19,10 +19,7 @@ export class UpdateBookUseCase {
       publicationDate: updateBookDto.publicationDate ? new Date(updateBookDto.publicationDate) : undefined,
     });
 
-    const updatedBook = await this.bookRepository.updateBook(
-      existingBook.properties().id!,
-      existingBook,
-    );
+    const updatedBook = await this.bookRepository.updateBook(existingBook.properties().id!, existingBook);
 
     if (!updatedBook) throw new DatabaseErrorException('Error updating Book');
 

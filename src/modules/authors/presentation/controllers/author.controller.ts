@@ -61,7 +61,7 @@ export class AuthorController {
 
       if (!authors.length) return res.status(HttpStatus.OK).json([]);
 
-      res.status(HttpStatus.OK).json(authors.map(authors => authors.properties()));
+      res.status(HttpStatus.OK).json(authors.map((authors) => authors.properties()));
     } catch (error) {
       next(error);
     }
@@ -73,10 +73,9 @@ export class AuthorController {
       const filters = req.query as AuthorFilters;
       const authors = await this.findByFiltersAuthorUseCase.execute(filters);
 
-      if (!authors.length)
-        throw new NotFoundException(`Authors not found with filters: ${JSON.stringify(filters)}`);
+      if (!authors.length) throw new NotFoundException(`Authors not found with filters: ${JSON.stringify(filters)}`);
 
-      res.status(HttpStatus.OK).json(authors.map(author => author.properties()));
+      res.status(HttpStatus.OK).json(authors.map((author) => author.properties()));
     } catch (error) {
       next(error);
     }

@@ -15,12 +15,7 @@ import {
   UpdateBookUseCase,
 } from '@/modules/books/application/use-cases';
 
-import {
-  CreateBookDto,
-  CreateBookSchema,
-  UpdateBookDto,
-  UpdateBookSchema,
-} from '@/modules/books/application/dtos';
+import { CreateBookDto, CreateBookSchema, UpdateBookDto, UpdateBookSchema } from '@/modules/books/application/dtos';
 
 import { BookFilters } from '@/modules/books/infrastructure/types/book.filters';
 
@@ -61,7 +56,7 @@ export class BookController {
 
       if (!books.length) return res.status(HttpStatus.OK).json([]);
 
-      res.status(HttpStatus.OK).json(books.map(book => book.properties()));
+      res.status(HttpStatus.OK).json(books.map((book) => book.properties()));
     } catch (error) {
       next(error);
     }
@@ -73,10 +68,9 @@ export class BookController {
       const filters = req.query as BookFilters;
       const books = await this.findByFiltersBookUseCase.execute(filters);
 
-      if (!books.length)
-        throw new NotFoundException(`Books not found with filters: ${JSON.stringify(filters)}`);
+      if (!books.length) throw new NotFoundException(`Books not found with filters: ${JSON.stringify(filters)}`);
 
-      res.status(HttpStatus.OK).json(books.map(book => book.properties()));
+      res.status(HttpStatus.OK).json(books.map((book) => book.properties()));
     } catch (error) {
       next(error);
     }

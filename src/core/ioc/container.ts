@@ -1,6 +1,14 @@
 import { Container } from 'inversify';
 
-import { databaseModule, errorHandleModule, countryModule, languageModule, publisherModule, authorModule, bookModule } from './modules';
+import {
+  databaseModule,
+  errorHandleModule,
+  countryModule,
+  languageModule,
+  publisherModule,
+  authorModule,
+  bookModule,
+} from './modules';
 
 export const container = new Container();
 

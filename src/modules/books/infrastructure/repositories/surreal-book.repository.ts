@@ -121,20 +121,18 @@ export class SurrealBookRepository implements BookRepository {
       const properties = book.propertiesToDatabase();
       const bookRecordId = SurrealRecordIdMapper.toRecordId('book', properties.id!);
 
-      if(!properties.authors.every(authorId => typeof authorId === 'string')) throw new DatabaseErrorException('Book authors must be an array of strings');
-      if(!properties.languages.every(langId => typeof langId === 'string')) throw new DatabaseErrorException('Book languages must be an array of strings');
-      
+      if (!properties.authors.every((authorId) => typeof authorId === 'string'))
+        throw new DatabaseErrorException('Book authors must be an array of strings');
+      if (!properties.languages.every((langId) => typeof langId === 'string'))
+        throw new DatabaseErrorException('Book languages must be an array of strings');
+
       const payload = {
         ...properties,
         publisher: SurrealRecordIdMapper.toRecordId('publisher', properties.publisher!),
-        authors: properties.authors.map(authorId => 
-          SurrealRecordIdMapper.toRecordId('author', authorId)
-        ),
-        languages: properties.languages.map(langId => 
-          SurrealRecordIdMapper.toRecordId('language', langId)
-        ),
+        authors: properties.authors.map((authorId) => SurrealRecordIdMapper.toRecordId('author', authorId)),
+        languages: properties.languages.map((langId) => SurrealRecordIdMapper.toRecordId('language', langId)),
         is_active: properties.is_active,
-      }
+      };
 
       const newBookRecord = await this.db.create(bookRecordId, payload);
 

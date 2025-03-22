@@ -13,12 +13,13 @@ export class CreateBookUseCase {
   constructor(@inject(TYPES.BookRepository) private bookRepository: BookRepository) {}
 
   async execute(createBookDto: CreateBookDto): Promise<Book> {
+    if (!Array.isArray(createBookDto.authors)) throw new BadRequestException('Book authors must be an array');
+    if (!Array.isArray(createBookDto.languages)) throw new BadRequestException('Book languages must be an array');
 
-    if(!Array.isArray(createBookDto.authors)) throw new BadRequestException('Book authors must be an array');
-    if(!Array.isArray(createBookDto.languages)) throw new BadRequestException('Book languages must be an array');
-
-    if(!createBookDto.authors.every(authorId => typeof authorId === 'string')) throw new BadRequestException('Book authors must be an array of strings');
-    if(!createBookDto.languages.every(langId => typeof langId === 'string')) throw new BadRequestException('Book languages must be an array of strings');
+    if (!createBookDto.authors.every((authorId) => typeof authorId === 'string'))
+      throw new BadRequestException('Book authors must be an array of strings');
+    if (!createBookDto.languages.every((langId) => typeof langId === 'string'))
+      throw new BadRequestException('Book languages must be an array of strings');
 
     const book = new Book({
       id: generateUUID(),

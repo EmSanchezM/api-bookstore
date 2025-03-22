@@ -19,18 +19,9 @@ export const CreateBookSchema = object({
     minLength(1, 'Book publicationDate must be at least 2 characters'),
     maxLength(100, 'Book publicationDate must be at most 100 characters'),
   ),
-  publisher: pipe(
-    string(),
-    nonEmpty('Book publisher is required'),
-  ),
-  authors: pipe(
-    array(string()),
-    nonEmpty('Book authors is required'),
-  ),
-  languages: pipe(
-    array(string()),
-    nonEmpty('Book languages is required'),
-  ),
+  publisher: pipe(string(), nonEmpty('Book publisher is required')),
+  authors: pipe(array(string()), nonEmpty('Book authors is required')),
+  languages: pipe(array(string()), nonEmpty('Book languages is required')),
 });
 
 export type CreateBookDto = InferInput<typeof CreateBookSchema>;

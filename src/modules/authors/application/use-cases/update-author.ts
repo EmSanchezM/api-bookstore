@@ -34,10 +34,7 @@ export class UpdateAuthorUseCase {
       notableWorks: updateAuthorDto.notableWorks ? updateAuthorDto.notableWorks : undefined,
     });
 
-    const updatedAuthor = await this.authorRepository.updateAuthor(
-      existingAuthor.properties().id!,
-      existingAuthor,
-    );
+    const updatedAuthor = await this.authorRepository.updateAuthor(existingAuthor.properties().id!, existingAuthor);
 
     if (!updatedAuthor) throw new DatabaseErrorException('Error updating author');
 

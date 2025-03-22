@@ -1,10 +1,4 @@
-import type Surreal from 'surrealdb';
-
-export const defineTables = async (db: Surreal) => {
-  try {
-    await db.query(`
-      BEGIN TRANSACTION;
-        DEFINE TABLE IF NOT EXISTS country SCHEMAFULL
+DEFINE TABLE IF NOT EXISTS country SCHEMAFULL
           PERMISSIONS
             FOR select FULL,
             FOR create FULL,
@@ -111,7 +105,7 @@ export const defineTables = async (db: Surreal) => {
         DEFINE FIELD first_name ON customer TYPE string;
         DEFINE FIELD last_name ON customer TYPE string;
         DEFINE FIELD email ON customer TYPE string;
-        DEFINE FIELD addresses ON customer TYPE option<array<record<address>>>;
+        DEFINE FIELD addresses ON customer TYPE array<record<address>>;
         DEFINE FIELD is_active ON customer TYPE bool DEFAULT true;
         DEFINE FIELD created_at ON customer TYPE datetime DEFAULT time::now();
         DEFINE FIELD updated_at ON customer TYPE datetime VALUE time::now();
@@ -145,10 +139,3 @@ export const defineTables = async (db: Surreal) => {
 
         DEFINE FIELD in ON wrote TYPE record<author>;
         DEFINE FIELD out ON wrote TYPE record<book>;
-      
-      COMMIT TRANSACTION;
-    `);
-  } catch (error) {
-    console.error(error);
-  }
-};

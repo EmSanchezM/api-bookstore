@@ -36,4 +36,12 @@ export const TYPES = {
   FindByIdAuthorUseCase: Symbol.for('FindByIdAuthorUseCase'),
   UpdateAuthorUseCase: Symbol.for('UpdateAuthorUseCase'),
   RemoveAuthorUseCase: Symbol.for('RemoveAuthorUseCase'),
+  //Books
+  BookRepository: Symbol.for('BookRepository'),
+  CreateBookUseCase: Symbol.for('CreateBookUseCase'),
+  FindAllBooksUseCase: Symbol.for('FindAllBooksUseCase'),
+  FindByFiltersBookUseCase: Symbol.for('FindByFiltersBookUseCase'),
+  FindByIdBookUseCase: Symbol.for('FindByIdBookUseCase'),
+  UpdateBookUseCase: Symbol.for('UpdateBookUseCase'),
+  RemoveBookUseCase: Symbol.for('RemoveBookUseCase'),
 };

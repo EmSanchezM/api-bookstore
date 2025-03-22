@@ -16,7 +16,23 @@ export class CreateAuthorUseCase {
     const author = new Author({
       id: generateUUID(),
       isActive: true,
-      ...createAuthorDto,
+      firstName: createAuthorDto.firstName,
+      lastName: createAuthorDto.lastName,
+      nationality: createAuthorDto.nationality,
+      biography: createAuthorDto.biography ? createAuthorDto.biography : undefined,
+      birthDate: new Date(createAuthorDto.birthDate),
+      dateOfDeath: createAuthorDto.dateOfDeath ? new Date(createAuthorDto.dateOfDeath) : undefined,
+      socialLinks: createAuthorDto.socialLinks
+        ? {
+            facebook: createAuthorDto.socialLinks.facebook,
+            twitter: createAuthorDto.socialLinks.twitter,
+            instagram: createAuthorDto.socialLinks.instagram,
+          }
+        : undefined,
+      website: createAuthorDto.website ? createAuthorDto.website : undefined,
+      awards: createAuthorDto.awards ? createAuthorDto.awards : undefined,
+      genres: createAuthorDto.genres ? createAuthorDto.genres : undefined,
+      notableWorks: createAuthorDto.notableWorks ? createAuthorDto.notableWorks : undefined,
     });
 
     const createdAuthor = await this.authorRepository.createAuthor(author);

@@ -15,7 +15,23 @@ export class UpdateAuthorUseCase {
     if (!existingAuthor) throw new NotFoundException('Author not found');
 
     existingAuthor.update({
-      ...updateAuthorDto,
+      firstName: updateAuthorDto.firstName ? updateAuthorDto.firstName : undefined,
+      lastName: updateAuthorDto.lastName ? updateAuthorDto.lastName : undefined,
+      nationality: updateAuthorDto.nationality ? updateAuthorDto.nationality : undefined,
+      biography: updateAuthorDto.biography ? updateAuthorDto.biography : undefined,
+      birthDate: updateAuthorDto.birthDate ? new Date(updateAuthorDto.birthDate) : undefined,
+      dateOfDeath: updateAuthorDto.dateOfDeath ? new Date(updateAuthorDto.dateOfDeath) : undefined,
+      socialLinks: updateAuthorDto.socialLinks
+        ? {
+            facebook: updateAuthorDto.socialLinks.facebook,
+            twitter: updateAuthorDto.socialLinks.twitter,
+            instagram: updateAuthorDto.socialLinks.instagram,
+          }
+        : undefined,
+      website: updateAuthorDto.website ? updateAuthorDto.website : undefined,
+      awards: updateAuthorDto.awards ? updateAuthorDto.awards : undefined,
+      genres: updateAuthorDto.genres ? updateAuthorDto.genres : undefined,
+      notableWorks: updateAuthorDto.notableWorks ? updateAuthorDto.notableWorks : undefined,
     });
 
     const updatedAuthor = await this.authorRepository.updateAuthor(

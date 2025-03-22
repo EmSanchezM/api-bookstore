@@ -1,5 +1,5 @@
 import { inject, injectable } from 'inversify';
-import Surreal, { RecordId, ResponseError } from 'surrealdb';
+import Surreal, { RecordId, ResponseError, surql } from 'surrealdb';
 
 import { Book } from '@/modules/books/domain/entities';
 import { BookRepository } from '@/modules/books/domain/repositories';
@@ -9,15 +9,17 @@ import { logger } from 'core/config/logger';
 import { TYPES } from '@/core/common/constants/types';
 import { SurrealRecordIdMapper } from '@/modules/shared/mappers';
 import { DatabaseErrorException } from '@/modules/shared/exceptions';
+import { Publisher } from '@/modules/publishers/domain/entities';
+import { Author } from '@/modules/authors/domain/entities';
 
 interface BookRecord {
   id: RecordId | string;
   title: string;
   isbn: string;
   publication_date: Date;
-  publisher: string;
-  authors: string[];
-  languages: string[];
+  publisher: string | { [key: string]: unknown };
+  authors: string[] | { [key: string]: unknown }[];
+  languages: string[] | { [key: string]: unknown }[];
   is_active: boolean;
   created_at: string | Date;
   updated_at: string | Date;
@@ -32,11 +34,25 @@ export class SurrealBookRepository implements BookRepository {
     try {
       const bookRecordId = SurrealRecordIdMapper.toRecordId('book', id);
 
-      const bookRecord = await this.db.select<BookRecord>(bookRecordId);
+      const query = `SELECT 
+          id,
+          title,
+          isbn,
+          publication_date,
+          is_active,
+          created_at,
+          updated_at,
+          publisher.name as publisher,
+          languages[*].name as languages, 
+          (SELECT id, first_name, last_name, nationality, birth_date, is_active FROM $parent.authors) as authors
+        FROM $book
+      `;
 
-      if (!bookRecord) return null;
+      const [response] = await this.db.query<BookRecord[]>(query, { book: bookRecordId });
 
-      return this.mapToBook(bookRecord);
+      if (!response?.length) return null;
+
+      return this.mapToBook(response[0]);
     } catch (error) {
       this.handleError(error, 'getBookById');
     }
@@ -44,9 +60,22 @@ export class SurrealBookRepository implements BookRepository {
 
   async getAllBooks(): Promise<Book[]> {
     try {
-      const response = await this.db.select<BookRecord>('book');
+      const query = surql`SELECT 
+          id,
+          title,
+          isbn,
+          publication_date,
+          is_active,
+          languages[*].name as languages, 
+          publisher.name as publisher,
+          (SELECT id, first_name, last_name, nationality, birth_date, is_active FROM $parent.authors) as authors
+        FROM book
+      `;
+      const [response] = await this.db.query<BookRecord[]>(query);
 
       if (!response?.length) return [];
+
+      if (!Array.isArray(response)) return [];
 
       return response.map((book: any) => this.mapToBook(book));
     } catch (error) {
@@ -65,7 +94,19 @@ export class SurrealBookRepository implements BookRepository {
       sortBy?: string;
     } = {};
     const conditions: string[] = [];
-    let query = 'SELECT * FROM book';
+    let query = `SELECT 
+        id,
+        title,
+        isbn,
+        publication_date,
+        is_active,
+        created_at,
+        updated_at,
+        publisher.name as publisher,
+        languages[*].name as languages,
+        (SELECT id, first_name, last_name, nationality, birth_date, is_active FROM $parent.authors) as authors
+      FROM book
+    `;
 
     if (filters.isActive !== undefined) {
       conditions.push('is_active = $is_active');
@@ -223,12 +264,32 @@ export class SurrealBookRepository implements BookRepository {
       title: record.title,
       isbn: record.isbn,
       publicationDate: new Date(record.publication_date),
-      publisher: record.publisher,
-      authors: record.authors,
+      publisher: typeof record.publisher === 'string' ? record.publisher : this.mapToPublisher(record.publisher[0]),
+      authors: Array.isArray(record.authors) ? this.mapToAuthors(record.authors) : record.authors,
       languages: record.languages,
       isActive: record.is_active,
-      createdAt: new Date(record.created_at),
-      updatedAt: new Date(record.updated_at),
+    });
+  }
+
+  private mapToPublisher(record: any): Publisher {
+    return new Publisher({
+      id: SurrealRecordIdMapper.fromRecordId(record.id),
+      name: record.name,
+      website: record.website,
+      isActive: record.is_active,
+    });
+  }
+
+  private mapToAuthors(record: any): Author[] {
+    return record.map((author: any) => {
+      return new Author({
+        id: SurrealRecordIdMapper.fromRecordId(author.id),
+        firstName: author.first_name,
+        lastName: author.last_name,
+        nationality: author.nationality,
+        birthDate: new Date(author.birth_date),
+        isActive: author.is_active,
+      });
     });
   }
 }

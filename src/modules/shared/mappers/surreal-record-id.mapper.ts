@@ -7,17 +7,17 @@ export class SurrealRecordIdMapper {
     return new RecordId(tableName, id);
   }
 
-  static fromRecordId(recordId: any): string {
+  static fromRecordId(recordId: string | RecordId | { id: string }): string {
     if (typeof recordId === 'string') return recordId;
 
-    if (typeof recordId === 'object' && recordId.id) {
+    if (recordId instanceof RecordId) {
+      return recordId.id.toString();
+    }
+
+    if (typeof recordId === 'object' && recordId?.id) {
       return recordId.id;
     }
-
-    if (typeof recordId === 'object' && recordId.value) {
-      return recordId.value;
-    }
-
+    
     throw new DatabaseErrorException('Invalid record id');
   }
 }

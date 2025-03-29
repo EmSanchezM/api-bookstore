@@ -44,4 +44,5 @@ export const TYPES = {
   FindByIdBookUseCase: Symbol.for('FindByIdBookUseCase'),
   UpdateBookUseCase: Symbol.for('UpdateBookUseCase'),
   RemoveBookUseCase: Symbol.for('RemoveBookUseCase'),
+  ToggleStatusBookUseCase: Symbol.for('ToggleStatusBookUseCase'),
 };

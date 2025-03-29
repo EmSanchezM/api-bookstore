@@ -16,6 +16,7 @@ export class UpdateBookUseCase {
 
     existingBook.update({
       title: updateBookDto.title ? updateBookDto.title : undefined,
+      isbn: updateBookDto.isbn ? updateBookDto.isbn : undefined,
       publicationDate: updateBookDto.publicationDate ? new Date(updateBookDto.publicationDate) : undefined,
     });
 

@@ -12,6 +12,7 @@ import {
   FindByFiltersBookUseCase,
   FindByIdBookUseCase,
   RemoveBookUseCase,
+  ToggleStatusBookUseCase,
   UpdateBookUseCase,
 } from '@/modules/books/application/use-cases';
 
@@ -27,6 +28,7 @@ export class BookController {
     @inject(TYPES.FindByFiltersBookUseCase) private findByFiltersBookUseCase: FindByFiltersBookUseCase,
     @inject(TYPES.FindByIdBookUseCase) private findByIdBookUseCase: FindByIdBookUseCase,
     @inject(TYPES.RemoveBookUseCase) private removeBookUseCase: RemoveBookUseCase,
+    @inject(TYPES.ToggleStatusBookUseCase) private toggleStatusBookUseCase: ToggleStatusBookUseCase,
     @inject(TYPES.UpdateBookUseCase) private updateBookUseCase: UpdateBookUseCase,
   ) {}
 
@@ -111,6 +113,21 @@ export class BookController {
 
   @httpDelete('/:id')
   async remove(req: Request, res: Response, next: NextFunction) {
+    try {
+      if (!req.params.id) throw new BadRequestException('Book id is required');
+
+      const isRemoved = await this.toggleStatusBookUseCase.execute(req.params.id);
+
+      res.status(HttpStatus.OK).json({
+        message: isRemoved ? 'Book deleted successfully' : 'Book not found',
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  @httpDelete('/:id/hard-delete')
+  async removePermanent(req: Request, res: Response, next: NextFunction) {
     try {
       if (!req.params.id) throw new BadRequestException('Book id is required');
 

@@ -8,6 +8,7 @@ import {
   FindByIdBookUseCase,
   RemoveBookUseCase,
   UpdateBookUseCase,
+  ToggleStatusBookUseCase,
 } from '@/modules/books/application/use-cases';
 
 export const bookModule = new ContainerModule((bind) => {
@@ -18,4 +19,5 @@ export const bookModule = new ContainerModule((bind) => {
   bind(TYPES.FindByFiltersBookUseCase).to(FindByFiltersBookUseCase);
   bind(TYPES.FindByIdBookUseCase).to(FindByIdBookUseCase);
   bind(TYPES.RemoveBookUseCase).to(RemoveBookUseCase);
+  bind(TYPES.ToggleStatusBookUseCase).to(ToggleStatusBookUseCase);
 });

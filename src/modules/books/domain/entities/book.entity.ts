@@ -1,6 +1,6 @@
 import { AuthorProperties } from '@/modules/authors/domain/entities';
 import { LanguageProperties } from '@/modules/languages/domain/entities';
-import { PublisherProperties } from '@/modules/publishers/domain/entities';
+import { PublisherProperties, Publisher } from '@/modules/publishers/domain/entities';
 
 import { DatabaseErrorException } from '@/modules/shared/exceptions';
 
@@ -8,7 +8,7 @@ export interface BookEssentials {
   title: string;
   isbn: string;
   publicationDate: Date;
-  publisher: string;
+  publisher: string | PublisherProperties | Publisher | null;
   authors: string[];
   languages: string[];
   isActive: boolean;
@@ -33,8 +33,8 @@ export class Book {
   private title!: string;
   private isbn!: string;
   private publicationDate!: Date;
-  private publisher!: string | PublisherProperties;
-  private authors!: string[] | AuthorProperties[];
+  private publisher!: string | PublisherProperties | Publisher | null;
+  private authors!: string[] | AuthorProperties[] | null;
   private languages!: string[] | LanguageProperties[];
   private isActive!: boolean;
   private readonly createdAt: Date;
@@ -81,7 +81,7 @@ export class Book {
       title: this.title,
       isbn: this.isbn,
       publication_date: this.publicationDate,
-      publisher: typeof this.publisher === 'string' ? this.publisher : this.publisher.id,
+      publisher: this.publisher ? (typeof this.publisher === 'string' ? this.publisher : (this.publisher as Publisher).properties().id) : null,
       authors: this.authors,
       languages: this.languages,
       is_active: this.isActive,

@@ -1,4 +1,3 @@
-# Template Node.js TypeScript SurrealDB
 # API Bookstore
 
 ## Description

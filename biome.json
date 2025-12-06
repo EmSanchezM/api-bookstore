@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.3.8/schema.json",
   "vcs": {
     "enabled": false,
     "clientKind": "git",
@@ -7,8 +7,7 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "include": ["src/**/*.js", "src/**/*.ts"],
-    "ignore": ["test", "dist"]
+    "includes": ["src/**/*.js", "src/**/*.ts"]
   },
   "formatter": {
     "enabled": true,
@@ -16,12 +15,8 @@
     "lineWidth": 80,
     "indentWidth": 2
   },
-  "organizeImports": {
-    "enabled": true
-  },
   "linter": {
     "enabled": true,
-    "ignore": ["test", "dist"],
     "rules": {
       "recommended": true
     }
@@ -36,5 +31,13 @@
     "parser": {
       "unsafeParameterDecoratorsEnabled": true
     }
-  }
+  },
+  "overrides": [
+    {
+      "includes": ["test", "dist"],
+      "linter": {
+        "enabled": false
+      }
+    }
+  ]
 }

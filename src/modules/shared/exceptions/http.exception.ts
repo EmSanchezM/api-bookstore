@@ -1,9 +1,9 @@
 import { isNumber, isObject, isString } from './shared.utils';
 import {
-  DescriptionAndOptions,
-  HttpExceptionBody,
-  HttpExceptionBodyMessage,
-  HttpExceptionOptions,
+  type DescriptionAndOptions,
+  type HttpExceptionBody,
+  type HttpExceptionBodyMessage,
+  type HttpExceptionOptions,
   HttpExceptionResponse,
 } from './types';
 
@@ -32,7 +32,9 @@ export class HttpException extends Error {
     } else if (isObject(this.response) && isString(this.response.message)) {
       this.message = this.response.message;
     } else if (this.constructor) {
-      this.message = this.constructor.name.match(/[A-Z][a-z]+|[0-9]+/g)?.join(' ') || 'Error';
+      this.message =
+        this.constructor.name.match(/[A-Z][a-z]+|[0-9]+/g)?.join(' ') ||
+        'Error';
     }
   }
 
@@ -59,9 +61,19 @@ export class HttpException extends Error {
     return this.options;
   }
 
-  public static createBody(nil: null | '', message: HttpExceptionBodyMessage, statusCode: number): HttpExceptionBody;
-  public static createBody(message: HttpExceptionBodyMessage, error: string, statusCode: number): HttpExceptionBody;
-  public static createBody<Body extends Record<string, unknown>>(custom: Body): Body;
+  public static createBody(
+    nil: null | '',
+    message: HttpExceptionBodyMessage,
+    statusCode: number,
+  ): HttpExceptionBody;
+  public static createBody(
+    message: HttpExceptionBodyMessage,
+    error: string,
+    statusCode: number,
+  ): HttpExceptionBody;
+  public static createBody<Body extends Record<string, unknown>>(
+    custom: Body,
+  ): Body;
   public static createBody<Body extends Record<string, unknown>>(
     arg0: null | HttpExceptionBodyMessage | Body,
     arg1?: HttpExceptionBodyMessage | string,
@@ -85,11 +97,17 @@ export class HttpException extends Error {
     return arg0;
   }
 
-  public static getDescriptionFrom(descriptionOrOptions: string | HttpExceptionOptions): string {
-    return isString(descriptionOrOptions) ? descriptionOrOptions : (descriptionOrOptions?.description as string);
+  public static getDescriptionFrom(
+    descriptionOrOptions: string | HttpExceptionOptions,
+  ): string {
+    return isString(descriptionOrOptions)
+      ? descriptionOrOptions
+      : (descriptionOrOptions?.description as string);
   }
 
-  public static getHttpExceptionOptionsFrom(descriptionOrOptions: string | HttpExceptionOptions): HttpExceptionOptions {
+  public static getHttpExceptionOptionsFrom(
+    descriptionOrOptions: string | HttpExceptionOptions,
+  ): HttpExceptionOptions {
     return isString(descriptionOrOptions) ? {} : descriptionOrOptions;
   }
 
@@ -101,9 +119,13 @@ export class HttpException extends Error {
   public static extractDescriptionAndOptionsFrom(
     descriptionOrOptions: string | HttpExceptionOptions,
   ): DescriptionAndOptions {
-    const description = isString(descriptionOrOptions) ? descriptionOrOptions : descriptionOrOptions?.description;
+    const description = isString(descriptionOrOptions)
+      ? descriptionOrOptions
+      : descriptionOrOptions?.description;
 
-    const httpExceptionOptions = isString(descriptionOrOptions) ? {} : descriptionOrOptions;
+    const httpExceptionOptions = isString(descriptionOrOptions)
+      ? {}
+      : descriptionOrOptions;
 
     return {
       description,

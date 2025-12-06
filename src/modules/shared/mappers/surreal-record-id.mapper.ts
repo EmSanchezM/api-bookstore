@@ -17,7 +17,7 @@ export class SurrealRecordIdMapper {
     if (typeof recordId === 'object' && recordId?.id) {
       return recordId.id;
     }
-    
+
     throw new DatabaseErrorException('Invalid record id');
   }
 }

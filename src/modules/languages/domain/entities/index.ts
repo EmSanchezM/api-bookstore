@@ -1,3 +1,7 @@
-import { Language, LanguageProperties, LanguageUpdate } from './language.entity';
+import {
+  Language,
+  LanguageProperties,
+  LanguageUpdate,
+} from './language.entity';
 
 export { Language, LanguageProperties, LanguageUpdate };

@@ -1,12 +1,21 @@
-import { NextFunction, Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import { inject } from 'inversify';
-import { controller, httpPost, httpGet, httpPut, httpDelete } from 'inversify-express-utils';
+import {
+  controller,
+  httpDelete,
+  httpGet,
+  httpPost,
+  httpPut,
+} from 'inversify-express-utils';
 
 import { TYPES } from '@/core/common/constants/types';
-import { BadRequestException, HttpStatus, NotFoundException } from '@/modules/shared/exceptions';
-import { ValidationService } from '@/modules/shared/validation/validator-service';
-
 import {
+  type CreateBookDto,
+  CreateBookSchema,
+  type UpdateBookDto,
+  UpdateBookSchema,
+} from '@/modules/books/application/dtos';
+import type {
   CreateBookUseCase,
   FindAllBooksUseCase,
   FindByFiltersBookUseCase,
@@ -15,27 +24,40 @@ import {
   ToggleStatusBookUseCase,
   UpdateBookUseCase,
 } from '@/modules/books/application/use-cases';
-
-import { CreateBookDto, CreateBookSchema, UpdateBookDto, UpdateBookSchema } from '@/modules/books/application/dtos';
-
-import { BookFilters } from '@/modules/books/infrastructure/types/book.filters';
+import type { BookFilters } from '@/modules/books/infrastructure/types/book.filters';
+import {
+  BadRequestException,
+  HttpStatus,
+  NotFoundException,
+} from '@/modules/shared/exceptions';
+import { ValidationService } from '@/modules/shared/validation/validator-service';
 
 @controller('/api/v1/books')
 export class BookController {
   constructor(
-    @inject(TYPES.CreateBookUseCase) private createBookUseCase: CreateBookUseCase,
-    @inject(TYPES.FindAllBooksUseCase) private findAllBooksUseCase: FindAllBooksUseCase,
-    @inject(TYPES.FindByFiltersBookUseCase) private findByFiltersBookUseCase: FindByFiltersBookUseCase,
-    @inject(TYPES.FindByIdBookUseCase) private findByIdBookUseCase: FindByIdBookUseCase,
-    @inject(TYPES.RemoveBookUseCase) private removeBookUseCase: RemoveBookUseCase,
-    @inject(TYPES.ToggleStatusBookUseCase) private toggleStatusBookUseCase: ToggleStatusBookUseCase,
-    @inject(TYPES.UpdateBookUseCase) private updateBookUseCase: UpdateBookUseCase,
+    @inject(TYPES.CreateBookUseCase)
+    private createBookUseCase: CreateBookUseCase,
+    @inject(TYPES.FindAllBooksUseCase)
+    private findAllBooksUseCase: FindAllBooksUseCase,
+    @inject(TYPES.FindByFiltersBookUseCase)
+    private findByFiltersBookUseCase: FindByFiltersBookUseCase,
+    @inject(TYPES.FindByIdBookUseCase)
+    private findByIdBookUseCase: FindByIdBookUseCase,
+    @inject(TYPES.RemoveBookUseCase)
+    private removeBookUseCase: RemoveBookUseCase,
+    @inject(TYPES.ToggleStatusBookUseCase)
+    private toggleStatusBookUseCase: ToggleStatusBookUseCase,
+    @inject(TYPES.UpdateBookUseCase)
+    private updateBookUseCase: UpdateBookUseCase,
   ) {}
 
   @httpPost('/')
   async create(req: Request, res: Response, next: NextFunction) {
     try {
-      const validationSchema = ValidationService.validate(CreateBookSchema, req.body);
+      const validationSchema = ValidationService.validate(
+        CreateBookSchema,
+        req.body,
+      );
 
       if (!validationSchema.success)
         throw new BadRequestException(
@@ -70,7 +92,10 @@ export class BookController {
       const filters = req.query as BookFilters;
       const books = await this.findByFiltersBookUseCase.execute(filters);
 
-      if (!books.length) throw new NotFoundException(`Books not found with filters: ${JSON.stringify(filters)}`);
+      if (!books.length)
+        throw new NotFoundException(
+          `Books not found with filters: ${JSON.stringify(filters)}`,
+        );
 
       res.status(HttpStatus.OK).json(books.map((book) => book.properties()));
     } catch (error) {
@@ -96,14 +121,20 @@ export class BookController {
     try {
       if (!req.params.id) throw new BadRequestException('Book id is required');
 
-      const validationSchema = ValidationService.validate(UpdateBookSchema, req.body);
+      const validationSchema = ValidationService.validate(
+        UpdateBookSchema,
+        req.body,
+      );
       if (!validationSchema.success)
         throw new BadRequestException(
           `Invalid book data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`,
         );
 
       const updateBookDto: UpdateBookDto = validationSchema.output;
-      const book = await this.updateBookUseCase.execute(req.params.id, updateBookDto);
+      const book = await this.updateBookUseCase.execute(
+        req.params.id,
+        updateBookDto,
+      );
 
       res.status(HttpStatus.OK).json(book.properties());
     } catch (error: unknown) {
@@ -116,7 +147,9 @@ export class BookController {
     try {
       if (!req.params.id) throw new BadRequestException('Book id is required');
 
-      const isRemoved = await this.toggleStatusBookUseCase.execute(req.params.id);
+      const isRemoved = await this.toggleStatusBookUseCase.execute(
+        req.params.id,
+      );
 
       res.status(HttpStatus.OK).json({
         message: isRemoved ? 'Book deleted successfully' : 'Book not found',

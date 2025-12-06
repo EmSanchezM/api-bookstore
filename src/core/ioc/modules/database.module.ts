@@ -1,7 +1,7 @@
 import { AsyncContainerModule } from 'inversify';
+import type Surreal from 'surrealdb';
 import { TYPES } from '@/core/common/constants/types';
 import { Database } from '@/core/database';
-import Surreal from 'surrealdb';
 
 export const databaseModule = new AsyncContainerModule(async (bind) => {
   const database = Database.getInstance();

@@ -1,14 +1,13 @@
-import { inject, injectable } from 'inversify';
-import Surreal, { RecordId, ResponseError } from 'surrealdb';
-
-import { Author } from '@/modules/authors/domain/entities';
-import { AuthorRepository } from '@/modules/authors/domain/repositories';
-import { AuthorFilters } from '@/modules/authors/infrastructure/types/author.filters';
-
 import { logger } from 'core/config/logger';
+import { inject, injectable } from 'inversify';
+import type Surreal from 'surrealdb';
+import { type RecordId, ResponseError } from 'surrealdb';
 import { TYPES } from '@/core/common/constants/types';
-import { SurrealRecordIdMapper } from '@/modules/shared/mappers';
+import { Author } from '@/modules/authors/domain/entities';
+import type { AuthorRepository } from '@/modules/authors/domain/repositories';
+import type { AuthorFilters } from '@/modules/authors/infrastructure/types/author.filters';
 import { DatabaseErrorException } from '@/modules/shared/exceptions';
+import { SurrealRecordIdMapper } from '@/modules/shared/mappers';
 
 interface AuthorRecord {
   id: RecordId | string;
@@ -82,12 +81,16 @@ export class SurrealAuthorRepository implements AuthorRepository {
     }
 
     if (filters.name) {
-      conditions.push('string::contains(string::lowercase(name), string::lowercase($name))');
+      conditions.push(
+        'string::contains(string::lowercase(name), string::lowercase($name))',
+      );
       params.name = filters.name;
     }
 
     if (filters.nationality) {
-      conditions.push('string::contains(string::lowercase(nationality), string::lowercase($nationality))');
+      conditions.push(
+        'string::contains(string::lowercase(nationality), string::lowercase($nationality))',
+      );
       params.nationality = filters.nationality;
     }
 
@@ -128,7 +131,10 @@ export class SurrealAuthorRepository implements AuthorRepository {
   async createAuthor(Author: Author): Promise<Author | null> {
     try {
       const properties = Author.propertiesToDatabase();
-      const authorRecordId = SurrealRecordIdMapper.toRecordId('author', properties.id!);
+      const authorRecordId = SurrealRecordIdMapper.toRecordId(
+        'author',
+        properties.id!,
+      );
 
       const newAuthorRecord = await this.db.create(authorRecordId, properties);
 
@@ -179,7 +185,8 @@ export class SurrealAuthorRepository implements AuthorRepository {
   async deleteAuthor(id: string): Promise<boolean> {
     try {
       const authorRecordId = SurrealRecordIdMapper.toRecordId('author', id);
-      const removedAuthorRecord = await this.db.delete<AuthorRecord>(authorRecordId);
+      const removedAuthorRecord =
+        await this.db.delete<AuthorRecord>(authorRecordId);
 
       if (!removedAuthorRecord) return false;
 

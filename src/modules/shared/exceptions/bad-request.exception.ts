@@ -1,6 +1,6 @@
 import { HttpException } from './http.exception';
 import { HttpStatus } from './http.status';
-import { HttpExceptionOptions } from './types';
+import type { HttpExceptionOptions } from './types';
 
 /**
  * Defines an HTTP exception for *Bad Request* type errors.
@@ -34,11 +34,19 @@ export class BadRequestException extends HttpException {
    * @param objectOrError string or object describing the error condition.
    * @param descriptionOrOptions either a short description of the HTTP error or an options object used to provide an underlying error cause
    */
-  constructor(objectOrError?: any, descriptionOrOptions: string | HttpExceptionOptions = 'Bad Request') {
-    const { description, httpExceptionOptions } = HttpException.extractDescriptionAndOptionsFrom(descriptionOrOptions);
+  constructor(
+    objectOrError?: any,
+    descriptionOrOptions: string | HttpExceptionOptions = 'Bad Request',
+  ) {
+    const { description, httpExceptionOptions } =
+      HttpException.extractDescriptionAndOptionsFrom(descriptionOrOptions);
 
     super(
-      HttpException.createBody(objectOrError, description!, HttpStatus.BAD_REQUEST),
+      HttpException.createBody(
+        objectOrError,
+        description!,
+        HttpStatus.BAD_REQUEST,
+      ),
       HttpStatus.BAD_REQUEST,
       httpExceptionOptions,
     );

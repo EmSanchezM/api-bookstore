@@ -1,4 +1,4 @@
-import { partial, type InferInput } from 'valibot';
+import { type InferInput, partial } from 'valibot';
 import { CreateBookSchema } from './create-book.dto';
 
 export const UpdateBookSchema = partial(CreateBookSchema);

@@ -1,6 +1,6 @@
 import { HttpException } from './http.exception';
 import { HttpStatus } from './http.status';
-import { HttpExceptionOptions } from './types';
+import type { HttpExceptionOptions } from './types';
 
 /**
  * Defines an HTTP exception for *Unauthorized* type errors.
@@ -34,11 +34,19 @@ export class UnauthorizedException extends HttpException {
    * @param objectOrError string or object describing the error condition.
    * @param descriptionOrOptions either a short description of the HTTP error or an options object used to provide an underlying error cause
    */
-  constructor(objectOrError?: any, descriptionOrOptions: string | HttpExceptionOptions = 'Unauthorized') {
-    const { description, httpExceptionOptions } = HttpException.extractDescriptionAndOptionsFrom(descriptionOrOptions);
+  constructor(
+    objectOrError?: any,
+    descriptionOrOptions: string | HttpExceptionOptions = 'Unauthorized',
+  ) {
+    const { description, httpExceptionOptions } =
+      HttpException.extractDescriptionAndOptionsFrom(descriptionOrOptions);
 
     super(
-      HttpException.createBody(objectOrError, description!, HttpStatus.UNAUTHORIZED),
+      HttpException.createBody(
+        objectOrError,
+        description!,
+        HttpStatus.UNAUTHORIZED,
+      ),
       HttpStatus.UNAUTHORIZED,
       httpExceptionOptions,
     );

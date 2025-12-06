@@ -61,12 +61,18 @@ export class Author {
   private updatedAt: Date | undefined;
 
   constructor(properties: AuthorProperties) {
-    if (!properties.id) throw new DatabaseErrorException('Author id is required');
-    if (!properties.firstName) throw new DatabaseErrorException('Author name is required');
-    if (!properties.lastName) throw new DatabaseErrorException('Author last name is required');
-    if (!properties.nationality) throw new DatabaseErrorException('Author nationality is required');
-    if (!properties.birthDate) throw new DatabaseErrorException('Author birth date is required');
-    if (!properties.isActive) throw new DatabaseErrorException('Author isActive is required');
+    if (!properties.id)
+      throw new DatabaseErrorException('Author id is required');
+    if (!properties.firstName)
+      throw new DatabaseErrorException('Author name is required');
+    if (!properties.lastName)
+      throw new DatabaseErrorException('Author last name is required');
+    if (!properties.nationality)
+      throw new DatabaseErrorException('Author nationality is required');
+    if (!properties.birthDate)
+      throw new DatabaseErrorException('Author birth date is required');
+    if (!properties.isActive)
+      throw new DatabaseErrorException('Author isActive is required');
 
     Object.assign(this, properties);
 

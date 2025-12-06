@@ -1,6 +1,6 @@
 import { HttpException } from './http.exception';
 import { HttpStatus } from './http.status';
-import { HttpExceptionOptions } from './types';
+import type { HttpExceptionOptions } from './types';
 
 /**
  * Defines an HTTP exception for *Service Unavailable* type errors.
@@ -33,11 +33,19 @@ export class ServiceUnavailableException extends HttpException {
    * @param objectOrError string or object describing the error condition.
    * @param descriptionOrOptions either a short description of the HTTP error or an options object used to provide an underlying error cause
    */
-  constructor(objectOrError?: any, descriptionOrOptions: string | HttpExceptionOptions = 'Service Unavailable') {
-    const { description, httpExceptionOptions } = HttpException.extractDescriptionAndOptionsFrom(descriptionOrOptions);
+  constructor(
+    objectOrError?: any,
+    descriptionOrOptions: string | HttpExceptionOptions = 'Service Unavailable',
+  ) {
+    const { description, httpExceptionOptions } =
+      HttpException.extractDescriptionAndOptionsFrom(descriptionOrOptions);
 
     super(
-      HttpException.createBody(objectOrError, description!, HttpStatus.SERVICE_UNAVAILABLE),
+      HttpException.createBody(
+        objectOrError,
+        description!,
+        HttpStatus.SERVICE_UNAVAILABLE,
+      ),
       HttpStatus.SERVICE_UNAVAILABLE,
       httpExceptionOptions,
     );

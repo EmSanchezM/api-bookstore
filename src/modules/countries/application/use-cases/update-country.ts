@@ -1,15 +1,20 @@
 import { inject, injectable } from 'inversify';
 
 import { TYPES } from '@/core/common/constants/types';
+import type { UpdateCountryDto } from '@/modules/countries/application/dtos';
+import type { CountryRepository } from '@/modules/countries/domain/repositories';
 
-import { CountryRepository } from '@/modules/countries/domain/repositories';
-import { UpdateCountryDto } from '@/modules/countries/application/dtos';
-
-import { DatabaseErrorException, NotFoundException } from '@/modules/shared/exceptions';
+import {
+  DatabaseErrorException,
+  NotFoundException,
+} from '@/modules/shared/exceptions';
 
 @injectable()
 export class UpdateCountryUseCase {
-  constructor(@inject(TYPES.CountryRepository) private countryRepositoty: CountryRepository) {}
+  constructor(
+    @inject(TYPES.CountryRepository)
+    private countryRepositoty: CountryRepository,
+  ) {}
 
   async execute(id: string, updateCountryDto: UpdateCountryDto) {
     const existingCountry = await this.countryRepositoty.getCountryById(id);
@@ -25,7 +30,8 @@ export class UpdateCountryUseCase {
       existingCountry,
     );
 
-    if (!updatedCountry) throw new DatabaseErrorException('Error updating country');
+    if (!updatedCountry)
+      throw new DatabaseErrorException('Error updating country');
 
     return updatedCountry;
   }

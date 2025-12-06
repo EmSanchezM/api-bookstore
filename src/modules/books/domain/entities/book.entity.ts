@@ -1,6 +1,9 @@
-import { AuthorProperties } from '@/modules/authors/domain/entities';
-import { LanguageProperties } from '@/modules/languages/domain/entities';
-import { PublisherProperties, Publisher } from '@/modules/publishers/domain/entities';
+import type { AuthorProperties } from '@/modules/authors/domain/entities';
+import type { LanguageProperties } from '@/modules/languages/domain/entities';
+import type {
+  Publisher,
+  PublisherProperties,
+} from '@/modules/publishers/domain/entities';
 
 import { DatabaseErrorException } from '@/modules/shared/exceptions';
 
@@ -42,14 +45,20 @@ export class Book {
 
   constructor(properties: BookProperties) {
     if (!properties.id) throw new DatabaseErrorException('Book id is required');
-    if (!properties.title) throw new DatabaseErrorException('Book title is required');
-    if (!properties.isbn) throw new DatabaseErrorException('Book isbn is required');
-    if (!properties.publicationDate) throw new DatabaseErrorException('Book publicationDate is required');
-    if (!properties.publisher) throw new DatabaseErrorException('Book publisher is required');
-    if (!properties.authors || !properties.authors.length) throw new DatabaseErrorException('Book authors is required');
+    if (!properties.title)
+      throw new DatabaseErrorException('Book title is required');
+    if (!properties.isbn)
+      throw new DatabaseErrorException('Book isbn is required');
+    if (!properties.publicationDate)
+      throw new DatabaseErrorException('Book publicationDate is required');
+    if (!properties.publisher)
+      throw new DatabaseErrorException('Book publisher is required');
+    if (!properties.authors || !properties.authors.length)
+      throw new DatabaseErrorException('Book authors is required');
     if (!properties.languages || !properties.languages.length)
       throw new DatabaseErrorException('Book languages is required');
-    if (!properties.isActive) throw new DatabaseErrorException('Book isActive is required');
+    if (!properties.isActive)
+      throw new DatabaseErrorException('Book isActive is required');
 
     Object.assign(this, properties);
 
@@ -81,7 +90,11 @@ export class Book {
       title: this.title,
       isbn: this.isbn,
       publication_date: this.publicationDate,
-      publisher: this.publisher ? (typeof this.publisher === 'string' ? this.publisher : (this.publisher as Publisher).properties().id) : null,
+      publisher: this.publisher
+        ? typeof this.publisher === 'string'
+          ? this.publisher
+          : (this.publisher as Publisher).properties().id
+        : null,
       authors: this.authors,
       languages: this.languages,
       is_active: this.isActive,

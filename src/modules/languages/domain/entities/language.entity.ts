@@ -17,7 +17,8 @@ export interface LanguageUpdate {
   isoCode: string;
 }
 
-export type LanguageProperties = LanguageEssentials & Partial<LanguageOptionals>;
+export type LanguageProperties = LanguageEssentials &
+  Partial<LanguageOptionals>;
 
 export class Language {
   private readonly id: string | undefined;
@@ -28,10 +29,14 @@ export class Language {
   private updatedAt: Date | undefined;
 
   constructor(properties: LanguageProperties) {
-    if (!properties.id) throw new DatabaseErrorException('Language id is required');
-    if (!properties.name) throw new DatabaseErrorException('Language name is required');
-    if (!properties.isoCode) throw new DatabaseErrorException('Language isoCode is required');
-    if (!properties.isActive) throw new DatabaseErrorException('Language isActive is required');
+    if (!properties.id)
+      throw new DatabaseErrorException('Language id is required');
+    if (!properties.name)
+      throw new DatabaseErrorException('Language name is required');
+    if (!properties.isoCode)
+      throw new DatabaseErrorException('Language isoCode is required');
+    if (!properties.isActive)
+      throw new DatabaseErrorException('Language isActive is required');
 
     Object.assign(this, properties);
 

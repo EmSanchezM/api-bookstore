@@ -1,5 +1,5 @@
-import { Language } from '@/modules/languages/domain/entities';
-import { LanguageFilters } from '@/modules/languages/infrastructure/types/language.filters';
+import type { Language } from '@/modules/languages/domain/entities';
+import type { LanguageFilters } from '@/modules/languages/infrastructure/types/language.filters';
 
 export interface LanguageRepository {
   getLanguageById(id: string): Promise<Language | null>;

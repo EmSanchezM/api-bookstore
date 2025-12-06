@@ -1,15 +1,15 @@
 import {
-  pipe,
-  string,
-  object,
-  nonEmpty,
-  minLength,
-  maxLength,
-  url,
   array,
-  startsWith,
-  regex,
   type InferInput,
+  maxLength,
+  minLength,
+  nonEmpty,
+  object,
+  pipe,
+  regex,
+  startsWith,
+  string,
+  url,
 } from 'valibot';
 
 export const CreateAuthorSchema = object({
@@ -18,14 +18,20 @@ export const CreateAuthorSchema = object({
     nonEmpty('El nombre es requerido'),
     minLength(2, 'El nombre debe tener al menos 2 caracteres'),
     maxLength(50, 'El nombre debe tener máximo 50 caracteres'),
-    regex(/^[a-zA-ZÀ-ÿ\s]*$/, 'El nombre solo puede contener letras y espacios'),
+    regex(
+      /^[a-zA-ZÀ-ÿ\s]*$/,
+      'El nombre solo puede contener letras y espacios',
+    ),
   ),
   lastName: pipe(
     string(),
     nonEmpty('El apellido es requerido'),
     minLength(2, 'El apellido debe tener al menos 2 caracteres'),
     maxLength(50, 'El apellido debe tener máximo 50 caracteres'),
-    regex(/^[a-zA-ZÀ-ÿ\s]*$/, 'El apellido solo puede contener letras y espacios'),
+    regex(
+      /^[a-zA-ZÀ-ÿ\s]*$/,
+      'El apellido solo puede contener letras y espacios',
+    ),
   ),
   nationality: pipe(
     string(),
@@ -67,9 +73,24 @@ export const CreateAuthorSchema = object({
     ),
   ),
   socialLinks: object({
-    facebook: pipe(string(), startsWith('https://facebook.com/', 'Debe ser una URL válida de Facebook')),
-    twitter: pipe(string(), startsWith('https://twitter.com/', 'Debe ser una URL válida de Twitter')),
-    instagram: pipe(string(), startsWith('https://instagram.com/', 'Debe ser una URL válida de Instagram')),
+    facebook: pipe(
+      string(),
+      startsWith(
+        'https://facebook.com/',
+        'Debe ser una URL válida de Facebook',
+      ),
+    ),
+    twitter: pipe(
+      string(),
+      startsWith('https://twitter.com/', 'Debe ser una URL válida de Twitter'),
+    ),
+    instagram: pipe(
+      string(),
+      startsWith(
+        'https://instagram.com/',
+        'Debe ser una URL válida de Instagram',
+      ),
+    ),
   }),
   website: pipe(string(), url('La URL del sitio web no es válida')),
   birthDate: pipe(
@@ -77,7 +98,10 @@ export const CreateAuthorSchema = object({
     nonEmpty('La fecha de nacimiento es requerida'),
     regex(/^\d{4}-\d{2}-\d{2}$/, 'La fecha debe tener el formato YYYY-MM-DD'),
   ),
-  dateOfDeath: pipe(string(), regex(/^\d{4}-\d{2}-\d{2}$/, 'La fecha debe tener el formato YYYY-MM-DD')),
+  dateOfDeath: pipe(
+    string(),
+    regex(/^\d{4}-\d{2}-\d{2}$/, 'La fecha debe tener el formato YYYY-MM-DD'),
+  ),
 });
 
 export type CreateAuthorDto = InferInput<typeof CreateAuthorSchema>;

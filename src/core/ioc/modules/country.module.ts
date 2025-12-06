@@ -1,6 +1,5 @@
 import { ContainerModule } from 'inversify';
 import { TYPES } from '@/core/common/constants/types';
-import { SurrealCountryRepository } from '@/modules/countries/infrastructure/repositories/surreal-country.repository';
 import {
   CreateCountryUseCase,
   FindAllCountriesUseCase,
@@ -10,6 +9,7 @@ import {
   RemoveCountryUseCase,
   UpdateCountryUseCase,
 } from '@/modules/countries/application/use-cases';
+import { SurrealCountryRepository } from '@/modules/countries/infrastructure/repositories/surreal-country.repository';
 
 export const countryModule = new ContainerModule((bind) => {
   bind(TYPES.CountryRepository).to(SurrealCountryRepository);

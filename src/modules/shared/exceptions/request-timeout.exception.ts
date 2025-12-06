@@ -1,6 +1,6 @@
 import { HttpException } from './http.exception';
 import { HttpStatus } from './http.status';
-import { HttpExceptionOptions } from './types';
+import type { HttpExceptionOptions } from './types';
 
 /**
  * Defines an HTTP exception for *Request Timeout* type errors.
@@ -34,11 +34,19 @@ export class RequestTimeoutException extends HttpException {
    * @param objectOrError string or object describing the error condition.
    * @param descriptionOrOptions either a short description of the HTTP error or an options object used to provide an underlying error cause
    */
-  constructor(objectOrError?: any, descriptionOrOptions: string | HttpExceptionOptions = 'Request Timeout') {
-    const { description, httpExceptionOptions } = HttpException.extractDescriptionAndOptionsFrom(descriptionOrOptions);
+  constructor(
+    objectOrError?: any,
+    descriptionOrOptions: string | HttpExceptionOptions = 'Request Timeout',
+  ) {
+    const { description, httpExceptionOptions } =
+      HttpException.extractDescriptionAndOptionsFrom(descriptionOrOptions);
 
     super(
-      HttpException.createBody(objectOrError, description!, HttpStatus.REQUEST_TIMEOUT),
+      HttpException.createBody(
+        objectOrError,
+        description!,
+        HttpStatus.REQUEST_TIMEOUT,
+      ),
       HttpStatus.REQUEST_TIMEOUT,
       httpExceptionOptions,
     );

@@ -1,4 +1,13 @@
-import { pipe, string, object, nonEmpty, minLength, maxLength, url, type InferInput } from 'valibot';
+import {
+  type InferInput,
+  maxLength,
+  minLength,
+  nonEmpty,
+  object,
+  pipe,
+  string,
+  url,
+} from 'valibot';
 
 export const CreatePublisherSchema = object({
   name: pipe(

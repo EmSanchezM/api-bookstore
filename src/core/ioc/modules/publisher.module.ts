@@ -1,6 +1,5 @@
 import { ContainerModule } from 'inversify';
 import { TYPES } from '@/core/common/constants/types';
-import { SurrealPublisherRepository } from '@/modules/publishers/infrastructure/repositories/surreal-publisher.repository';
 import {
   CreatePublisherUseCase,
   FindAllPublishersUseCase,
@@ -9,6 +8,7 @@ import {
   RemovePublisherUseCase,
   UpdatePublisherUseCase,
 } from '@/modules/publishers/application/use-cases';
+import { SurrealPublisherRepository } from '@/modules/publishers/infrastructure/repositories/surreal-publisher.repository';
 
 export const publisherModule = new ContainerModule((bind) => {
   bind(TYPES.PublisherRepository).to(SurrealPublisherRepository);

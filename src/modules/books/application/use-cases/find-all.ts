@@ -1,11 +1,13 @@
 import { inject, injectable } from 'inversify';
 
 import { TYPES } from '@/core/common/constants/types';
-import { BookRepository } from '@/modules/books/domain/repositories';
+import type { BookRepository } from '@/modules/books/domain/repositories';
 
 @injectable()
 export class FindAllBooksUseCase {
-  constructor(@inject(TYPES.BookRepository) private bookRepository: BookRepository) {}
+  constructor(
+    @inject(TYPES.BookRepository) private bookRepository: BookRepository,
+  ) {}
 
   async execute() {
     const books = await this.bookRepository.getAllBooks();

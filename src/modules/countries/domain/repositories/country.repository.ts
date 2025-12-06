@@ -1,5 +1,5 @@
-import { Country } from '@/modules/countries/domain/entities';
-import { CountryFilters } from '@/modules/countries/infrastructure/types/country.filters';
+import type { Country } from '@/modules/countries/domain/entities';
+import type { CountryFilters } from '@/modules/countries/infrastructure/types/country.filters';
 
 export interface CountryRepository {
   getCountryById(id: string): Promise<Country | null>;

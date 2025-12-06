@@ -1,5 +1,5 @@
-import { Book } from '@/modules/books/domain/entities';
-import { BookFilters } from '@/modules/books/infrastructure/types/book.filters';
+import type { Book } from '@/modules/books/domain/entities';
+import type { BookFilters } from '@/modules/books/infrastructure/types/book.filters';
 
 export interface BookRepository {
   getBookById(id: string): Promise<Book | null>;

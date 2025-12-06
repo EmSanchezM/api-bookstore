@@ -1,5 +1,5 @@
+import { object, safeParse, string } from 'valibot';
 import { InternalServerErrorException } from '@/modules/shared/exceptions';
-import { object, string, safeParse } from 'valibot';
 
 export const ENVIRONMENT_VARIABLES = {
   NODE_ENV: 'NODE_ENV',

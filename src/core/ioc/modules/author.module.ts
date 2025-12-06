@@ -1,6 +1,5 @@
 import { ContainerModule } from 'inversify';
 import { TYPES } from '@/core/common/constants/types';
-import { SurrealAuthorRepository } from '@/modules/authors/infrastructure/repositories/surreal-author.repository';
 import {
   CreateAuthorUseCase,
   FindAllAuthorsUseCase,
@@ -9,6 +8,7 @@ import {
   RemoveAuthorUseCase,
   UpdateAuthorUseCase,
 } from '@/modules/authors/application/use-cases';
+import { SurrealAuthorRepository } from '@/modules/authors/infrastructure/repositories/surreal-author.repository';
 
 export const authorModule = new ContainerModule((bind) => {
   bind(TYPES.AuthorRepository).to(SurrealAuthorRepository);

@@ -1,13 +1,19 @@
 import { inject, injectable } from 'inversify';
 
 import { TYPES } from '@/core/common/constants/types';
-import { LanguageRepository } from '@/modules/languages/domain/repositories';
-import { UpdateLanguageDto } from '@/modules/languages/application/dtos';
-import { DatabaseErrorException, NotFoundException } from '@/modules/shared/exceptions';
+import type { UpdateLanguageDto } from '@/modules/languages/application/dtos';
+import type { LanguageRepository } from '@/modules/languages/domain/repositories';
+import {
+  DatabaseErrorException,
+  NotFoundException,
+} from '@/modules/shared/exceptions';
 
 @injectable()
 export class UpdateLanguageUseCase {
-  constructor(@inject(TYPES.LanguageRepository) private languageRepository: LanguageRepository) {}
+  constructor(
+    @inject(TYPES.LanguageRepository)
+    private languageRepository: LanguageRepository,
+  ) {}
 
   async execute(id: string, updateCountryDto: UpdateLanguageDto) {
     const existingLanguage = await this.languageRepository.getLanguageById(id);
@@ -23,7 +29,8 @@ export class UpdateLanguageUseCase {
       existingLanguage,
     );
 
-    if (!updatedLanguage) throw new DatabaseErrorException('Error updating language');
+    if (!updatedLanguage)
+      throw new DatabaseErrorException('Error updating language');
 
     return updatedLanguage;
   }

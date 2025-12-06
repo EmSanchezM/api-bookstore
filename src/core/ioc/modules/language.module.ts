@@ -1,6 +1,5 @@
 import { ContainerModule } from 'inversify';
 import { TYPES } from '@/core/common/constants/types';
-import { SurrealLanguageRepository } from '@/modules/languages/infrastructure/repositories/surreal-language.repository';
 import {
   CreateLanguageUseCase,
   FindAllLanguagesUseCase,
@@ -10,6 +9,7 @@ import {
   RemoveLanguageUseCase,
   UpdateLanguageUseCase,
 } from '@/modules/languages/application/use-cases';
+import { SurrealLanguageRepository } from '@/modules/languages/infrastructure/repositories/surreal-language.repository';
 
 export const languageModule = new ContainerModule((bind) => {
   bind(TYPES.LanguageRepository).to(SurrealLanguageRepository);

@@ -1,4 +1,4 @@
-import { HttpStatus } from './http.status';
+import type { HttpStatus } from './http.status';
 
 export interface HttpExceptionOptions {
   cause?: unknown;

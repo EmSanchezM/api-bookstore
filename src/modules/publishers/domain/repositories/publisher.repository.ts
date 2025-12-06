@@ -1,5 +1,5 @@
-import { Publisher } from '@/modules/publishers/domain/entities';
-import { PublisherFilters } from '@/modules/publishers/infrastructure/types/publisher.filters';
+import type { Publisher } from '@/modules/publishers/domain/entities';
+import type { PublisherFilters } from '@/modules/publishers/infrastructure/types/publisher.filters';
 
 export interface PublisherRepository {
   getPublisherById(id: string): Promise<Publisher | null>;

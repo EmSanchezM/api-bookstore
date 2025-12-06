@@ -1,16 +1,15 @@
 import 'reflect-metadata';
-import { json, urlencoded } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { json, urlencoded } from 'express';
 import { InversifyExpressServer } from 'inversify-express-utils';
-
-import { logger } from './logger';
 import { database } from '../database';
+import { logger } from './logger';
 
 import '@/core/ioc/registry';
-import { loadContainer } from '@/core/ioc/container';
 import { TYPES } from '@/core/common/constants/types';
-import { ErrorHandlerMiddleware } from '@/modules/shared/middlewares/error-handlers';
+import { loadContainer } from '@/core/ioc/container';
+import type { ErrorHandlerMiddleware } from '@/modules/shared/middlewares/error-handlers';
 
 export const createServer = async () => {
   try {
@@ -33,7 +32,9 @@ export const createServer = async () => {
     });
 
     server.setErrorConfig((app) => {
-      const errorHandlerMiddleware = container.get<ErrorHandlerMiddleware>(TYPES.ErrorHandlerMiddleware);
+      const errorHandlerMiddleware = container.get<ErrorHandlerMiddleware>(
+        TYPES.ErrorHandlerMiddleware,
+      );
       app.use(errorHandlerMiddleware.catchAll.bind(errorHandlerMiddleware));
     });
 

@@ -1,4 +1,4 @@
-import { envVariables, createServer, logger } from './core/config';
+import { createServer, envVariables, logger } from './core/config';
 import { database } from './core/database';
 
 async function main() {
@@ -6,7 +6,9 @@ async function main() {
     const server = await createServer();
 
     server.listen(envVariables.PORT, () => {
-      logger.info(`🌎 API Bookstore is running on ${envVariables.HOST_URL}:${envVariables.PORT}`);
+      logger.info(
+        `🌎 API Bookstore is running on ${envVariables.HOST_URL}:${envVariables.PORT}`,
+      );
     });
 
     const shutdown = async () => {

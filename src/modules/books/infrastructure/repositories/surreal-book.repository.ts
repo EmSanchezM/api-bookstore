@@ -1,17 +1,16 @@
-import { inject, injectable } from 'inversify';
-import Surreal, { RecordId, ResponseError, surql } from 'surrealdb';
-
-import { Book } from '@/modules/books/domain/entities';
-import { BookRepository } from '@/modules/books/domain/repositories';
-import { BookFilters } from '@/modules/books/infrastructure/types/book.filters';
-
 import { logger } from 'core/config/logger';
+import { inject, injectable } from 'inversify';
+import type Surreal from 'surrealdb';
+import { RecordId, ResponseError, surql } from 'surrealdb';
 import { TYPES } from '@/core/common/constants/types';
-import { SurrealRecordIdMapper } from '@/modules/shared/mappers';
-import { DatabaseErrorException } from '@/modules/shared/exceptions';
-import { Publisher } from '@/modules/publishers/domain/entities';
 import { Author } from '@/modules/authors/domain/entities';
+import { Book } from '@/modules/books/domain/entities';
+import type { BookRepository } from '@/modules/books/domain/repositories';
+import type { BookFilters } from '@/modules/books/infrastructure/types/book.filters';
 import { Language } from '@/modules/languages/domain/entities';
+import { Publisher } from '@/modules/publishers/domain/entities';
+import { DatabaseErrorException } from '@/modules/shared/exceptions';
+import { SurrealRecordIdMapper } from '@/modules/shared/mappers';
 
 interface BookRecord {
   id: RecordId | string;
@@ -49,7 +48,9 @@ export class SurrealBookRepository implements BookRepository {
         FROM $book
       `;
 
-      const [response] = await this.db.query<BookRecord[]>(query, { book: bookRecordId });
+      const [response] = await this.db.query<BookRecord[]>(query, {
+        book: bookRecordId,
+      });
 
       if (!response?.length) return null;
 
@@ -115,7 +116,9 @@ export class SurrealBookRepository implements BookRepository {
     }
 
     if (filters.title) {
-      conditions.push('string::contains(string::lowercase(title), string::lowercase($title))');
+      conditions.push(
+        'string::contains(string::lowercase(title), string::lowercase($title))',
+      );
       params.title = filters.title;
     }
 
@@ -161,18 +164,37 @@ export class SurrealBookRepository implements BookRepository {
   async createBook(book: Book): Promise<Book | null> {
     try {
       const properties = book.propertiesToDatabase();
-      const bookRecordId = SurrealRecordIdMapper.toRecordId('book', properties.id!);
+      const bookRecordId = SurrealRecordIdMapper.toRecordId(
+        'book',
+        properties.id!,
+      );
 
-      if (properties.authors && !properties.authors.every((authorId) => typeof authorId === 'string'))
-        throw new DatabaseErrorException('Book authors must be an array of strings');
+      if (
+        properties.authors &&
+        !properties.authors.every((authorId) => typeof authorId === 'string')
+      )
+        throw new DatabaseErrorException(
+          'Book authors must be an array of strings',
+        );
       if (!properties.languages.every((langId) => typeof langId === 'string'))
-        throw new DatabaseErrorException('Book languages must be an array of strings');
+        throw new DatabaseErrorException(
+          'Book languages must be an array of strings',
+        );
 
       const payload = {
         ...properties,
-        publisher: SurrealRecordIdMapper.toRecordId('publisher', properties.publisher!),
-        authors: properties.authors &&properties.authors.map((authorId) => SurrealRecordIdMapper.toRecordId('author', authorId)),
-        languages: properties.languages.map((langId) => SurrealRecordIdMapper.toRecordId('language', langId)),
+        publisher: SurrealRecordIdMapper.toRecordId(
+          'publisher',
+          properties.publisher!,
+        ),
+        authors:
+          properties.authors &&
+          properties.authors.map((authorId) =>
+            SurrealRecordIdMapper.toRecordId('author', authorId),
+          ),
+        languages: properties.languages.map((langId) =>
+          SurrealRecordIdMapper.toRecordId('language', langId),
+        ),
         is_active: properties.is_active,
       };
       delete payload.id;
@@ -181,7 +203,7 @@ export class SurrealBookRepository implements BookRepository {
 
       if (!newBookRecord) return null;
 
-      console.log({ newBookRecord })
+      console.log({ newBookRecord });
 
       return this.mapToBook(newBookRecord);
     } catch (error) {
@@ -195,17 +217,17 @@ export class SurrealBookRepository implements BookRepository {
       const properties = book.properties();
 
       const updateData: Record<string, any> = {
-        updated_at: new Date()
+        updated_at: new Date(),
       };
-  
+
       if (properties.title !== undefined) {
         updateData.title = properties.title;
       }
-  
+
       if (properties.isbn !== undefined) {
         updateData.isbn = properties.isbn;
       }
-  
+
       if (properties.publicationDate !== undefined) {
         updateData.publication_date = properties.publicationDate;
       }
@@ -213,10 +235,13 @@ export class SurrealBookRepository implements BookRepository {
       const patches = Object.entries(updateData).map(([key, value]) => ({
         op: 'replace' as const,
         path: `/${key}`,
-        value
+        value,
       }));
 
-      const updatedBookRecord = await this.db.patch<BookRecord>(bookRecordId, patches);
+      const updatedBookRecord = await this.db.patch<BookRecord>(
+        bookRecordId,
+        patches,
+      );
 
       if (!updatedBookRecord) return null;
 
@@ -271,7 +296,7 @@ export class SurrealBookRepository implements BookRepository {
     throw new DatabaseErrorException(error, `Error ${methodName} database`);
   }
 
-  private mapToBook(record: any): Book {    
+  private mapToBook(record: any): Book {
     return new Book({
       id: SurrealRecordIdMapper.fromRecordId(record.id),
       title: record.title,
@@ -289,9 +314,10 @@ export class SurrealBookRepository implements BookRepository {
   }
 
   private mapToPublisher(publisher: any): Publisher | string {
-    if(typeof publisher === 'string') return publisher;
-    
-    if(publisher instanceof RecordId) return SurrealRecordIdMapper.fromRecordId(publisher);
+    if (typeof publisher === 'string') return publisher;
+
+    if (publisher instanceof RecordId)
+      return SurrealRecordIdMapper.fromRecordId(publisher);
 
     return new Publisher({
       id: SurrealRecordIdMapper.fromRecordId(publisher.id),
@@ -306,8 +332,9 @@ export class SurrealBookRepository implements BookRepository {
 
     if (typeof author === 'string') return author;
 
-    if (author instanceof RecordId) return SurrealRecordIdMapper.fromRecordId(author);
-    
+    if (author instanceof RecordId)
+      return SurrealRecordIdMapper.fromRecordId(author);
+
     return new Author({
       id: SurrealRecordIdMapper.fromRecordId(author.id),
       firstName: author.first_name,
@@ -323,7 +350,8 @@ export class SurrealBookRepository implements BookRepository {
 
     if (typeof language === 'string') return language;
 
-    if (language instanceof RecordId) return SurrealRecordIdMapper.fromRecordId(language);
+    if (language instanceof RecordId)
+      return SurrealRecordIdMapper.fromRecordId(language);
 
     return new Language({
       id: SurrealRecordIdMapper.fromRecordId(language.id),

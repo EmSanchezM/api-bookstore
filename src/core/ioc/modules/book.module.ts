@@ -1,15 +1,15 @@
 import { ContainerModule } from 'inversify';
 import { TYPES } from '@/core/common/constants/types';
-import { SurrealBookRepository } from '@/modules/books/infrastructure/repositories/surreal-book.repository';
 import {
   CreateBookUseCase,
   FindAllBooksUseCase,
   FindByFiltersBookUseCase,
   FindByIdBookUseCase,
   RemoveBookUseCase,
-  UpdateBookUseCase,
   ToggleStatusBookUseCase,
+  UpdateBookUseCase,
 } from '@/modules/books/application/use-cases';
+import { SurrealBookRepository } from '@/modules/books/infrastructure/repositories/surreal-book.repository';
 
 export const bookModule = new ContainerModule((bind) => {
   bind(TYPES.BookRepository).to(SurrealBookRepository);

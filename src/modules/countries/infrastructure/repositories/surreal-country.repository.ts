@@ -1,14 +1,13 @@
-import { inject, injectable } from 'inversify';
-import Surreal, { RecordId, ResponseError } from 'surrealdb';
-
-import { Country } from '@/modules/countries/domain/entities';
-import { CountryRepository } from '@/modules/countries/domain/repositories';
-
 import { logger } from 'core/config/logger';
+import { inject, injectable } from 'inversify';
+import type Surreal from 'surrealdb';
+import { type RecordId, ResponseError } from 'surrealdb';
 import { TYPES } from '@/core/common/constants/types';
+import { Country } from '@/modules/countries/domain/entities';
+import type { CountryRepository } from '@/modules/countries/domain/repositories';
 import { DatabaseErrorException } from '@/modules/shared/exceptions';
-import { CountryFilters } from '../types/country.filters';
 import { SurrealRecordIdMapper } from '@/modules/shared/mappers';
+import type { CountryFilters } from '../types/country.filters';
 
 interface CountryRecord {
   id: RecordId | string;
@@ -28,7 +27,8 @@ export class SurrealCountryRepository implements CountryRepository {
     try {
       const countryRecordId = SurrealRecordIdMapper.toRecordId('country', id);
 
-      const countryRecord = await this.db.select<CountryRecord>(countryRecordId);
+      const countryRecord =
+        await this.db.select<CountryRecord>(countryRecordId);
 
       if (!countryRecord) return null;
 
@@ -88,7 +88,9 @@ export class SurrealCountryRepository implements CountryRepository {
     }
 
     if (filters.name) {
-      conditions.push('string::contains(string::lowercase(name), string::lowercase($name))');
+      conditions.push(
+        'string::contains(string::lowercase(name), string::lowercase($name))',
+      );
       params.name = filters.name;
     }
 
@@ -125,7 +127,9 @@ export class SurrealCountryRepository implements CountryRepository {
 
       if (!Array.isArray(response)) return [];
 
-      return response.map((country: CountryRecord) => this.mapToCountry(country));
+      return response.map((country: CountryRecord) =>
+        this.mapToCountry(country),
+      );
     } catch (error) {
       this.handleError(error, 'getAllCountries');
     }
@@ -134,9 +138,15 @@ export class SurrealCountryRepository implements CountryRepository {
   async createCountry(country: Country): Promise<Country | null> {
     try {
       const properties = country.propertiesToDatabase();
-      const countryRecordId = SurrealRecordIdMapper.toRecordId('country', properties.id!);
+      const countryRecordId = SurrealRecordIdMapper.toRecordId(
+        'country',
+        properties.id!,
+      );
 
-      const newCountryRecord = await this.db.create(countryRecordId, properties);
+      const newCountryRecord = await this.db.create(
+        countryRecordId,
+        properties,
+      );
 
       if (!newCountryRecord) return null;
 
@@ -163,7 +173,10 @@ export class SurrealCountryRepository implements CountryRepository {
         if (payload[key] === undefined) delete payload[key];
       });
 
-      const updatedCountryRecord = await this.db.update(countryRecordId, payload);
+      const updatedCountryRecord = await this.db.update(
+        countryRecordId,
+        payload,
+      );
 
       if (!updatedCountryRecord) return null;
 
@@ -176,7 +189,8 @@ export class SurrealCountryRepository implements CountryRepository {
   async deleteCountry(id: string): Promise<boolean> {
     try {
       const countryRecordId = SurrealRecordIdMapper.toRecordId('country', id);
-      const removedCountryRecord = await this.db.delete<CountryRecord>(countryRecordId);
+      const removedCountryRecord =
+        await this.db.delete<CountryRecord>(countryRecordId);
 
       if (!removedCountryRecord) return false;
 
@@ -190,7 +204,8 @@ export class SurrealCountryRepository implements CountryRepository {
     try {
       const countryRecordId = SurrealRecordIdMapper.toRecordId('country', id);
 
-      const currentCountry = await this.db.select<CountryRecord>(countryRecordId);
+      const currentCountry =
+        await this.db.select<CountryRecord>(countryRecordId);
 
       if (!currentCountry) return false;
 

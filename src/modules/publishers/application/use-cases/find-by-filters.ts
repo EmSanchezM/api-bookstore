@@ -1,15 +1,19 @@
 import { inject, injectable } from 'inversify';
 
 import { TYPES } from '@/core/common/constants/types';
-import { PublisherRepository } from '@/modules/publishers/domain/repositories';
-import { PublisherFilters } from '@/modules/publishers/infrastructure/types/publisher.filters';
+import type { PublisherRepository } from '@/modules/publishers/domain/repositories';
+import type { PublisherFilters } from '@/modules/publishers/infrastructure/types/publisher.filters';
 
 @injectable()
 export class FindByFiltersPublisherUseCase {
-  constructor(@inject(TYPES.PublisherRepository) private publisherRepository: PublisherRepository) {}
+  constructor(
+    @inject(TYPES.PublisherRepository)
+    private publisherRepository: PublisherRepository,
+  ) {}
 
   async execute(filters: PublisherFilters) {
-    const publishers = await this.publisherRepository.getPublishersByFilters(filters);
+    const publishers =
+      await this.publisherRepository.getPublishersByFilters(filters);
 
     if (!publishers.length) return [];
 

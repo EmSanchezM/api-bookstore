@@ -17,7 +17,8 @@ export interface PublisherUpdate {
   website: string;
 }
 
-export type PublisherProperties = PublisherEssentials & Partial<PublisherOptionals>;
+export type PublisherProperties = PublisherEssentials &
+  Partial<PublisherOptionals>;
 
 export class Publisher {
   private readonly id: string | undefined;
@@ -28,10 +29,14 @@ export class Publisher {
   private updatedAt: Date | undefined;
 
   constructor(properties: PublisherProperties) {
-    if (!properties.id) throw new DatabaseErrorException('Publisher id is required');
-    if (!properties.name) throw new DatabaseErrorException('Publisher name is required');
-    if (!properties.website) throw new DatabaseErrorException('Publisher isoCode is required');
-    if (!properties.isActive) throw new DatabaseErrorException('Publisher isActive is required');
+    if (!properties.id)
+      throw new DatabaseErrorException('Publisher id is required');
+    if (!properties.name)
+      throw new DatabaseErrorException('Publisher name is required');
+    if (!properties.website)
+      throw new DatabaseErrorException('Publisher isoCode is required');
+    if (!properties.isActive)
+      throw new DatabaseErrorException('Publisher isActive is required');
 
     Object.assign(this, properties);
 

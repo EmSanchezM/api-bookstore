@@ -1,8 +1,7 @@
-import { Request, Response, NextFunction } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import { injectable } from 'inversify';
-
-import { HttpException, HttpStatus } from '../exceptions';
 import { envVariables, logger } from '@/core/config';
+import { HttpException, HttpStatus } from '../exceptions';
 
 @injectable()
 export class ErrorHandlerMiddleware {
@@ -24,7 +23,12 @@ export class ErrorHandlerMiddleware {
     });
   }
 
-  public catchAll(error: Error, req: Request, res: Response, next: NextFunction) {
+  public catchAll(
+    error: Error,
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) {
     this.handle(error, req, res, next);
   }
 }

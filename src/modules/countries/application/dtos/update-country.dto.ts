@@ -1,4 +1,4 @@
-import { partial, type InferInput } from 'valibot';
+import { type InferInput, partial } from 'valibot';
 import { CreateCountrySchema } from './create-country.dto';
 
 export const UpdateCountrySchema = partial(CreateCountrySchema);

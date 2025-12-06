@@ -1,25 +1,35 @@
 import { inject, injectable } from 'inversify';
 
 import { TYPES } from '@/core/common/constants/types';
-
+import type { CreateBookDto } from '@/modules/books/application/dtos';
 import { Book } from '@/modules/books/domain/entities';
-import { BookRepository } from '@/modules/books/domain/repositories';
-import { CreateBookDto } from '@/modules/books/application/dtos';
-import { BadRequestException, InternalServerErrorException } from '@/modules/shared/exceptions';
+import type { BookRepository } from '@/modules/books/domain/repositories';
+import {
+  BadRequestException,
+  InternalServerErrorException,
+} from '@/modules/shared/exceptions';
 import { generateUUID } from '@/modules/shared/generate-uuid';
 
 @injectable()
 export class CreateBookUseCase {
-  constructor(@inject(TYPES.BookRepository) private bookRepository: BookRepository) {}
+  constructor(
+    @inject(TYPES.BookRepository) private bookRepository: BookRepository,
+  ) {}
 
   async execute(createBookDto: CreateBookDto): Promise<Book> {
-    if (!Array.isArray(createBookDto.authors)) throw new BadRequestException('Book authors must be an array');
-    if (!Array.isArray(createBookDto.languages)) throw new BadRequestException('Book languages must be an array');
+    if (!Array.isArray(createBookDto.authors))
+      throw new BadRequestException('Book authors must be an array');
+    if (!Array.isArray(createBookDto.languages))
+      throw new BadRequestException('Book languages must be an array');
 
-    if (!createBookDto.authors.every((authorId) => typeof authorId === 'string'))
+    if (
+      !createBookDto.authors.every((authorId) => typeof authorId === 'string')
+    )
       throw new BadRequestException('Book authors must be an array of strings');
     if (!createBookDto.languages.every((langId) => typeof langId === 'string'))
-      throw new BadRequestException('Book languages must be an array of strings');
+      throw new BadRequestException(
+        'Book languages must be an array of strings',
+      );
 
     const book = new Book({
       id: generateUUID(),
@@ -34,7 +44,8 @@ export class CreateBookUseCase {
 
     const createdBook = await this.bookRepository.createBook(book);
 
-    if (!createdBook) throw new InternalServerErrorException('Error creating Book');
+    if (!createdBook)
+      throw new InternalServerErrorException('Error creating Book');
 
     return createdBook;
   }

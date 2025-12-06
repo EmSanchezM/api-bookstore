@@ -1,14 +1,13 @@
-import { inject, injectable } from 'inversify';
-import Surreal, { RecordId, ResponseError } from 'surrealdb';
-
-import { Language } from '@/modules/languages/domain/entities';
-import { LanguageRepository } from '@/modules/languages/domain/repositories';
-import { LanguageFilters } from '@/modules/languages/infrastructure/types/language.filters';
-
 import { logger } from 'core/config/logger';
+import { inject, injectable } from 'inversify';
+import type Surreal from 'surrealdb';
+import { type RecordId, ResponseError } from 'surrealdb';
 import { TYPES } from '@/core/common/constants/types';
-import { SurrealRecordIdMapper } from '@/modules/shared/mappers';
+import { Language } from '@/modules/languages/domain/entities';
+import type { LanguageRepository } from '@/modules/languages/domain/repositories';
+import type { LanguageFilters } from '@/modules/languages/infrastructure/types/language.filters';
 import { DatabaseErrorException } from '@/modules/shared/exceptions';
+import { SurrealRecordIdMapper } from '@/modules/shared/mappers';
 
 interface LanguageRecord {
   id: RecordId | string;
@@ -28,7 +27,8 @@ export class SurrealLanguageRepository implements LanguageRepository {
     try {
       const languageRecordId = SurrealRecordIdMapper.toRecordId('language', id);
 
-      const LanguageRecord = await this.db.select<LanguageRecord>(languageRecordId);
+      const LanguageRecord =
+        await this.db.select<LanguageRecord>(languageRecordId);
 
       if (!LanguageRecord) return null;
 
@@ -88,7 +88,9 @@ export class SurrealLanguageRepository implements LanguageRepository {
     }
 
     if (filters.name) {
-      conditions.push('string::contains(string::lowercase(name), string::lowercase($name))');
+      conditions.push(
+        'string::contains(string::lowercase(name), string::lowercase($name))',
+      );
       params.name = filters.name;
     }
 
@@ -125,7 +127,9 @@ export class SurrealLanguageRepository implements LanguageRepository {
 
       if (!Array.isArray(response)) return [];
 
-      return response.map((Language: LanguageRecord) => this.mapToLanguage(Language));
+      return response.map((Language: LanguageRecord) =>
+        this.mapToLanguage(Language),
+      );
     } catch (error) {
       this.handleError(error, 'getAllLanguages');
     }
@@ -134,9 +138,15 @@ export class SurrealLanguageRepository implements LanguageRepository {
   async createLanguage(Language: Language): Promise<Language | null> {
     try {
       const properties = Language.propertiesToDatabase();
-      const languageRecordId = SurrealRecordIdMapper.toRecordId('language', properties.id!);
+      const languageRecordId = SurrealRecordIdMapper.toRecordId(
+        'language',
+        properties.id!,
+      );
 
-      const newLanguageRecord = await this.db.create(languageRecordId, properties);
+      const newLanguageRecord = await this.db.create(
+        languageRecordId,
+        properties,
+      );
 
       if (!newLanguageRecord) return null;
 
@@ -146,7 +156,10 @@ export class SurrealLanguageRepository implements LanguageRepository {
     }
   }
 
-  async updateLanguage(id: string, Language: Language): Promise<Language | null> {
+  async updateLanguage(
+    id: string,
+    Language: Language,
+  ): Promise<Language | null> {
     try {
       const languageRecordId = SurrealRecordIdMapper.toRecordId('language', id);
       const properties = Language.properties();
@@ -163,7 +176,10 @@ export class SurrealLanguageRepository implements LanguageRepository {
         if (payload[key] === undefined) delete payload[key];
       });
 
-      const updatedLanguageRecord = await this.db.update(languageRecordId, payload);
+      const updatedLanguageRecord = await this.db.update(
+        languageRecordId,
+        payload,
+      );
 
       if (!updatedLanguageRecord) return null;
 
@@ -176,7 +192,8 @@ export class SurrealLanguageRepository implements LanguageRepository {
   async deleteLanguage(id: string): Promise<boolean> {
     try {
       const languageRecordId = SurrealRecordIdMapper.toRecordId('language', id);
-      const removedLanguageRecord = await this.db.delete<LanguageRecord>(languageRecordId);
+      const removedLanguageRecord =
+        await this.db.delete<LanguageRecord>(languageRecordId);
 
       if (!removedLanguageRecord) return false;
 
@@ -190,7 +207,8 @@ export class SurrealLanguageRepository implements LanguageRepository {
     try {
       const languageRecordId = SurrealRecordIdMapper.toRecordId('Language', id);
 
-      const currentLanguage = await this.db.select<LanguageRecord>(languageRecordId);
+      const currentLanguage =
+        await this.db.select<LanguageRecord>(languageRecordId);
 
       if (!currentLanguage) return false;
 

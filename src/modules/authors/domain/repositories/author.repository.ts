@@ -1,5 +1,5 @@
-import { Author } from '@/modules/authors/domain/entities';
-import { AuthorFilters } from '@/modules/authors/infrastructure/types/author.filters';
+import type { Author } from '@/modules/authors/domain/entities';
+import type { AuthorFilters } from '@/modules/authors/infrastructure/types/author.filters';
 
 export interface AuthorRepository {
   getAuthorById(id: string): Promise<Author | null>;

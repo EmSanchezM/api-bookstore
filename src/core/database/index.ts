@@ -1,4 +1,5 @@
-import Surreal, { ConnectionStatus } from 'surrealdb';
+import type Surreal from 'surrealdb';
+import { ConnectionStatus } from 'surrealdb';
 import { getDatabaseConnection } from './connection';
 
 export class Database {

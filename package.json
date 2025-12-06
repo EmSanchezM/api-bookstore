@@ -14,24 +14,24 @@
   "author": "Elvin Sanchez | emsanchez891@gmail.com",
   "license": "ISC",
   "devDependencies": {
-    "@biomejs/biome": "1.9.4",
-    "@types/cors": "2.8.17",
-    "@types/express": "5.0.0",
-    "@types/node": "22.13.5",
+    "@biomejs/biome": "2.3.8",
+    "@types/cors": "2.8.19",
+    "@types/express": "5.0.6",
+    "@types/node": "24.0.0",
     "ts-node": "10.9.2",
     "tsconfig-paths": "4.2.0",
-    "typescript": "5.7.3"
+    "typescript": "5.9.3"
   },
   "dependencies": {
     "cors": "2.8.5",
-    "dotenv": "16.4.7",
+    "dotenv": "16.4.8",
     "express": "4.21.2",
     "inversify": "6.2.2",
     "inversify-express-utils": "6.4.10",
     "reflect-metadata": "0.2.2",
     "surrealdb": "1.2.1",
     "uuidv7": "1.0.2",
-    "valibot": "1.0.0-rc.4",
+    "valibot": "1.0.0",
     "winston": "3.17.0"
   }
 }

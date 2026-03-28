@@ -1,0 +1,1126 @@
+{
+	"info": {
+		"_postman_id": "api-bookstore-collection",
+		"name": "API Bookstore",
+		"description": "Colección completa para probar todos los endpoints de la API Bookstore.\n\nBase URL: http://localhost:3000/api/v1\nDatabase: SurrealDB",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000/api/v1",
+			"type": "string"
+		},
+		{
+			"key": "authorId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "bookId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "countryId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "languageId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "publisherId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "authToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "userId",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Authors",
+			"item": [
+				{
+					"name": "Create Author",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    if (response && response.id) {",
+									"        pm.collectionVariables.set('authorId', response.id);",
+									"    }",
+									"    pm.test('Author created successfully', function () {",
+									"        pm.response.to.have.status(201);",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"Gabriel\",\n  \"lastName\": \"García Márquez\",\n  \"nationality\": \"Colombiana\",\n  \"biography\": \"Gabriel José de la Concordia García Márquez fue un escritor y periodista colombiano, reconocido principalmente por sus novelas y cuentos, también escribió no ficción, discursos y reportajes.\",\n  \"awards\": [\"Premio Nobel de Literatura 1982\", \"Premio Rómulo Gallegos 1972\"],\n  \"genres\": [\"Realismo mágico\", \"Ficción literaria\"],\n  \"notableWorks\": [\"Cien años de soledad\", \"El amor en los tiempos del cólera\"],\n  \"socialLinks\": {\n    \"facebook\": \"https://facebook.com/gabrielgarciamarquez\",\n    \"twitter\": \"https://twitter.com/garciamarquez\",\n    \"instagram\": \"https://instagram.com/garciamarquez\"\n  },\n  \"website\": \"https://www.garciamarquez.com\",\n  \"birthDate\": \"1927-03-06\",\n  \"dateOfDeath\": \"2014-04-17\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/authors",
+							"host": ["{{baseUrl}}"],
+							"path": ["authors"]
+						},
+						"description": "Crea un nuevo autor. Todos los campos son requeridos excepto dateOfDeath."
+					}
+				},
+				{
+					"name": "Get All Authors",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/authors",
+							"host": ["{{baseUrl}}"],
+							"path": ["authors"]
+						},
+						"description": "Obtiene la lista de todos los autores."
+					}
+				},
+				{
+					"name": "Get Author by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/authors/{{authorId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["authors", "{{authorId}}"]
+						},
+						"description": "Obtiene un autor por su ID."
+					}
+				},
+				{
+					"name": "Get Authors with Filters",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/authors/filters?name=Gabriel&nationality=Colombiana&isActive=true&skip=0&limit=10&orderBy=firstName&sortBy=asc",
+							"host": ["{{baseUrl}}"],
+							"path": ["authors", "filters"],
+							"query": [
+								{
+									"key": "name",
+									"value": "Gabriel",
+									"description": "Filtrar por nombre"
+								},
+								{
+									"key": "nationality",
+									"value": "Colombiana",
+									"description": "Filtrar por nacionalidad"
+								},
+								{
+									"key": "isActive",
+									"value": "true",
+									"description": "Filtrar por estado activo/inactivo"
+								},
+								{
+									"key": "skip",
+									"value": "0",
+									"description": "Registros a saltar (paginación)"
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Límite de registros"
+								},
+								{
+									"key": "orderBy",
+									"value": "firstName",
+									"description": "Campo para ordenar"
+								},
+								{
+									"key": "sortBy",
+									"value": "asc",
+									"description": "Dirección del orden (asc/desc)"
+								}
+							]
+						},
+						"description": "Obtiene autores aplicando filtros. Todos los query params son opcionales."
+					}
+				},
+				{
+					"name": "Update Author",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"Gabriel José\",\n  \"biography\": \"Gabriel José de la Concordia García Márquez fue un escritor, guionista, editor y periodista colombiano. Premio Nobel de Literatura en 1982.\",\n  \"awards\": [\"Premio Nobel de Literatura 1982\", \"Premio Rómulo Gallegos 1972\", \"Legión de Honor de Francia\"]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/authors/{{authorId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["authors", "{{authorId}}"]
+						},
+						"description": "Actualiza un autor. Todos los campos son opcionales (partial update)."
+					}
+				},
+				{
+					"name": "Delete Author (Soft Delete)",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/authors/{{authorId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["authors", "{{authorId}}"]
+						},
+						"description": "Elimina un autor (soft delete - cambia estado a inactivo)."
+					}
+				}
+			],
+			"description": "Endpoints para la gestión de autores."
+		},
+		{
+			"name": "Books",
+			"item": [
+				{
+					"name": "Create Book",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    if (response && response.id) {",
+									"        pm.collectionVariables.set('bookId', response.id);",
+									"    }",
+									"    pm.test('Book created successfully', function () {",
+									"        pm.response.to.have.status(201);",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Cien años de soledad\",\n  \"isbn\": \"978-0-06-088328-7\",\n  \"publicationDate\": \"1967-05-30\",\n  \"publisher\": \"{{publisherId}}\",\n  \"authors\": [\"{{authorId}}\"],\n  \"languages\": [\"{{languageId}}\"]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/books",
+							"host": ["{{baseUrl}}"],
+							"path": ["books"]
+						},
+						"description": "Crea un nuevo libro. Los campos publisher, authors y languages reciben IDs de los recursos correspondientes."
+					}
+				},
+				{
+					"name": "Get All Books",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/books",
+							"host": ["{{baseUrl}}"],
+							"path": ["books"]
+						},
+						"description": "Obtiene la lista de todos los libros."
+					}
+				},
+				{
+					"name": "Get Book by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/books/{{bookId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["books", "{{bookId}}"]
+						},
+						"description": "Obtiene un libro por su ID."
+					}
+				},
+				{
+					"name": "Get Books with Filters",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/books/filters?title=Cien&isbn=978&isActive=true&skip=0&limit=10&orderBy=title&sortBy=asc",
+							"host": ["{{baseUrl}}"],
+							"path": ["books", "filters"],
+							"query": [
+								{
+									"key": "title",
+									"value": "Cien",
+									"description": "Filtrar por título"
+								},
+								{
+									"key": "isbn",
+									"value": "978",
+									"description": "Filtrar por ISBN"
+								},
+								{
+									"key": "isActive",
+									"value": "true",
+									"description": "Filtrar por estado activo/inactivo"
+								},
+								{
+									"key": "skip",
+									"value": "0",
+									"description": "Registros a saltar (paginación)"
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Límite de registros"
+								},
+								{
+									"key": "orderBy",
+									"value": "title",
+									"description": "Campo para ordenar"
+								},
+								{
+									"key": "sortBy",
+									"value": "asc",
+									"description": "Dirección del orden (asc/desc)"
+								}
+							]
+						},
+						"description": "Obtiene libros aplicando filtros. Todos los query params son opcionales."
+					}
+				},
+				{
+					"name": "Update Book",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Cien años de soledad (Edición conmemorativa)\",\n  \"isbn\": \"978-0-06-088328-7\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/books/{{bookId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["books", "{{bookId}}"]
+						},
+						"description": "Actualiza un libro. Todos los campos son opcionales (partial update)."
+					}
+				},
+				{
+					"name": "Delete Book (Soft Delete)",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/books/{{bookId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["books", "{{bookId}}"]
+						},
+						"description": "Elimina un libro (soft delete - cambia estado a inactivo)."
+					}
+				},
+				{
+					"name": "Hard Delete Book",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/books/{{bookId}}/hard-delete",
+							"host": ["{{baseUrl}}"],
+							"path": ["books", "{{bookId}}", "hard-delete"]
+						},
+						"description": "Elimina permanentemente un libro de la base de datos."
+					}
+				}
+			],
+			"description": "Endpoints para la gestión de libros."
+		},
+		{
+			"name": "Countries",
+			"item": [
+				{
+					"name": "Create Country",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    if (response && response.id) {",
+									"        pm.collectionVariables.set('countryId', response.id);",
+									"    }",
+									"    pm.test('Country created successfully', function () {",
+									"        pm.response.to.have.status(201);",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Colombia\",\n  \"isoCode\": \"CO\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/countries",
+							"host": ["{{baseUrl}}"],
+							"path": ["countries"]
+						},
+						"description": "Crea un nuevo país."
+					}
+				},
+				{
+					"name": "Get All Countries",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/countries",
+							"host": ["{{baseUrl}}"],
+							"path": ["countries"]
+						},
+						"description": "Obtiene la lista de todos los países."
+					}
+				},
+				{
+					"name": "Get Country by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/countries/{{countryId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["countries", "{{countryId}}"]
+						},
+						"description": "Obtiene un país por su ID."
+					}
+				},
+				{
+					"name": "Get Country by ISO Code",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/countries/iso-code/CO",
+							"host": ["{{baseUrl}}"],
+							"path": ["countries", "iso-code", "CO"]
+						},
+						"description": "Obtiene un país por su código ISO."
+					}
+				},
+				{
+					"name": "Get Countries with Filters",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/countries/filters?name=Colombia&isoCode=CO&isActive=true&skip=0&limit=10&orderBy=name&sortBy=asc",
+							"host": ["{{baseUrl}}"],
+							"path": ["countries", "filters"],
+							"query": [
+								{
+									"key": "name",
+									"value": "Colombia",
+									"description": "Filtrar por nombre"
+								},
+								{
+									"key": "isoCode",
+									"value": "CO",
+									"description": "Filtrar por código ISO"
+								},
+								{
+									"key": "isActive",
+									"value": "true",
+									"description": "Filtrar por estado activo/inactivo"
+								},
+								{
+									"key": "skip",
+									"value": "0",
+									"description": "Registros a saltar (paginación)"
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Límite de registros"
+								},
+								{
+									"key": "orderBy",
+									"value": "name",
+									"description": "Campo para ordenar"
+								},
+								{
+									"key": "sortBy",
+									"value": "asc",
+									"description": "Dirección del orden (asc/desc)"
+								}
+							]
+						},
+						"description": "Obtiene países aplicando filtros. Todos los query params son opcionales."
+					}
+				},
+				{
+					"name": "Update Country",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"República de Colombia\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/countries/{{countryId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["countries", "{{countryId}}"]
+						},
+						"description": "Actualiza un país. Todos los campos son opcionales (partial update)."
+					}
+				},
+				{
+					"name": "Delete Country (Soft Delete)",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/countries/{{countryId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["countries", "{{countryId}}"]
+						},
+						"description": "Elimina un país (soft delete - cambia estado a inactivo)."
+					}
+				}
+			],
+			"description": "Endpoints para la gestión de países."
+		},
+		{
+			"name": "Languages",
+			"item": [
+				{
+					"name": "Create Language",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    if (response && response.id) {",
+									"        pm.collectionVariables.set('languageId', response.id);",
+									"    }",
+									"    pm.test('Language created successfully', function () {",
+									"        pm.response.to.have.status(201);",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Español\",\n  \"isoCode\": \"ES\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/languages",
+							"host": ["{{baseUrl}}"],
+							"path": ["languages"]
+						},
+						"description": "Crea un nuevo idioma."
+					}
+				},
+				{
+					"name": "Get All Languages",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/languages",
+							"host": ["{{baseUrl}}"],
+							"path": ["languages"]
+						},
+						"description": "Obtiene la lista de todos los idiomas."
+					}
+				},
+				{
+					"name": "Get Language by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/languages/{{languageId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["languages", "{{languageId}}"]
+						},
+						"description": "Obtiene un idioma por su ID."
+					}
+				},
+				{
+					"name": "Get Language by ISO Code",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/languages/iso-code/ES",
+							"host": ["{{baseUrl}}"],
+							"path": ["languages", "iso-code", "ES"]
+						},
+						"description": "Obtiene un idioma por su código ISO."
+					}
+				},
+				{
+					"name": "Get Languages with Filters",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/languages/filters?name=Español&isoCode=ES&isActive=true&skip=0&limit=10&orderBy=name&sortBy=asc",
+							"host": ["{{baseUrl}}"],
+							"path": ["languages", "filters"],
+							"query": [
+								{
+									"key": "name",
+									"value": "Español",
+									"description": "Filtrar por nombre"
+								},
+								{
+									"key": "isoCode",
+									"value": "ES",
+									"description": "Filtrar por código ISO"
+								},
+								{
+									"key": "isActive",
+									"value": "true",
+									"description": "Filtrar por estado activo/inactivo"
+								},
+								{
+									"key": "skip",
+									"value": "0",
+									"description": "Registros a saltar (paginación)"
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Límite de registros"
+								},
+								{
+									"key": "orderBy",
+									"value": "name",
+									"description": "Campo para ordenar"
+								},
+								{
+									"key": "sortBy",
+									"value": "asc",
+									"description": "Dirección del orden (asc/desc)"
+								}
+							]
+						},
+						"description": "Obtiene idiomas aplicando filtros. Todos los query params son opcionales."
+					}
+				},
+				{
+					"name": "Update Language",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Español Latinoamericano\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/languages/{{languageId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["languages", "{{languageId}}"]
+						},
+						"description": "Actualiza un idioma. Todos los campos son opcionales (partial update)."
+					}
+				},
+				{
+					"name": "Delete Language (Soft Delete)",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/languages/{{languageId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["languages", "{{languageId}}"]
+						},
+						"description": "Elimina un idioma (soft delete - cambia estado a inactivo)."
+					}
+				}
+			],
+			"description": "Endpoints para la gestión de idiomas."
+		},
+		{
+			"name": "Publishers",
+			"item": [
+				{
+					"name": "Create Publisher",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    if (response && response.id) {",
+									"        pm.collectionVariables.set('publisherId', response.id);",
+									"    }",
+									"    pm.test('Publisher created successfully', function () {",
+									"        pm.response.to.have.status(201);",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Editorial Sudamericana\",\n  \"website\": \"https://www.penguinlibros.com/sudamericana\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/publishers",
+							"host": ["{{baseUrl}}"],
+							"path": ["publishers"]
+						},
+						"description": "Crea una nueva editorial."
+					}
+				},
+				{
+					"name": "Get All Publishers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/publishers",
+							"host": ["{{baseUrl}}"],
+							"path": ["publishers"]
+						},
+						"description": "Obtiene la lista de todas las editoriales."
+					}
+				},
+				{
+					"name": "Get Publisher by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/publishers/{{publisherId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["publishers", "{{publisherId}}"]
+						},
+						"description": "Obtiene una editorial por su ID."
+					}
+				},
+				{
+					"name": "Get Publishers with Filters",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/publishers/filters?name=Sudamericana&isActive=true&skip=0&limit=10&orderBy=name&sortBy=asc",
+							"host": ["{{baseUrl}}"],
+							"path": ["publishers", "filters"],
+							"query": [
+								{
+									"key": "name",
+									"value": "Sudamericana",
+									"description": "Filtrar por nombre"
+								},
+								{
+									"key": "isActive",
+									"value": "true",
+									"description": "Filtrar por estado activo/inactivo"
+								},
+								{
+									"key": "skip",
+									"value": "0",
+									"description": "Registros a saltar (paginación)"
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Límite de registros"
+								},
+								{
+									"key": "orderBy",
+									"value": "name",
+									"description": "Campo para ordenar"
+								},
+								{
+									"key": "sortBy",
+									"value": "asc",
+									"description": "Dirección del orden (asc/desc)"
+								}
+							]
+						},
+						"description": "Obtiene editoriales aplicando filtros. Todos los query params son opcionales."
+					}
+				},
+				{
+					"name": "Update Publisher",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Editorial Sudamericana S.A.\",\n  \"website\": \"https://www.penguinlibros.com/editorial-sudamericana\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/publishers/{{publisherId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["publishers", "{{publisherId}}"]
+						},
+						"description": "Actualiza una editorial. Todos los campos son opcionales (partial update)."
+					}
+				},
+				{
+					"name": "Delete Publisher (Soft Delete)",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/publishers/{{publisherId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["publishers", "{{publisherId}}"]
+						},
+						"description": "Elimina una editorial (soft delete - cambia estado a inactivo)."
+					}
+				}
+			],
+			"description": "Endpoints para la gestión de editoriales."
+		},
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    if (response && response.id) {",
+									"        pm.collectionVariables.set('userId', response.id);",
+									"    }",
+									"    pm.test('User registered successfully', function () {",
+									"        pm.response.to.have.status(201);",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"Elvin\",\n  \"lastName\": \"Sanchez\",\n  \"email\": \"elvin@bookworm.dev\",\n  \"password\": \"Password1\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "register"]
+						},
+						"description": "Registra un nuevo usuario. La contraseña debe tener mínimo 8 caracteres, al menos 1 mayúscula, 1 minúscula y 1 número."
+					}
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response && response.token) {",
+									"        pm.collectionVariables.set('authToken', response.token);",
+									"    }",
+									"    if (response && response.user && response.user.id) {",
+									"        pm.collectionVariables.set('userId', response.user.id);",
+									"    }",
+									"    pm.test('Login successful', function () {",
+									"        pm.response.to.have.status(200);",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"elvin@bookworm.dev\",\n  \"password\": \"Password1\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "login"]
+						},
+						"description": "Inicia sesión y retorna un JWT. El token se guarda automáticamente en la variable authToken."
+					}
+				},
+				{
+					"name": "Get My Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/auth/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "me"]
+						},
+						"description": "Obtiene el perfil del usuario autenticado. Requiere token JWT."
+					}
+				},
+				{
+					"name": "Update My Profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"Elvin Moises\",\n  \"bio\": \"Fullstack developer apasionado por la lectura.\",\n  \"avatar\": \"https://avatars.githubusercontent.com/u/12345\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "me"]
+						},
+						"description": "Actualiza el perfil del usuario autenticado. Todos los campos son opcionales. Requiere token JWT."
+					}
+				}
+			],
+			"description": "Endpoints de autenticación: registro, login y gestión del perfil propio."
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/users",
+							"host": ["{{baseUrl}}"],
+							"path": ["users"]
+						},
+						"description": "Obtiene la lista de todos los usuarios. Requiere token JWT."
+					}
+				},
+				{
+					"name": "Get Users with Filters",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/users/filters?name=Elvin&email=bookworm&isActive=true&skip=0&limit=10&orderBy=created_at&sortBy=desc",
+							"host": ["{{baseUrl}}"],
+							"path": ["users", "filters"],
+							"query": [
+								{
+									"key": "name",
+									"value": "Elvin",
+									"description": "Filtrar por nombre o apellido"
+								},
+								{
+									"key": "email",
+									"value": "bookworm",
+									"description": "Filtrar por email (búsqueda parcial)"
+								},
+								{
+									"key": "isActive",
+									"value": "true",
+									"description": "Filtrar por estado activo/inactivo"
+								},
+								{
+									"key": "skip",
+									"value": "0",
+									"description": "Registros a saltar (paginación)"
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Límite de registros"
+								},
+								{
+									"key": "orderBy",
+									"value": "created_at",
+									"description": "Campo para ordenar"
+								},
+								{
+									"key": "sortBy",
+									"value": "desc",
+									"description": "Dirección del orden (asc/desc)"
+								}
+							]
+						},
+						"description": "Obtiene usuarios aplicando filtros. Todos los query params son opcionales. Requiere token JWT."
+					}
+				},
+				{
+					"name": "Get User by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/users/{{userId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["users", "{{userId}}"]
+						},
+						"description": "Obtiene un usuario por su ID. Requiere token JWT."
+					}
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/users/{{userId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["users", "{{userId}}"]
+						},
+						"description": "Elimina un usuario permanentemente. Requiere token JWT."
+					}
+				}
+			],
+			"description": "Endpoints para la gestión de usuarios. Todos requieren autenticación JWT."
+		}
+	]
+}

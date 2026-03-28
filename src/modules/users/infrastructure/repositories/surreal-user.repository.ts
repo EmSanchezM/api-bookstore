@@ -1,13 +1,13 @@
 import { logger } from 'core/config/logger';
 import { inject, injectable } from 'inversify';
-import type Surreal from 'surrealdb';
-import { type RecordId, ResponseError } from 'surrealdb';
+import type { Surreal } from 'surrealdb';
+import { type RecordId, ResponseError, Table } from 'surrealdb';
 import { TYPES } from '@/core/common/constants/types';
+import { DatabaseErrorException } from '@/modules/shared/exceptions';
+import { fromRecordId, toRecordId } from '@/modules/shared/mappers';
 import { User } from '@/modules/users/domain/entities';
 import type { UserRepository } from '@/modules/users/domain/repositories';
 import type { UserFilters } from '@/modules/users/infrastructure/types/user.filters';
-import { DatabaseErrorException } from '@/modules/shared/exceptions';
-import { SurrealRecordIdMapper } from '@/modules/shared/mappers';
 
 interface UserRecord {
   id: RecordId | string;
@@ -29,7 +29,7 @@ export class SurrealUserRepository implements UserRepository {
 
   async getUserById(id: string): Promise<User | null> {
     try {
-      const userRecordId = SurrealRecordIdMapper.toRecordId('user', id);
+      const userRecordId = toRecordId('user', id);
 
       const userRecord = await this.db.select<UserRecord>(userRecordId);
 
@@ -58,11 +58,13 @@ export class SurrealUserRepository implements UserRepository {
 
   async getAllUsers(): Promise<User[]> {
     try {
-      const response = await this.db.select<UserRecord>('user');
+      const response = await this.db.select<UserRecord>(new Table('user'));
 
       if (!response?.length) return [];
 
-      return response.map((user: UserRecord) => this.mapToUser(user));
+      return response.map((user) =>
+        this.mapToUser(user as unknown as Record<string, unknown>),
+      );
     } catch (error) {
       this.handleError(error, 'getAllUsers');
     }
@@ -135,12 +137,11 @@ export class SurrealUserRepository implements UserRepository {
   async createUser(user: User): Promise<User | null> {
     try {
       const properties = user.propertiesToDatabase();
-      const userRecordId = SurrealRecordIdMapper.toRecordId(
-        'user',
-        properties.id!,
-      );
+      const userRecordId = toRecordId('user', properties.id!);
 
-      const newUserRecord = await this.db.create(userRecordId, properties);
+      const newUserRecord = await this.db
+        .create(userRecordId)
+        .content(properties);
 
       if (!newUserRecord) return null;
 
@@ -152,7 +153,7 @@ export class SurrealUserRepository implements UserRepository {
 
   async updateUser(id: string, user: User): Promise<User | null> {
     try {
-      const userRecordId = SurrealRecordIdMapper.toRecordId('user', id);
+      const userRecordId = toRecordId('user', id);
       const properties = user.properties();
 
       const payload: Partial<UserRecord> = {
@@ -170,7 +171,9 @@ export class SurrealUserRepository implements UserRepository {
         if (payload[key] === undefined) delete payload[key];
       });
 
-      const updatedUserRecord = await this.db.update(userRecordId, payload);
+      const updatedUserRecord = await this.db
+        .update(userRecordId)
+        .merge(payload);
 
       if (!updatedUserRecord) return null;
 
@@ -182,12 +185,12 @@ export class SurrealUserRepository implements UserRepository {
 
   async deleteUser(id: string): Promise<boolean> {
     try {
-      const userRecordId = SurrealRecordIdMapper.toRecordId('user', id);
+      const userRecordId = toRecordId('user', id);
       const removedUserRecord = await this.db.delete<UserRecord>(userRecordId);
 
       if (!removedUserRecord) return false;
 
-      return removedUserRecord.id ? true : false;
+      return !!removedUserRecord.id;
     } catch (error: unknown) {
       this.handleError(error, 'deleteUser');
     }
@@ -206,7 +209,7 @@ export class SurrealUserRepository implements UserRepository {
 
   private mapToUser(record: any): User {
     return new User({
-      id: SurrealRecordIdMapper.fromRecordId(record.id),
+      id: fromRecordId(record.id),
       firstName: record.first_name,
       lastName: record.last_name,
       email: record.email,

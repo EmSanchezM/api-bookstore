@@ -1,8 +1,18 @@
-import type { NextFunction, Request, Response } from 'express';
+import {
+  Controller,
+  Delete,
+  Get,
+  Params,
+  Query,
+  UseGuard,
+} from '@inversifyjs/http-core';
 import { inject } from 'inversify';
-import { controller, httpDelete, httpGet } from 'inversify-express-utils';
 
 import { TYPES } from '@/core/common/constants/types';
+import {
+  BadRequestException,
+  NotFoundException,
+} from '@/modules/shared/exceptions';
 import type {
   FindAllUsersUseCase,
   FindByFiltersUserUseCase,
@@ -10,13 +20,9 @@ import type {
   RemoveUserUseCase,
 } from '@/modules/users/application/use-cases';
 import type { UserFilters } from '@/modules/users/infrastructure/types/user.filters';
-import {
-  BadRequestException,
-  HttpStatus,
-  NotFoundException,
-} from '@/modules/shared/exceptions';
 
-@controller('/api/v1/users', TYPES.AuthMiddleware)
+@UseGuard(TYPES.AuthGuard)
+@Controller('/api/v1/users')
 export class UserController {
   constructor(
     @inject(TYPES.FindAllUsersUseCase)
@@ -29,65 +35,44 @@ export class UserController {
     private removeUserUseCase: RemoveUserUseCase,
   ) {}
 
-  @httpGet('/')
-  async findAll(req: Request, res: Response, next: NextFunction) {
-    try {
-      const users = await this.findAllUsersUseCase.execute();
+  @Get('/')
+  async findAll() {
+    const users = await this.findAllUsersUseCase.execute();
 
-      if (!users.length) return res.status(HttpStatus.OK).json([]);
+    if (!users.length) return [];
 
-      res
-        .status(HttpStatus.OK)
-        .json(users.map((user) => user.propertiesWithoutPassword()));
-    } catch (error) {
-      next(error);
-    }
+    return users.map((user) => user.propertiesWithoutPassword());
   }
 
-  @httpGet('/filters')
-  async findByFilters(req: Request, res: Response, next: NextFunction) {
-    try {
-      const filters = req.query as UserFilters;
-      const users = await this.findByFiltersUserUseCase.execute(filters);
+  @Get('/filters')
+  async findByFilters(@Query() filters: UserFilters) {
+    const users = await this.findByFiltersUserUseCase.execute(filters);
 
-      if (!users.length)
-        throw new NotFoundException(
-          `Users not found with filters: ${JSON.stringify(filters)}`,
-        );
+    if (!users.length)
+      throw new NotFoundException(
+        `Users not found with filters: ${JSON.stringify(filters)}`,
+      );
 
-      res
-        .status(HttpStatus.OK)
-        .json(users.map((user) => user.propertiesWithoutPassword()));
-    } catch (error) {
-      next(error);
-    }
+    return users.map((user) => user.propertiesWithoutPassword());
   }
 
-  @httpGet('/:id')
-  async findById(req: Request, res: Response, next: NextFunction) {
-    try {
-      if (!req.params.id) throw new BadRequestException('User id is required');
+  @Get('/:id')
+  async findById(@Params({ name: 'id' }) id: string) {
+    if (!id) throw new BadRequestException('User id is required');
 
-      const user = await this.findByIdUserUseCase.execute(req.params.id);
+    const user = await this.findByIdUserUseCase.execute(id);
 
-      res.status(HttpStatus.OK).json(user.propertiesWithoutPassword());
-    } catch (error) {
-      next(error);
-    }
+    return user.propertiesWithoutPassword();
   }
 
-  @httpDelete('/:id')
-  async remove(req: Request, res: Response, next: NextFunction) {
-    try {
-      if (!req.params.id) throw new BadRequestException('User id is required');
+  @Delete('/:id')
+  async remove(@Params({ name: 'id' }) id: string) {
+    if (!id) throw new BadRequestException('User id is required');
 
-      const isRemoved = await this.removeUserUseCase.execute(req.params.id);
+    const isRemoved = await this.removeUserUseCase.execute(id);
 
-      res.status(HttpStatus.OK).json({
-        message: isRemoved ? 'User deleted successfully' : 'User not found',
-      });
-    } catch (error) {
-      next(error);
-    }
+    return {
+      message: isRemoved ? 'User deleted successfully' : 'User not found',
+    };
   }
 }

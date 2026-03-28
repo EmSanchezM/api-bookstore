@@ -48,7 +48,7 @@ export const TYPES = {
   //Security
   PasswordHasher: Symbol.for('PasswordHasher'),
   TokenProvider: Symbol.for('TokenProvider'),
-  AuthMiddleware: Symbol.for('AuthMiddleware'),
+  AuthGuard: Symbol.for('AuthGuard'),
   //Books
   BookRepository: Symbol.for('BookRepository'),
   CreateBookUseCase: Symbol.for('CreateBookUseCase'),

@@ -1,13 +1,19 @@
-import type { NextFunction, Request, Response } from 'express';
-import { inject } from 'inversify';
 import {
-  controller,
-  httpGet,
-  httpPost,
-  httpPut,
-} from 'inversify-express-utils';
+  Body,
+  Controller,
+  CreatedHttpResponse,
+  Get,
+  Post,
+  Put,
+  Request,
+  UseGuard,
+} from '@inversifyjs/http-core';
+import type express from 'express';
+import { inject } from 'inversify';
 
 import { TYPES } from '@/core/common/constants/types';
+import { BadRequestException } from '@/modules/shared/exceptions';
+import { validate } from '@/modules/shared/validation/validator-service';
 import {
   type LoginUserDto,
   LoginUserSchema,
@@ -22,11 +28,9 @@ import type {
   RegisterUserUseCase,
   UpdateProfileUseCase,
 } from '@/modules/users/application/use-cases';
-import { BadRequestException, HttpStatus } from '@/modules/shared/exceptions';
-import { ValidationService } from '@/modules/shared/validation/validator-service';
-import type { AuthenticatedRequest } from '@/modules/users/presentation/middlewares/auth.middleware';
+import type { AuthenticatedRequest } from '@/modules/users/presentation/middlewares/auth.guard';
 
-@controller('/api/v1/auth')
+@Controller('/api/v1/auth')
 export class AuthController {
   constructor(
     @inject(TYPES.RegisterUserUseCase)
@@ -39,89 +43,60 @@ export class AuthController {
     private updateProfileUseCase: UpdateProfileUseCase,
   ) {}
 
-  @httpPost('/register')
-  async register(req: Request, res: Response, next: NextFunction) {
-    try {
-      const validationSchema = ValidationService.validate(
-        RegisterUserSchema,
-        req.body,
+  @Post('/register')
+  async register(@Body() body: unknown): Promise<CreatedHttpResponse> {
+    const validationSchema = validate(RegisterUserSchema, body);
+
+    if (!validationSchema.success)
+      throw new BadRequestException(
+        `Invalid registration data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`,
       );
 
-      if (!validationSchema.success)
-        throw new BadRequestException(
-          `Invalid registration data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`,
-        );
+    const registerUserDto: RegisterUserDto = validationSchema.output;
+    const user = await this.registerUserUseCase.execute(registerUserDto);
 
-      const registerUserDto: RegisterUserDto = validationSchema.output;
-      const user = await this.registerUserUseCase.execute(registerUserDto);
-
-      res.status(HttpStatus.CREATED).json(user.propertiesWithoutPassword());
-    } catch (error: unknown) {
-      next(error);
-    }
+    return new CreatedHttpResponse(user.propertiesWithoutPassword());
   }
 
-  @httpPost('/login')
-  async login(req: Request, res: Response, next: NextFunction) {
-    try {
-      const validationSchema = ValidationService.validate(
-        LoginUserSchema,
-        req.body,
+  @Post('/login')
+  async login(@Body() body: unknown) {
+    const validationSchema = validate(LoginUserSchema, body);
+
+    if (!validationSchema.success)
+      throw new BadRequestException(
+        `Invalid login data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`,
       );
 
-      if (!validationSchema.success)
-        throw new BadRequestException(
-          `Invalid login data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`,
-        );
+    const loginUserDto: LoginUserDto = validationSchema.output;
+    const { token, user } = await this.loginUserUseCase.execute(loginUserDto);
 
-      const loginUserDto: LoginUserDto = validationSchema.output;
-      const { token, user } = await this.loginUserUseCase.execute(loginUserDto);
-
-      res.status(HttpStatus.OK).json({
-        token,
-        user: user.propertiesWithoutPassword(),
-      });
-    } catch (error: unknown) {
-      next(error);
-    }
+    return { token, user: user.propertiesWithoutPassword() };
   }
 
-  @httpGet('/me', TYPES.AuthMiddleware)
-  async me(req: Request, res: Response, next: NextFunction) {
-    try {
-      const { id } = (req as AuthenticatedRequest).user;
-      const user = await this.findByIdUserUseCase.execute(id);
+  @UseGuard(TYPES.AuthGuard)
+  @Get('/me')
+  async me(@Request() req: express.Request) {
+    const { id } = (req as AuthenticatedRequest).user;
+    const user = await this.findByIdUserUseCase.execute(id);
 
-      res.status(HttpStatus.OK).json(user.propertiesWithoutPassword());
-    } catch (error: unknown) {
-      next(error);
-    }
+    return user.propertiesWithoutPassword();
   }
 
-  @httpPut('/me', TYPES.AuthMiddleware)
-  async updateMe(req: Request, res: Response, next: NextFunction) {
-    try {
-      const { id } = (req as AuthenticatedRequest).user;
+  @UseGuard(TYPES.AuthGuard)
+  @Put('/me')
+  async updateMe(@Request() req: express.Request, @Body() body: unknown) {
+    const { id } = (req as AuthenticatedRequest).user;
 
-      const validationSchema = ValidationService.validate(
-        UpdateProfileSchema,
-        req.body,
+    const validationSchema = validate(UpdateProfileSchema, body);
+
+    if (!validationSchema.success)
+      throw new BadRequestException(
+        `Invalid profile data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`,
       );
 
-      if (!validationSchema.success)
-        throw new BadRequestException(
-          `Invalid profile data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`,
-        );
+    const updateProfileDto: UpdateProfileDto = validationSchema.output;
+    const user = await this.updateProfileUseCase.execute(id, updateProfileDto);
 
-      const updateProfileDto: UpdateProfileDto = validationSchema.output;
-      const user = await this.updateProfileUseCase.execute(
-        id,
-        updateProfileDto,
-      );
-
-      res.status(HttpStatus.OK).json(user.propertiesWithoutPassword());
-    } catch (error: unknown) {
-      next(error);
-    }
+    return user.propertiesWithoutPassword();
   }
 }

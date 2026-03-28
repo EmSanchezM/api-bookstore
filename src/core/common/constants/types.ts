@@ -36,6 +36,19 @@ export const TYPES = {
   FindByIdAuthorUseCase: Symbol.for('FindByIdAuthorUseCase'),
   UpdateAuthorUseCase: Symbol.for('UpdateAuthorUseCase'),
   RemoveAuthorUseCase: Symbol.for('RemoveAuthorUseCase'),
+  //Users
+  UserRepository: Symbol.for('UserRepository'),
+  RegisterUserUseCase: Symbol.for('RegisterUserUseCase'),
+  LoginUserUseCase: Symbol.for('LoginUserUseCase'),
+  FindByIdUserUseCase: Symbol.for('FindByIdUserUseCase'),
+  FindAllUsersUseCase: Symbol.for('FindAllUsersUseCase'),
+  FindByFiltersUserUseCase: Symbol.for('FindByFiltersUserUseCase'),
+  UpdateProfileUseCase: Symbol.for('UpdateProfileUseCase'),
+  RemoveUserUseCase: Symbol.for('RemoveUserUseCase'),
+  //Security
+  PasswordHasher: Symbol.for('PasswordHasher'),
+  TokenProvider: Symbol.for('TokenProvider'),
+  AuthMiddleware: Symbol.for('AuthMiddleware'),
   //Books
   BookRepository: Symbol.for('BookRepository'),
   CreateBookUseCase: Symbol.for('CreateBookUseCase'),

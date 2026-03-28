@@ -1,3 +1,1 @@
-import { SurrealRecordIdMapper } from './surreal-record-id.mapper';
-
-export { SurrealRecordIdMapper };
+export { fromRecordId, toRecordId } from './surreal-record-id.mapper';

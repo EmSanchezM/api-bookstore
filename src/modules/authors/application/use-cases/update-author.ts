@@ -52,7 +52,7 @@ export class UpdateAuthorUseCase {
     });
 
     const updatedAuthor = await this.authorRepository.updateAuthor(
-      existingAuthor.properties().id!,
+      id,
       existingAuthor,
     );
 

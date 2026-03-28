@@ -18,9 +18,7 @@ export class RemoveAuthorUseCase {
 
     if (!author) throw new NotFoundException('Publisher not found');
 
-    const deletedAuthor = await this.authorRepository.deleteAuthor(
-      author.properties().id!,
-    );
+    const deletedAuthor = await this.authorRepository.deleteAuthor(id);
 
     if (!deletedAuthor)
       throw new InternalServerErrorException('Error deleting author');

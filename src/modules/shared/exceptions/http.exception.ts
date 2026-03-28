@@ -1,10 +1,9 @@
 import { isNumber, isObject, isString } from './shared.utils';
-import {
-  type DescriptionAndOptions,
-  type HttpExceptionBody,
-  type HttpExceptionBodyMessage,
-  type HttpExceptionOptions,
-  HttpExceptionResponse,
+import type {
+  DescriptionAndOptions,
+  HttpExceptionBody,
+  HttpExceptionBodyMessage,
+  HttpExceptionOptions,
 } from './types';
 
 export class HttpException extends Error {

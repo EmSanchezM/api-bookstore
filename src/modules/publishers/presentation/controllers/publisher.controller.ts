@@ -29,7 +29,7 @@ import {
   HttpStatus,
   NotFoundException,
 } from '@/modules/shared/exceptions';
-import { ValidationService } from '@/modules/shared/validation/validator-service';
+import { validate } from '@/modules/shared/validation/validator-service';
 
 @controller('/api/v1/publishers')
 export class PublisherController {
@@ -51,10 +51,7 @@ export class PublisherController {
   @httpPost('/')
   async create(req: Request, res: Response, next: NextFunction) {
     try {
-      const validationSchema = ValidationService.validate(
-        CreatePublisherSchema,
-        req.body,
-      );
+      const validationSchema = validate(CreatePublisherSchema, req.body);
 
       if (!validationSchema.success)
         throw new BadRequestException(
@@ -72,7 +69,7 @@ export class PublisherController {
   }
 
   @httpGet('/')
-  async findAll(req: Request, res: Response, next: NextFunction) {
+  async findAll(_req: Request, res: Response, next: NextFunction) {
     try {
       const publishers = await this.findAllPublishersUseCase.execute();
 
@@ -113,7 +110,7 @@ export class PublisherController {
         throw new BadRequestException('Publisher id is required');
 
       const publisher = await this.findByIdPublisherUseCase.execute(
-        req.params.id,
+        req.params.id as string,
       );
 
       res.status(HttpStatus.OK).json(publisher.properties());
@@ -128,10 +125,7 @@ export class PublisherController {
       if (!req.params.id)
         throw new BadRequestException('Publisher id is required');
 
-      const validationSchema = ValidationService.validate(
-        UpdatePublisherSchema,
-        req.body,
-      );
+      const validationSchema = validate(UpdatePublisherSchema, req.body);
       if (!validationSchema.success)
         throw new BadRequestException(
           `Invalid publisher data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`,
@@ -139,7 +133,7 @@ export class PublisherController {
 
       const updatePublisherDto: UpdatePublisherDto = validationSchema.output;
       const publisher = await this.updatePublisherUseCase.execute(
-        req.params.id,
+        req.params.id as string,
         updatePublisherDto,
       );
 
@@ -156,7 +150,7 @@ export class PublisherController {
         throw new BadRequestException('Publisher id is required');
 
       const isRemoved = await this.removePublisherUseCase.execute(
-        req.params.id,
+        req.params.id as string,
       );
 
       res.status(HttpStatus.OK).json({

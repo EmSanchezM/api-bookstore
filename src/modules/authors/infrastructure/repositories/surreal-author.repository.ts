@@ -7,7 +7,7 @@ import { Author } from '@/modules/authors/domain/entities';
 import type { AuthorRepository } from '@/modules/authors/domain/repositories';
 import type { AuthorFilters } from '@/modules/authors/infrastructure/types/author.filters';
 import { DatabaseErrorException } from '@/modules/shared/exceptions';
-import { SurrealRecordIdMapper } from '@/modules/shared/mappers';
+import { fromRecordId, toRecordId } from '@/modules/shared/mappers';
 
 interface AuthorRecord {
   id: RecordId | string;
@@ -38,7 +38,7 @@ export class SurrealAuthorRepository implements AuthorRepository {
 
   async getAuthorById(id: string): Promise<Author | null> {
     try {
-      const authorRecordId = SurrealRecordIdMapper.toRecordId('author', id);
+      const authorRecordId = toRecordId('author', id);
 
       const authorRecord = await this.db.select<AuthorRecord>(authorRecordId);
 
@@ -131,10 +131,7 @@ export class SurrealAuthorRepository implements AuthorRepository {
   async createAuthor(Author: Author): Promise<Author | null> {
     try {
       const properties = Author.propertiesToDatabase();
-      const authorRecordId = SurrealRecordIdMapper.toRecordId(
-        'author',
-        properties.id!,
-      );
+      const authorRecordId = toRecordId('author', properties.id as string);
 
       const newAuthorRecord = await this.db.create(authorRecordId, properties);
 
@@ -148,7 +145,7 @@ export class SurrealAuthorRepository implements AuthorRepository {
 
   async updateAuthor(id: string, author: Author): Promise<Author | null> {
     try {
-      const authorRecordId = SurrealRecordIdMapper.toRecordId('author', id);
+      const authorRecordId = toRecordId('author', id);
       const properties = author.properties();
 
       const payload: Partial<AuthorRecord> = {
@@ -184,13 +181,13 @@ export class SurrealAuthorRepository implements AuthorRepository {
 
   async deleteAuthor(id: string): Promise<boolean> {
     try {
-      const authorRecordId = SurrealRecordIdMapper.toRecordId('author', id);
+      const authorRecordId = toRecordId('author', id);
       const removedAuthorRecord =
         await this.db.delete<AuthorRecord>(authorRecordId);
 
       if (!removedAuthorRecord) return false;
 
-      return removedAuthorRecord.id ? true : false;
+      return !!removedAuthorRecord.id;
     } catch (error: unknown) {
       this.handleError(error, 'deleteAuthor');
     }
@@ -198,7 +195,7 @@ export class SurrealAuthorRepository implements AuthorRepository {
 
   async toggleAuthorStatus(id: string): Promise<boolean> {
     try {
-      const authorRecordId = SurrealRecordIdMapper.toRecordId('author', id);
+      const authorRecordId = toRecordId('author', id);
 
       const currentAuthor = await this.db.select<AuthorRecord>(authorRecordId);
 
@@ -228,23 +225,24 @@ export class SurrealAuthorRepository implements AuthorRepository {
     throw new DatabaseErrorException(error);
   }
 
-  private mapToAuthor(record: any): Author {
+  private mapToAuthor(record: Record<string, unknown>): Author {
+    const r = record as AuthorRecord;
     return new Author({
-      id: SurrealRecordIdMapper.fromRecordId(record.id),
-      firstName: record.first_name,
-      lastName: record.last_name,
-      nationality: record.nationality,
-      biography: record.biography,
-      awards: record.awards,
-      genres: record.genres,
-      notableWorks: record.notable_works,
-      website: record.website,
-      socialLinks: record.social_links,
-      birthDate: new Date(record.birth_date),
-      dateOfDeath: new Date(record.date_of_death),
-      isActive: record.is_active,
-      createdAt: new Date(record.created_at),
-      updatedAt: new Date(record.updated_at),
+      id: fromRecordId(r.id),
+      firstName: r.first_name,
+      lastName: r.last_name,
+      nationality: r.nationality,
+      biography: r.biography,
+      awards: r.awards,
+      genres: r.genres,
+      notableWorks: r.notable_works,
+      website: r.website,
+      socialLinks: r.social_links,
+      birthDate: new Date(r.birth_date as string),
+      dateOfDeath: new Date(r.date_of_death as string),
+      isActive: r.is_active,
+      createdAt: new Date(r.created_at as string),
+      updatedAt: new Date(r.updated_at as string),
     });
   }
 }

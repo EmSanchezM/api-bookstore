@@ -30,7 +30,7 @@ import {
   HttpStatus,
   NotFoundException,
 } from '@/modules/shared/exceptions';
-import { ValidationService } from '@/modules/shared/validation/validator-service';
+import { validate } from '@/modules/shared/validation/validator-service';
 
 @controller('/api/v1/books')
 export class BookController {
@@ -54,10 +54,7 @@ export class BookController {
   @httpPost('/')
   async create(req: Request, res: Response, next: NextFunction) {
     try {
-      const validationSchema = ValidationService.validate(
-        CreateBookSchema,
-        req.body,
-      );
+      const validationSchema = validate(CreateBookSchema, req.body);
 
       if (!validationSchema.success)
         throw new BadRequestException(
@@ -74,7 +71,7 @@ export class BookController {
   }
 
   @httpGet('/')
-  async findAll(req: Request, res: Response, next: NextFunction) {
+  async findAll(_req: Request, res: Response, next: NextFunction) {
     try {
       const books = await this.findAllBooksUseCase.execute();
 
@@ -108,7 +105,9 @@ export class BookController {
     try {
       if (!req.params.id) throw new BadRequestException('Book id is required');
 
-      const book = await this.findByIdBookUseCase.execute(req.params.id);
+      const book = await this.findByIdBookUseCase.execute(
+        req.params.id as string,
+      );
 
       res.status(HttpStatus.OK).json(book.properties());
     } catch (error) {
@@ -121,10 +120,7 @@ export class BookController {
     try {
       if (!req.params.id) throw new BadRequestException('Book id is required');
 
-      const validationSchema = ValidationService.validate(
-        UpdateBookSchema,
-        req.body,
-      );
+      const validationSchema = validate(UpdateBookSchema, req.body);
       if (!validationSchema.success)
         throw new BadRequestException(
           `Invalid book data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`,
@@ -132,7 +128,7 @@ export class BookController {
 
       const updateBookDto: UpdateBookDto = validationSchema.output;
       const book = await this.updateBookUseCase.execute(
-        req.params.id,
+        req.params.id as string,
         updateBookDto,
       );
 
@@ -148,7 +144,7 @@ export class BookController {
       if (!req.params.id) throw new BadRequestException('Book id is required');
 
       const isRemoved = await this.toggleStatusBookUseCase.execute(
-        req.params.id,
+        req.params.id as string,
       );
 
       res.status(HttpStatus.OK).json({
@@ -164,7 +160,9 @@ export class BookController {
     try {
       if (!req.params.id) throw new BadRequestException('Book id is required');
 
-      const isRemoved = await this.removeBookUseCase.execute(req.params.id);
+      const isRemoved = await this.removeBookUseCase.execute(
+        req.params.id as string,
+      );
 
       res.status(HttpStatus.OK).json({
         message: isRemoved ? 'Book deleted successfully' : 'Book not found',

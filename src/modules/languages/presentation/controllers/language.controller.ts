@@ -30,7 +30,7 @@ import {
   HttpStatus,
   NotFoundException,
 } from '@/modules/shared/exceptions';
-import { ValidationService } from '@/modules/shared/validation/validator-service';
+import { validate } from '@/modules/shared/validation/validator-service';
 
 @controller('/api/v1/languages')
 export class LanguageController {
@@ -54,10 +54,7 @@ export class LanguageController {
   @httpPost('/')
   async create(req: Request, res: Response, next: NextFunction) {
     try {
-      const validationSchema = ValidationService.validate(
-        CreateLanguageSchema,
-        req.body,
-      );
+      const validationSchema = validate(CreateLanguageSchema, req.body);
 
       if (!validationSchema.success)
         throw new BadRequestException(
@@ -75,7 +72,7 @@ export class LanguageController {
   }
 
   @httpGet('/')
-  async findAll(req: Request, res: Response, next: NextFunction) {
+  async findAll(_req: Request, res: Response, next: NextFunction) {
     try {
       const languages = await this.findAllLanguagesUseCase.execute();
 
@@ -116,7 +113,7 @@ export class LanguageController {
         throw new BadRequestException('Language id is required');
 
       const language = await this.findByIdLanguageUseCase.execute(
-        req.params.id,
+        req.params.id as string,
       );
 
       res.status(HttpStatus.OK).json(language.properties());
@@ -132,7 +129,7 @@ export class LanguageController {
         throw new BadRequestException('Language iso code is required');
 
       const language = await this.findByIsoCodeLanguageUseCase.execute(
-        req.params.isoCode,
+        req.params.isoCode as string,
       );
 
       res.status(HttpStatus.OK).json(language.properties());
@@ -147,10 +144,7 @@ export class LanguageController {
       if (!req.params.id)
         throw new BadRequestException('Language id is required');
 
-      const validationSchema = ValidationService.validate(
-        UpdateLanguageSchema,
-        req.body,
-      );
+      const validationSchema = validate(UpdateLanguageSchema, req.body);
       if (!validationSchema.success)
         throw new BadRequestException(
           `Invalid language data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`,
@@ -158,7 +152,7 @@ export class LanguageController {
 
       const updateLanguageDto: UpdateLanguageDto = validationSchema.output;
       const language = await this.updateLanguageUseCase.execute(
-        req.params.id,
+        req.params.id as string,
         updateLanguageDto,
       );
 
@@ -174,7 +168,9 @@ export class LanguageController {
       if (!req.params.id)
         throw new BadRequestException('Language id is required');
 
-      const isRemoved = await this.removeLanguageUseCase.execute(req.params.id);
+      const isRemoved = await this.removeLanguageUseCase.execute(
+        req.params.id as string,
+      );
 
       res.status(HttpStatus.OK).json({
         message: isRemoved

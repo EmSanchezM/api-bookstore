@@ -29,7 +29,7 @@ import {
   HttpStatus,
   NotFoundException,
 } from '@/modules/shared/exceptions';
-import { ValidationService } from '@/modules/shared/validation/validator-service';
+import { validate } from '@/modules/shared/validation/validator-service';
 
 @controller('/api/v1/authors')
 export class AuthorController {
@@ -51,10 +51,7 @@ export class AuthorController {
   @httpPost('/')
   async create(req: Request, res: Response, next: NextFunction) {
     try {
-      const validationSchema = ValidationService.validate(
-        CreateAuthorSchema,
-        req.body,
-      );
+      const validationSchema = validate(CreateAuthorSchema, req.body);
 
       if (!validationSchema.success)
         throw new BadRequestException(
@@ -71,7 +68,7 @@ export class AuthorController {
   }
 
   @httpGet('/')
-  async findAll(req: Request, res: Response, next: NextFunction) {
+  async findAll(_req: Request, res: Response, next: NextFunction) {
     try {
       const authors = await this.findAllAuthorsUseCase.execute();
 
@@ -110,7 +107,9 @@ export class AuthorController {
       if (!req.params.id)
         throw new BadRequestException('Author id is required');
 
-      const author = await this.findByIdAuthorUseCase.execute(req.params.id);
+      const author = await this.findByIdAuthorUseCase.execute(
+        req.params.id as string,
+      );
 
       res.status(HttpStatus.OK).json(author.properties());
     } catch (error) {
@@ -124,10 +123,7 @@ export class AuthorController {
       if (!req.params.id)
         throw new BadRequestException('Author id is required');
 
-      const validationSchema = ValidationService.validate(
-        UpdateAuthorSchema,
-        req.body,
-      );
+      const validationSchema = validate(UpdateAuthorSchema, req.body);
       if (!validationSchema.success)
         throw new BadRequestException(
           `Invalid author data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`,
@@ -135,7 +131,7 @@ export class AuthorController {
 
       const updateAuthorDto: UpdateAuthorDto = validationSchema.output;
       const author = await this.updateAuthorUseCase.execute(
-        req.params.id,
+        req.params.id as string,
         updateAuthorDto,
       );
 
@@ -151,7 +147,9 @@ export class AuthorController {
       if (!req.params.id)
         throw new BadRequestException('Author id is required');
 
-      const isRemoved = await this.removeAuthorUseCase.execute(req.params.id);
+      const isRemoved = await this.removeAuthorUseCase.execute(
+        req.params.id as string,
+      );
 
       res.status(HttpStatus.OK).json({
         message: isRemoved ? 'Author deleted successfully' : 'Author not found',

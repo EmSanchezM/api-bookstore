@@ -5,7 +5,7 @@ const { combine, timestamp, json, colorize, errors } = format;
 const consoleLogFormat = format.combine(
   colorize(),
   timestamp(),
-  format.printf(({ level, message, timestamp }) => {
+  format.printf(({ level, message }) => {
     return `[${level}] ${message}`;
   }),
 );

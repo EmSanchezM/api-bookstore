@@ -25,7 +25,7 @@ export class UpdateLanguageUseCase {
     });
 
     const updatedLanguage = await this.languageRepository.updateLanguage(
-      existingLanguage.properties().id!,
+      id,
       existingLanguage,
     );
 

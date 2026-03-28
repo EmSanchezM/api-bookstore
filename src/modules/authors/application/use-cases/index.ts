@@ -7,9 +7,9 @@ import { UpdateAuthorUseCase } from './update-author';
 
 export {
   CreateAuthorUseCase,
-  UpdateAuthorUseCase,
   FindAllAuthorsUseCase,
   FindByFiltersAuthorUseCase,
   FindByIdAuthorUseCase,
   RemoveAuthorUseCase,
+  UpdateAuthorUseCase,
 };

@@ -1,13 +1,13 @@
 import { logger } from 'core/config/logger';
 import { inject, injectable } from 'inversify';
-import type Surreal from 'surrealdb';
-import { type RecordId, ResponseError } from 'surrealdb';
+import type { Surreal } from 'surrealdb';
+import { type RecordId, ResponseError, Table } from 'surrealdb';
 import { TYPES } from '@/core/common/constants/types';
 import { Author } from '@/modules/authors/domain/entities';
 import type { AuthorRepository } from '@/modules/authors/domain/repositories';
 import type { AuthorFilters } from '@/modules/authors/infrastructure/types/author.filters';
 import { DatabaseErrorException } from '@/modules/shared/exceptions';
-import { SurrealRecordIdMapper } from '@/modules/shared/mappers';
+import { fromRecordId, toRecordId } from '@/modules/shared/mappers';
 
 interface AuthorRecord {
   id: RecordId | string;
@@ -38,7 +38,7 @@ export class SurrealAuthorRepository implements AuthorRepository {
 
   async getAuthorById(id: string): Promise<Author | null> {
     try {
-      const authorRecordId = SurrealRecordIdMapper.toRecordId('author', id);
+      const authorRecordId = toRecordId('author', id);
 
       const authorRecord = await this.db.select<AuthorRecord>(authorRecordId);
 
@@ -52,11 +52,13 @@ export class SurrealAuthorRepository implements AuthorRepository {
 
   async getAllAuthors(): Promise<Author[]> {
     try {
-      const response = await this.db.select<AuthorRecord>('author');
+      const response = await this.db.select<AuthorRecord>(new Table('author'));
 
       if (!response?.length) return [];
 
-      return response.map((author: AuthorRecord) => this.mapToAuthor(author));
+      return response.map((author) =>
+        this.mapToAuthor(author as unknown as Record<string, unknown>),
+      );
     } catch (error) {
       this.handleError(error, 'getAllAuthors');
     }
@@ -77,7 +79,7 @@ export class SurrealAuthorRepository implements AuthorRepository {
 
     if (filters.isActive !== undefined) {
       conditions.push('is_active = $is_active');
-      params.is_active = filters.isActive;
+      params.is_active = String(filters.isActive) === 'true';
     }
 
     if (filters.name) {
@@ -102,8 +104,10 @@ export class SurrealAuthorRepository implements AuthorRepository {
     const sortBy = filters.sortBy ?? 'desc';
     query += ` ORDER BY ${orderBy} ${sortBy}`;
 
-    if (filters.skip && filters.limit) {
-      query += ` LIMIT ${filters.limit} START ${filters.skip}`;
+    const skip = Number(filters.skip);
+    const limit = Number(filters.limit);
+    if (!isNaN(skip) && !isNaN(limit) && limit > 0) {
+      query += ` LIMIT ${limit} START ${skip}`;
     }
 
     return {
@@ -122,7 +126,9 @@ export class SurrealAuthorRepository implements AuthorRepository {
 
       if (!Array.isArray(response)) return [];
 
-      return response.map((author: AuthorRecord) => this.mapToAuthor(author));
+      return response.map((author) =>
+        this.mapToAuthor(author as unknown as Record<string, unknown>),
+      );
     } catch (error) {
       this.handleError(error, 'getAuthorsByFilters');
     }
@@ -131,12 +137,11 @@ export class SurrealAuthorRepository implements AuthorRepository {
   async createAuthor(Author: Author): Promise<Author | null> {
     try {
       const properties = Author.propertiesToDatabase();
-      const authorRecordId = SurrealRecordIdMapper.toRecordId(
-        'author',
-        properties.id!,
-      );
+      const authorRecordId = toRecordId('author', properties.id as string);
 
-      const newAuthorRecord = await this.db.create(authorRecordId, properties);
+      const newAuthorRecord = await this.db
+        .create(authorRecordId)
+        .content(properties);
 
       if (!newAuthorRecord) return null;
 
@@ -148,7 +153,7 @@ export class SurrealAuthorRepository implements AuthorRepository {
 
   async updateAuthor(id: string, author: Author): Promise<Author | null> {
     try {
-      const authorRecordId = SurrealRecordIdMapper.toRecordId('author', id);
+      const authorRecordId = toRecordId('author', id);
       const properties = author.properties();
 
       const payload: Partial<AuthorRecord> = {
@@ -172,7 +177,9 @@ export class SurrealAuthorRepository implements AuthorRepository {
         if (payload[key] === undefined) delete payload[key];
       });
 
-      const updatedAuthorRecord = await this.db.update(authorRecordId, payload);
+      const updatedAuthorRecord = await this.db
+        .update(authorRecordId)
+        .merge(payload);
 
       if (!updatedAuthorRecord) return null;
 
@@ -184,13 +191,13 @@ export class SurrealAuthorRepository implements AuthorRepository {
 
   async deleteAuthor(id: string): Promise<boolean> {
     try {
-      const authorRecordId = SurrealRecordIdMapper.toRecordId('author', id);
+      const authorRecordId = toRecordId('author', id);
       const removedAuthorRecord =
         await this.db.delete<AuthorRecord>(authorRecordId);
 
       if (!removedAuthorRecord) return false;
 
-      return removedAuthorRecord.id ? true : false;
+      return !!removedAuthorRecord.id;
     } catch (error: unknown) {
       this.handleError(error, 'deleteAuthor');
     }
@@ -198,13 +205,13 @@ export class SurrealAuthorRepository implements AuthorRepository {
 
   async toggleAuthorStatus(id: string): Promise<boolean> {
     try {
-      const authorRecordId = SurrealRecordIdMapper.toRecordId('author', id);
+      const authorRecordId = toRecordId('author', id);
 
       const currentAuthor = await this.db.select<AuthorRecord>(authorRecordId);
 
       if (!currentAuthor) return false;
 
-      const updatedAuthorRecord = await this.db.update(authorRecordId, {
+      const updatedAuthorRecord = await this.db.update(authorRecordId).merge({
         is_active: !currentAuthor.is_active,
         updated_at: new Date(),
       });
@@ -228,23 +235,24 @@ export class SurrealAuthorRepository implements AuthorRepository {
     throw new DatabaseErrorException(error);
   }
 
-  private mapToAuthor(record: any): Author {
+  private mapToAuthor(record: Record<string, unknown>): Author {
+    const r = record as AuthorRecord;
     return new Author({
-      id: SurrealRecordIdMapper.fromRecordId(record.id),
-      firstName: record.first_name,
-      lastName: record.last_name,
-      nationality: record.nationality,
-      biography: record.biography,
-      awards: record.awards,
-      genres: record.genres,
-      notableWorks: record.notable_works,
-      website: record.website,
-      socialLinks: record.social_links,
-      birthDate: new Date(record.birth_date),
-      dateOfDeath: new Date(record.date_of_death),
-      isActive: record.is_active,
-      createdAt: new Date(record.created_at),
-      updatedAt: new Date(record.updated_at),
+      id: fromRecordId(r.id),
+      firstName: r.first_name,
+      lastName: r.last_name,
+      nationality: r.nationality,
+      biography: r.biography,
+      awards: r.awards,
+      genres: r.genres,
+      notableWorks: r.notable_works,
+      website: r.website,
+      socialLinks: r.social_links,
+      birthDate: new Date(r.birth_date as string),
+      dateOfDeath: new Date(r.date_of_death as string),
+      isActive: r.is_active,
+      createdAt: new Date(r.created_at as string),
+      updatedAt: new Date(r.updated_at as string),
     });
   }
 }

@@ -3,7 +3,7 @@ import { UpdateCountryDto, UpdateCountrySchema } from './update-country.dto';
 
 export {
   CreateCountryDto,
-  UpdateCountryDto,
   CreateCountrySchema,
+  UpdateCountryDto,
   UpdateCountrySchema,
 };

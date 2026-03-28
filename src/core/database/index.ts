@@ -1,5 +1,4 @@
-import type Surreal from 'surrealdb';
-import { ConnectionStatus } from 'surrealdb';
+import type { Surreal } from 'surrealdb';
 import { getDatabaseConnection } from './connection';
 
 export class Database {
@@ -33,7 +32,7 @@ export class Database {
   public isConnected() {
     if (this.db === null) return false;
 
-    return this.db.status === ConnectionStatus.Connected;
+    return this.db.status === 'connected';
   }
 
   public async reconnect() {

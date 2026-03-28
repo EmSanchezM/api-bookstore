@@ -1,7 +1,3 @@
-export * from '@/modules/authors/presentation/controllers/author.controller';
-export * from '@/modules/books/presentation/controllers/book.controller';
-export * from '@/modules/countries/presentation/controllers/country.controller';
-export * from '@/modules/languages/presentation/controllers/language.controller';
-export * from '@/modules/publishers/presentation/controllers/publisher.controller';
-export * from '@/modules/users/presentation/controllers/auth.controller';
-export * from '@/modules/users/presentation/controllers/user.controller';
+// Controllers are registered in the container in server.ts
+// This file is kept for backward compatibility but is no longer needed
+// with the @inversifyjs/http-express adapter pattern

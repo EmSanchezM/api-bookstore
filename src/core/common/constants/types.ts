@@ -1,7 +1,7 @@
 export const TYPES = {
   Database: Symbol.for('Database'),
   DatabaseConnection: Symbol.for('DatabaseConnection'),
-  ErrorHandlerMiddleware: Symbol.for('ErrorHandlerMiddleware'),
+  GlobalErrorFilter: Symbol.for('GlobalErrorFilter'),
   //Countries
   CountryRepository: Symbol.for('CountryRepository'),
   CreateCountryUseCase: Symbol.for('CreateCountryUseCase'),

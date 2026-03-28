@@ -1,12 +1,12 @@
 import { logger } from 'core/config/logger';
 import { inject, injectable } from 'inversify';
-import type Surreal from 'surrealdb';
-import { type RecordId, ResponseError } from 'surrealdb';
+import type { Surreal } from 'surrealdb';
+import { type RecordId, ResponseError, Table } from 'surrealdb';
 import { TYPES } from '@/core/common/constants/types';
 import { Country } from '@/modules/countries/domain/entities';
 import type { CountryRepository } from '@/modules/countries/domain/repositories';
 import { DatabaseErrorException } from '@/modules/shared/exceptions';
-import { SurrealRecordIdMapper } from '@/modules/shared/mappers';
+import { fromRecordId, toRecordId } from '@/modules/shared/mappers';
 import type { CountryFilters } from '../types/country.filters';
 
 interface CountryRecord {
@@ -25,7 +25,7 @@ export class SurrealCountryRepository implements CountryRepository {
 
   async getCountryById(id: string): Promise<Country | null> {
     try {
-      const countryRecordId = SurrealRecordIdMapper.toRecordId('country', id);
+      const countryRecordId = toRecordId('country', id);
 
       const countryRecord =
         await this.db.select<CountryRecord>(countryRecordId);
@@ -49,7 +49,7 @@ export class SurrealCountryRepository implements CountryRepository {
 
       if (!response[0]) return null;
 
-      const countryRecord = response[0];
+      const countryRecord = response[0] as Record<string, unknown>;
 
       return this.mapToCountry(countryRecord);
     } catch (error) {
@@ -59,11 +59,15 @@ export class SurrealCountryRepository implements CountryRepository {
 
   async getAllCountries(): Promise<Country[]> {
     try {
-      const response = await this.db.select<CountryRecord>('country');
+      const response = await this.db.select<CountryRecord>(
+        new Table('country'),
+      );
 
       if (!response?.length) return [];
 
-      return response.map((country: any) => this.mapToCountry(country));
+      return response.map((country) =>
+        this.mapToCountry(country as unknown as Record<string, unknown>),
+      );
     } catch (error) {
       this.handleError(error, 'getAllCountries');
     }
@@ -84,7 +88,7 @@ export class SurrealCountryRepository implements CountryRepository {
 
     if (filters.isActive !== undefined) {
       conditions.push('is_active = $is_active');
-      params.is_active = filters.isActive;
+      params.is_active = String(filters.isActive) === 'true';
     }
 
     if (filters.name) {
@@ -107,8 +111,10 @@ export class SurrealCountryRepository implements CountryRepository {
     const sortBy = filters.sortBy ?? 'desc';
     query += ` ORDER BY ${orderBy} ${sortBy}`;
 
-    if (filters.skip && filters.limit) {
-      query += ` LIMIT ${filters.limit} START ${filters.skip}`;
+    const skip = Number(filters.skip);
+    const limit = Number(filters.limit);
+    if (!isNaN(skip) && !isNaN(limit) && limit > 0) {
+      query += ` LIMIT ${limit} START ${skip}`;
     }
 
     return {
@@ -127,8 +133,8 @@ export class SurrealCountryRepository implements CountryRepository {
 
       if (!Array.isArray(response)) return [];
 
-      return response.map((country: CountryRecord) =>
-        this.mapToCountry(country),
+      return response.map((country) =>
+        this.mapToCountry(country as unknown as Record<string, unknown>),
       );
     } catch (error) {
       this.handleError(error, 'getAllCountries');
@@ -138,15 +144,11 @@ export class SurrealCountryRepository implements CountryRepository {
   async createCountry(country: Country): Promise<Country | null> {
     try {
       const properties = country.propertiesToDatabase();
-      const countryRecordId = SurrealRecordIdMapper.toRecordId(
-        'country',
-        properties.id!,
-      );
+      const countryRecordId = toRecordId('country', properties.id as string);
 
-      const newCountryRecord = await this.db.create(
-        countryRecordId,
-        properties,
-      );
+      const newCountryRecord = await this.db
+        .create(countryRecordId)
+        .content(properties);
 
       if (!newCountryRecord) return null;
 
@@ -158,7 +160,7 @@ export class SurrealCountryRepository implements CountryRepository {
 
   async updateCountry(id: string, country: Country): Promise<Country | null> {
     try {
-      const countryRecordId = SurrealRecordIdMapper.toRecordId('country', id);
+      const countryRecordId = toRecordId('country', id);
       const properties = country.properties();
 
       const payload: Partial<CountryRecord> = {
@@ -173,10 +175,9 @@ export class SurrealCountryRepository implements CountryRepository {
         if (payload[key] === undefined) delete payload[key];
       });
 
-      const updatedCountryRecord = await this.db.update(
-        countryRecordId,
-        payload,
-      );
+      const updatedCountryRecord = await this.db
+        .update(countryRecordId)
+        .merge(payload);
 
       if (!updatedCountryRecord) return null;
 
@@ -188,13 +189,13 @@ export class SurrealCountryRepository implements CountryRepository {
 
   async deleteCountry(id: string): Promise<boolean> {
     try {
-      const countryRecordId = SurrealRecordIdMapper.toRecordId('country', id);
+      const countryRecordId = toRecordId('country', id);
       const removedCountryRecord =
         await this.db.delete<CountryRecord>(countryRecordId);
 
       if (!removedCountryRecord) return false;
 
-      return removedCountryRecord.id ? true : false;
+      return !!removedCountryRecord.id;
     } catch (error: unknown) {
       this.handleError(error, 'deleteCountry');
     }
@@ -202,14 +203,14 @@ export class SurrealCountryRepository implements CountryRepository {
 
   async toggleCountryStatus(id: string): Promise<boolean> {
     try {
-      const countryRecordId = SurrealRecordIdMapper.toRecordId('country', id);
+      const countryRecordId = toRecordId('country', id);
 
       const currentCountry =
         await this.db.select<CountryRecord>(countryRecordId);
 
       if (!currentCountry) return false;
 
-      const updatedCountryRecord = await this.db.update(countryRecordId, {
+      const updatedCountryRecord = await this.db.update(countryRecordId).merge({
         is_active: !currentCountry.is_active,
         updated_at: new Date(),
       });
@@ -233,14 +234,15 @@ export class SurrealCountryRepository implements CountryRepository {
     throw new DatabaseErrorException(error);
   }
 
-  private mapToCountry(record: any): Country {
+  private mapToCountry(record: Record<string, unknown>): Country {
+    const r = record as CountryRecord;
     return new Country({
-      id: SurrealRecordIdMapper.fromRecordId(record.id),
-      name: record.name,
-      isoCode: record.iso_code,
-      isActive: record.is_active,
-      createdAt: new Date(record.created_at),
-      updatedAt: new Date(record.updated_at),
+      id: fromRecordId(r.id),
+      name: r.name,
+      isoCode: r.iso_code,
+      isActive: r.is_active,
+      createdAt: new Date(r.created_at as string),
+      updatedAt: new Date(r.updated_at as string),
     });
   }
 }

@@ -8,10 +8,10 @@ import { UpdateCountryUseCase } from './update-country';
 
 export {
   CreateCountryUseCase,
-  UpdateCountryUseCase,
   FindAllCountriesUseCase,
   FindByFiltersCountryUseCase,
   FindByIdCountryUseCase,
   FindByIsoCodeCountryUseCase,
   RemoveCountryUseCase,
+  UpdateCountryUseCase,
 };

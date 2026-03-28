@@ -1,12 +1,15 @@
-import type { NextFunction, Request, Response } from 'express';
-import { inject } from 'inversify';
 import {
-  controller,
-  httpDelete,
-  httpGet,
-  httpPost,
-  httpPut,
-} from 'inversify-express-utils';
+  Body,
+  Controller,
+  CreatedHttpResponse,
+  Delete,
+  Get,
+  Params,
+  Post,
+  Put,
+  Query,
+} from '@inversifyjs/http-core';
+import { inject } from 'inversify';
 
 import { TYPES } from '@/core/common/constants/types';
 import {
@@ -27,12 +30,11 @@ import type {
 import type { BookFilters } from '@/modules/books/infrastructure/types/book.filters';
 import {
   BadRequestException,
-  HttpStatus,
   NotFoundException,
 } from '@/modules/shared/exceptions';
-import { ValidationService } from '@/modules/shared/validation/validator-service';
+import { validate } from '@/modules/shared/validation/validator-service';
 
-@controller('/api/v1/books')
+@Controller('/api/v1/books')
 export class BookController {
   constructor(
     @inject(TYPES.CreateBookUseCase)
@@ -51,126 +53,86 @@ export class BookController {
     private updateBookUseCase: UpdateBookUseCase,
   ) {}
 
-  @httpPost('/')
-  async create(req: Request, res: Response, next: NextFunction) {
-    try {
-      const validationSchema = ValidationService.validate(
-        CreateBookSchema,
-        req.body,
+  @Post('/')
+  async create(@Body() body: unknown): Promise<CreatedHttpResponse> {
+    const validationSchema = validate(CreateBookSchema, body);
+
+    if (!validationSchema.success)
+      throw new BadRequestException(
+        `Invalid book data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`,
       );
 
-      if (!validationSchema.success)
-        throw new BadRequestException(
-          `Invalid book data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`,
-        );
+    const createBookDto: CreateBookDto = validationSchema.output;
+    const book = await this.createBookUseCase.execute(createBookDto);
 
-      const createBookDto: CreateBookDto = validationSchema.output;
-      const book = await this.createBookUseCase.execute(createBookDto);
-
-      res.status(HttpStatus.CREATED).json(book.properties());
-    } catch (error: unknown) {
-      next(error);
-    }
+    return new CreatedHttpResponse(book.properties());
   }
 
-  @httpGet('/')
-  async findAll(req: Request, res: Response, next: NextFunction) {
-    try {
-      const books = await this.findAllBooksUseCase.execute();
+  @Get('/')
+  async findAll() {
+    const books = await this.findAllBooksUseCase.execute();
 
-      if (!books.length) return res.status(HttpStatus.OK).json([]);
+    if (!books.length) return [];
 
-      res.status(HttpStatus.OK).json(books.map((book) => book.properties()));
-    } catch (error) {
-      next(error);
-    }
+    return books.map((book) => book.properties());
   }
 
-  @httpGet('/filters')
-  async findByFilters(req: Request, res: Response, next: NextFunction) {
-    try {
-      const filters = req.query as BookFilters;
-      const books = await this.findByFiltersBookUseCase.execute(filters);
+  @Get('/filters')
+  async findByFilters(@Query() filters: BookFilters) {
+    const books = await this.findByFiltersBookUseCase.execute(filters);
 
-      if (!books.length)
-        throw new NotFoundException(
-          `Books not found with filters: ${JSON.stringify(filters)}`,
-        );
-
-      res.status(HttpStatus.OK).json(books.map((book) => book.properties()));
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  @httpGet('/:id')
-  async findById(req: Request, res: Response, next: NextFunction) {
-    try {
-      if (!req.params.id) throw new BadRequestException('Book id is required');
-
-      const book = await this.findByIdBookUseCase.execute(req.params.id);
-
-      res.status(HttpStatus.OK).json(book.properties());
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  @httpPut('/:id')
-  async update(req: Request, res: Response, next: NextFunction) {
-    try {
-      if (!req.params.id) throw new BadRequestException('Book id is required');
-
-      const validationSchema = ValidationService.validate(
-        UpdateBookSchema,
-        req.body,
-      );
-      if (!validationSchema.success)
-        throw new BadRequestException(
-          `Invalid book data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`,
-        );
-
-      const updateBookDto: UpdateBookDto = validationSchema.output;
-      const book = await this.updateBookUseCase.execute(
-        req.params.id,
-        updateBookDto,
+    if (!books.length)
+      throw new NotFoundException(
+        `Books not found with filters: ${JSON.stringify(filters)}`,
       );
 
-      res.status(HttpStatus.OK).json(book.properties());
-    } catch (error: unknown) {
-      next(error);
-    }
+    return books.map((book) => book.properties());
   }
 
-  @httpDelete('/:id')
-  async remove(req: Request, res: Response, next: NextFunction) {
-    try {
-      if (!req.params.id) throw new BadRequestException('Book id is required');
+  @Get('/:id')
+  async findById(@Params({ name: 'id' }) id: string) {
+    if (!id) throw new BadRequestException('Book id is required');
 
-      const isRemoved = await this.toggleStatusBookUseCase.execute(
-        req.params.id,
+    const book = await this.findByIdBookUseCase.execute(id);
+
+    return book.properties();
+  }
+
+  @Put('/:id')
+  async update(@Params({ name: 'id' }) id: string, @Body() body: unknown) {
+    if (!id) throw new BadRequestException('Book id is required');
+
+    const validationSchema = validate(UpdateBookSchema, body);
+    if (!validationSchema.success)
+      throw new BadRequestException(
+        `Invalid book data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`,
       );
 
-      res.status(HttpStatus.OK).json({
-        message: isRemoved ? 'Book deleted successfully' : 'Book not found',
-      });
-    } catch (error) {
-      next(error);
-    }
+    const updateBookDto: UpdateBookDto = validationSchema.output;
+    const book = await this.updateBookUseCase.execute(id, updateBookDto);
+
+    return book.properties();
   }
 
-  @httpDelete('/:id/hard-delete')
-  async removePermanent(req: Request, res: Response, next: NextFunction) {
-    try {
-      if (!req.params.id) throw new BadRequestException('Book id is required');
+  @Delete('/:id')
+  async remove(@Params({ name: 'id' }) id: string) {
+    if (!id) throw new BadRequestException('Book id is required');
 
-      const isRemoved = await this.removeBookUseCase.execute(req.params.id);
+    const isRemoved = await this.toggleStatusBookUseCase.execute(id);
 
-      res.status(HttpStatus.OK).json({
-        message: isRemoved ? 'Book deleted successfully' : 'Book not found',
-      });
-    } catch (error) {
-      next(error);
-    }
+    return {
+      message: isRemoved ? 'Book deleted successfully' : 'Book not found',
+    };
+  }
+
+  @Delete('/:id/hard-delete')
+  async removePermanent(@Params({ name: 'id' }) id: string) {
+    if (!id) throw new BadRequestException('Book id is required');
+
+    const isRemoved = await this.removeBookUseCase.execute(id);
+
+    return {
+      message: isRemoved ? 'Book deleted successfully' : 'Book not found',
+    };
   }
 }

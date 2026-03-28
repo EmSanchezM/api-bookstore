@@ -15,13 +15,15 @@ export const container = new Container();
 
 export const loadContainer = async () => {
   await container.loadAsync(databaseModule);
-  container.load(countryModule);
-  container.load(languageModule);
-  container.load(publisherModule);
-  container.load(authorModule);
-  container.load(bookModule);
-  container.load(userModule);
-  container.load(errorHandleModule);
+  await container.load(
+    countryModule,
+    languageModule,
+    publisherModule,
+    authorModule,
+    bookModule,
+    userModule,
+    errorHandleModule,
+  );
 
   return container;
 };

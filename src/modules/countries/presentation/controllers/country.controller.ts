@@ -1,12 +1,16 @@
-import type { NextFunction, Request, Response } from 'express';
-import { inject } from 'inversify';
 import {
-  controller,
-  httpDelete,
-  httpGet,
-  httpPost,
-  httpPut,
-} from 'inversify-express-utils';
+  Body,
+  Controller,
+  CreatedHttpResponse,
+  Delete,
+  Get,
+  Params,
+  Post,
+  Put,
+  Query,
+} from '@inversifyjs/http-core';
+import { inject } from 'inversify';
+
 import { TYPES } from '@/core/common/constants/types';
 import {
   type CreateCountryDto,
@@ -26,12 +30,11 @@ import type {
 import type { CountryFilters } from '@/modules/countries/infrastructure/types/country.filters';
 import {
   BadRequestException,
-  HttpStatus,
   NotFoundException,
 } from '@/modules/shared/exceptions';
 import { validate } from '@/modules/shared/validation/validator-service';
 
-@controller('/api/v1/countries')
+@Controller('/api/v1/countries')
 export class CountryController {
   constructor(
     @inject(TYPES.CreateCountryUseCase)
@@ -50,132 +53,87 @@ export class CountryController {
     private removeCountryUseCase: RemoveCountryUseCase,
   ) {}
 
-  @httpPost('/')
-  async create(req: Request, res: Response, next: NextFunction) {
-    try {
-      const validationSchema = validate(CreateCountrySchema, req.body);
+  @Post('/')
+  async create(@Body() body: unknown): Promise<CreatedHttpResponse> {
+    const validationSchema = validate(CreateCountrySchema, body);
 
-      if (!validationSchema.success)
-        throw new BadRequestException(
-          `Invalid country data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`,
-        );
-
-      const createCountryDto: CreateCountryDto = validationSchema.output;
-      const country = await this.createCountryUseCase.execute(createCountryDto);
-
-      res.status(HttpStatus.CREATED).json(country.properties());
-    } catch (error: unknown) {
-      next(error);
-    }
-  }
-
-  @httpGet('/')
-  async findAll(_req: Request, res: Response, next: NextFunction) {
-    try {
-      const countries = await this.findAllCountriesUseCase.execute();
-
-      if (!countries.length) return res.status(HttpStatus.OK).json([]);
-
-      res
-        .status(HttpStatus.OK)
-        .json(countries.map((country) => country.properties()));
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  @httpGet('/filters')
-  async findByFilters(req: Request, res: Response, next: NextFunction) {
-    try {
-      const filters = req.query as CountryFilters;
-      const countries = await this.findByFiltersCountryUseCase.execute(filters);
-
-      if (!countries.length)
-        throw new NotFoundException(
-          `Countries not found with filters: ${JSON.stringify(filters)}`,
-        );
-
-      res
-        .status(HttpStatus.OK)
-        .json(countries.map((country) => country.properties()));
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  @httpGet('/:id')
-  async findById(req: Request, res: Response, next: NextFunction) {
-    try {
-      if (!req.params.id)
-        throw new BadRequestException('Country id is required');
-
-      const country = await this.findByIdCountryUseCase.execute(
-        req.params.id as string,
+    if (!validationSchema.success)
+      throw new BadRequestException(
+        `Invalid country data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`,
       );
 
-      res.status(HttpStatus.OK).json(country.properties());
-    } catch (error) {
-      next(error);
-    }
+    const createCountryDto: CreateCountryDto = validationSchema.output;
+    const country = await this.createCountryUseCase.execute(createCountryDto);
+
+    return new CreatedHttpResponse(country.properties());
   }
 
-  @httpGet('/iso-code/:isoCode')
-  async findByIsoCode(req: Request, res: Response, next: NextFunction) {
-    try {
-      if (!req.params.isoCode)
-        throw new BadRequestException('Country iso code is required');
+  @Get('/')
+  async findAll() {
+    const countries = await this.findAllCountriesUseCase.execute();
 
-      const country = await this.findByIsoCodeCountryUseCase.execute(
-        req.params.isoCode as string,
-      );
+    if (!countries.length) return [];
 
-      res.status(HttpStatus.OK).json(country.properties());
-    } catch (error) {
-      next(error);
-    }
+    return countries.map((country) => country.properties());
   }
 
-  @httpPut('/:id')
-  async update(req: Request, res: Response, next: NextFunction) {
-    try {
-      if (!req.params.id)
-        throw new BadRequestException('Country id is required');
+  @Get('/filters')
+  async findByFilters(@Query() filters: CountryFilters) {
+    const countries = await this.findByFiltersCountryUseCase.execute(filters);
 
-      const validationSchema = validate(UpdateCountrySchema, req.body);
-      if (!validationSchema.success)
-        throw new BadRequestException(
-          `Invalid country data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`,
-        );
-
-      const updateCountryDto: UpdateCountryDto = validationSchema.output;
-      const country = await this.updateCountryUseCase.execute(
-        req.params.id as string,
-        updateCountryDto,
+    if (!countries.length)
+      throw new NotFoundException(
+        `Countries not found with filters: ${JSON.stringify(filters)}`,
       );
 
-      res.status(HttpStatus.OK).json(country.properties());
-    } catch (error: unknown) {
-      next(error);
-    }
+    return countries.map((country) => country.properties());
   }
 
-  @httpDelete('/:id')
-  async remove(req: Request, res: Response, next: NextFunction) {
-    try {
-      if (!req.params.id)
-        throw new BadRequestException('Country id is required');
+  @Get('/:id')
+  async findById(@Params({ name: 'id' }) id: string) {
+    if (!id) throw new BadRequestException('Country id is required');
 
-      const isRemoved = await this.removeCountryUseCase.execute(
-        req.params.id as string,
+    const country = await this.findByIdCountryUseCase.execute(id);
+
+    return country.properties();
+  }
+
+  @Get('/iso-code/:isoCode')
+  async findByIsoCode(@Params({ name: 'isoCode' }) isoCode: string) {
+    if (!isoCode) throw new BadRequestException('Country iso code is required');
+
+    const country = await this.findByIsoCodeCountryUseCase.execute(isoCode);
+
+    return country.properties();
+  }
+
+  @Put('/:id')
+  async update(@Params({ name: 'id' }) id: string, @Body() body: unknown) {
+    if (!id) throw new BadRequestException('Country id is required');
+
+    const validationSchema = validate(UpdateCountrySchema, body);
+    if (!validationSchema.success)
+      throw new BadRequestException(
+        `Invalid country data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`,
       );
 
-      res.status(HttpStatus.OK).json({
-        message: isRemoved
-          ? 'Country deleted successfully'
-          : 'Country not found',
-      });
-    } catch (error) {
-      next(error);
-    }
+    const updateCountryDto: UpdateCountryDto = validationSchema.output;
+    const country = await this.updateCountryUseCase.execute(
+      id,
+      updateCountryDto,
+    );
+
+    return country.properties();
+  }
+
+  @Delete('/:id')
+  async remove(@Params({ name: 'id' }) id: string) {
+    if (!id) throw new BadRequestException('Country id is required');
+
+    const isRemoved = await this.removeCountryUseCase.execute(id);
+
+    return {
+      message: isRemoved ? 'Country deleted successfully' : 'Country not found',
+    };
   }
 }

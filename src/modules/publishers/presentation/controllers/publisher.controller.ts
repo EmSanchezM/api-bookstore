@@ -1,12 +1,15 @@
-import type { NextFunction, Request, Response } from 'express';
-import { inject } from 'inversify';
 import {
-  controller,
-  httpDelete,
-  httpGet,
-  httpPost,
-  httpPut,
-} from 'inversify-express-utils';
+  Body,
+  Controller,
+  CreatedHttpResponse,
+  Delete,
+  Get,
+  Params,
+  Post,
+  Put,
+  Query,
+} from '@inversifyjs/http-core';
+import { inject } from 'inversify';
 
 import { TYPES } from '@/core/common/constants/types';
 import {
@@ -26,12 +29,11 @@ import type {
 import type { PublisherFilters } from '@/modules/publishers/infrastructure/types/publisher.filters';
 import {
   BadRequestException,
-  HttpStatus,
   NotFoundException,
 } from '@/modules/shared/exceptions';
 import { validate } from '@/modules/shared/validation/validator-service';
 
-@controller('/api/v1/publishers')
+@Controller('/api/v1/publishers')
 export class PublisherController {
   constructor(
     @inject(TYPES.CreatePublisherUseCase)
@@ -48,118 +50,82 @@ export class PublisherController {
     private updatePublisherUseCase: UpdatePublisherUseCase,
   ) {}
 
-  @httpPost('/')
-  async create(req: Request, res: Response, next: NextFunction) {
-    try {
-      const validationSchema = validate(CreatePublisherSchema, req.body);
+  @Post('/')
+  async create(@Body() body: unknown): Promise<CreatedHttpResponse> {
+    const validationSchema = validate(CreatePublisherSchema, body);
 
-      if (!validationSchema.success)
-        throw new BadRequestException(
-          `Invalid publisher data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`,
-        );
-
-      const createPublisherDto: CreatePublisherDto = validationSchema.output;
-      const publisher =
-        await this.createPublisherUseCase.execute(createPublisherDto);
-
-      res.status(HttpStatus.CREATED).json(publisher.properties());
-    } catch (error: unknown) {
-      next(error);
-    }
-  }
-
-  @httpGet('/')
-  async findAll(_req: Request, res: Response, next: NextFunction) {
-    try {
-      const publishers = await this.findAllPublishersUseCase.execute();
-
-      if (!publishers.length) return res.status(HttpStatus.OK).json([]);
-
-      res
-        .status(HttpStatus.OK)
-        .json(publishers.map((publisher) => publisher.properties()));
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  @httpGet('/filters')
-  async findByFilters(req: Request, res: Response, next: NextFunction) {
-    try {
-      const filters = req.query as PublisherFilters;
-      const publishers =
-        await this.findByFiltersPublisherUseCase.execute(filters);
-
-      if (!publishers.length)
-        throw new NotFoundException(
-          `Publishers not found with filters: ${JSON.stringify(filters)}`,
-        );
-
-      res
-        .status(HttpStatus.OK)
-        .json(publishers.map((publisher) => publisher.properties()));
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  @httpGet('/:id')
-  async findById(req: Request, res: Response, next: NextFunction) {
-    try {
-      if (!req.params.id)
-        throw new BadRequestException('Publisher id is required');
-
-      const publisher = await this.findByIdPublisherUseCase.execute(
-        req.params.id as string,
+    if (!validationSchema.success)
+      throw new BadRequestException(
+        `Invalid publisher data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`,
       );
 
-      res.status(HttpStatus.OK).json(publisher.properties());
-    } catch (error) {
-      next(error);
-    }
+    const createPublisherDto: CreatePublisherDto = validationSchema.output;
+    const publisher =
+      await this.createPublisherUseCase.execute(createPublisherDto);
+
+    return new CreatedHttpResponse(publisher.properties());
   }
 
-  @httpPut('/:id')
-  async update(req: Request, res: Response, next: NextFunction) {
-    try {
-      if (!req.params.id)
-        throw new BadRequestException('Publisher id is required');
+  @Get('/')
+  async findAll() {
+    const publishers = await this.findAllPublishersUseCase.execute();
 
-      const validationSchema = validate(UpdatePublisherSchema, req.body);
-      if (!validationSchema.success)
-        throw new BadRequestException(
-          `Invalid publisher data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`,
-        );
+    if (!publishers.length) return [];
 
-      const updatePublisherDto: UpdatePublisherDto = validationSchema.output;
-      const publisher = await this.updatePublisherUseCase.execute(
-        req.params.id as string,
-        updatePublisherDto,
-      );
-
-      res.status(HttpStatus.OK).json(publisher.properties());
-    } catch (error: unknown) {
-      next(error);
-    }
+    return publishers.map((publisher) => publisher.properties());
   }
 
-  @httpDelete('/:id')
-  async remove(req: Request, res: Response, next: NextFunction) {
-    try {
-      if (!req.params.id)
-        throw new BadRequestException('Publisher id is required');
+  @Get('/filters')
+  async findByFilters(@Query() filters: PublisherFilters) {
+    const publishers =
+      await this.findByFiltersPublisherUseCase.execute(filters);
 
-      const isRemoved = await this.removePublisherUseCase.execute(
-        req.params.id as string,
+    if (!publishers.length)
+      throw new NotFoundException(
+        `Publishers not found with filters: ${JSON.stringify(filters)}`,
       );
 
-      res.status(HttpStatus.OK).json({
-        message: isRemoved
-          ? 'Publisher deleted successfully'
-          : 'Publisher not found',
-      });
-    } catch (error) {
-      next(error);
-    }
+    return publishers.map((publisher) => publisher.properties());
+  }
+
+  @Get('/:id')
+  async findById(@Params({ name: 'id' }) id: string) {
+    if (!id) throw new BadRequestException('Publisher id is required');
+
+    const publisher = await this.findByIdPublisherUseCase.execute(id);
+
+    return publisher.properties();
+  }
+
+  @Put('/:id')
+  async update(@Params({ name: 'id' }) id: string, @Body() body: unknown) {
+    if (!id) throw new BadRequestException('Publisher id is required');
+
+    const validationSchema = validate(UpdatePublisherSchema, body);
+    if (!validationSchema.success)
+      throw new BadRequestException(
+        `Invalid publisher data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`,
+      );
+
+    const updatePublisherDto: UpdatePublisherDto = validationSchema.output;
+    const publisher = await this.updatePublisherUseCase.execute(
+      id,
+      updatePublisherDto,
+    );
+
+    return publisher.properties();
+  }
+
+  @Delete('/:id')
+  async remove(@Params({ name: 'id' }) id: string) {
+    if (!id) throw new BadRequestException('Publisher id is required');
+
+    const isRemoved = await this.removePublisherUseCase.execute(id);
+
+    return {
+      message: isRemoved
+        ? 'Publisher deleted successfully'
+        : 'Publisher not found',
+    };
   }
 }

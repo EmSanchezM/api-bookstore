@@ -1,4 +1,4 @@
-import { ContainerModule } from 'inversify';
+import { ContainerModule, type ContainerModuleLoadOptions } from 'inversify';
 import { TYPES } from '@/core/common/constants/types';
 import {
   CreateCountryUseCase,
@@ -11,13 +11,19 @@ import {
 } from '@/modules/countries/application/use-cases';
 import { SurrealCountryRepository } from '@/modules/countries/infrastructure/repositories/surreal-country.repository';
 
-export const countryModule = new ContainerModule((bind) => {
-  bind(TYPES.CountryRepository).to(SurrealCountryRepository);
-  bind(TYPES.CreateCountryUseCase).to(CreateCountryUseCase);
-  bind(TYPES.FindAllCountriesUseCase).to(FindAllCountriesUseCase);
-  bind(TYPES.FindByFiltersCountryUseCase).to(FindByFiltersCountryUseCase);
-  bind(TYPES.FindByIdCountryUseCase).to(FindByIdCountryUseCase);
-  bind(TYPES.FindByIsoCodeCountryUseCase).to(FindByIsoCodeCountryUseCase);
-  bind(TYPES.UpdateCountryUseCase).to(UpdateCountryUseCase);
-  bind(TYPES.RemoveCountryUseCase).to(RemoveCountryUseCase);
-});
+export const countryModule = new ContainerModule(
+  (options: ContainerModuleLoadOptions) => {
+    options.bind(TYPES.CountryRepository).to(SurrealCountryRepository);
+    options.bind(TYPES.CreateCountryUseCase).to(CreateCountryUseCase);
+    options.bind(TYPES.FindAllCountriesUseCase).to(FindAllCountriesUseCase);
+    options
+      .bind(TYPES.FindByFiltersCountryUseCase)
+      .to(FindByFiltersCountryUseCase);
+    options.bind(TYPES.FindByIdCountryUseCase).to(FindByIdCountryUseCase);
+    options
+      .bind(TYPES.FindByIsoCodeCountryUseCase)
+      .to(FindByIsoCodeCountryUseCase);
+    options.bind(TYPES.UpdateCountryUseCase).to(UpdateCountryUseCase);
+    options.bind(TYPES.RemoveCountryUseCase).to(RemoveCountryUseCase);
+  },
+);

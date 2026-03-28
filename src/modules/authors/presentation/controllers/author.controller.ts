@@ -1,12 +1,15 @@
-import type { NextFunction, Request, Response } from 'express';
-import { inject } from 'inversify';
 import {
-  controller,
-  httpDelete,
-  httpGet,
-  httpPost,
-  httpPut,
-} from 'inversify-express-utils';
+  Body,
+  Controller,
+  CreatedHttpResponse,
+  Delete,
+  Get,
+  Params,
+  Post,
+  Put,
+  Query,
+} from '@inversifyjs/http-core';
+import { inject } from 'inversify';
 
 import { TYPES } from '@/core/common/constants/types';
 import {
@@ -26,12 +29,11 @@ import type {
 import type { AuthorFilters } from '@/modules/authors/infrastructure/types/author.filters';
 import {
   BadRequestException,
-  HttpStatus,
   NotFoundException,
 } from '@/modules/shared/exceptions';
 import { validate } from '@/modules/shared/validation/validator-service';
 
-@controller('/api/v1/authors')
+@Controller('/api/v1/authors')
 export class AuthorController {
   constructor(
     @inject(TYPES.CreateAuthorUseCase)
@@ -48,114 +50,75 @@ export class AuthorController {
     private updateAuthorUseCase: UpdateAuthorUseCase,
   ) {}
 
-  @httpPost('/')
-  async create(req: Request, res: Response, next: NextFunction) {
-    try {
-      const validationSchema = validate(CreateAuthorSchema, req.body);
+  @Post('/')
+  async create(@Body() body: unknown): Promise<CreatedHttpResponse> {
+    const validationSchema = validate(CreateAuthorSchema, body);
 
-      if (!validationSchema.success)
-        throw new BadRequestException(
-          `Invalid author data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`,
-        );
-
-      const createAuthorDto: CreateAuthorDto = validationSchema.output;
-      const author = await this.createAuthorUseCase.execute(createAuthorDto);
-
-      res.status(HttpStatus.CREATED).json(author.properties());
-    } catch (error: unknown) {
-      next(error);
-    }
-  }
-
-  @httpGet('/')
-  async findAll(_req: Request, res: Response, next: NextFunction) {
-    try {
-      const authors = await this.findAllAuthorsUseCase.execute();
-
-      if (!authors.length) return res.status(HttpStatus.OK).json([]);
-
-      res
-        .status(HttpStatus.OK)
-        .json(authors.map((authors) => authors.properties()));
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  @httpGet('/filters')
-  async findByFilters(req: Request, res: Response, next: NextFunction) {
-    try {
-      const filters = req.query as AuthorFilters;
-      const authors = await this.findByFiltersAuthorUseCase.execute(filters);
-
-      if (!authors.length)
-        throw new NotFoundException(
-          `Authors not found with filters: ${JSON.stringify(filters)}`,
-        );
-
-      res
-        .status(HttpStatus.OK)
-        .json(authors.map((author) => author.properties()));
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  @httpGet('/:id')
-  async findById(req: Request, res: Response, next: NextFunction) {
-    try {
-      if (!req.params.id)
-        throw new BadRequestException('Author id is required');
-
-      const author = await this.findByIdAuthorUseCase.execute(
-        req.params.id as string,
+    if (!validationSchema.success)
+      throw new BadRequestException(
+        `Invalid author data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`,
       );
 
-      res.status(HttpStatus.OK).json(author.properties());
-    } catch (error) {
-      next(error);
-    }
+    const createAuthorDto: CreateAuthorDto = validationSchema.output;
+    const author = await this.createAuthorUseCase.execute(createAuthorDto);
+
+    return new CreatedHttpResponse(author.properties());
   }
 
-  @httpPut('/:id')
-  async update(req: Request, res: Response, next: NextFunction) {
-    try {
-      if (!req.params.id)
-        throw new BadRequestException('Author id is required');
+  @Get('/')
+  async findAll() {
+    const authors = await this.findAllAuthorsUseCase.execute();
 
-      const validationSchema = validate(UpdateAuthorSchema, req.body);
-      if (!validationSchema.success)
-        throw new BadRequestException(
-          `Invalid author data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`,
-        );
+    if (!authors.length) return [];
 
-      const updateAuthorDto: UpdateAuthorDto = validationSchema.output;
-      const author = await this.updateAuthorUseCase.execute(
-        req.params.id as string,
-        updateAuthorDto,
-      );
-
-      res.status(HttpStatus.OK).json(author.properties());
-    } catch (error: unknown) {
-      next(error);
-    }
+    return authors.map((author) => author.properties());
   }
 
-  @httpDelete('/:id')
-  async remove(req: Request, res: Response, next: NextFunction) {
-    try {
-      if (!req.params.id)
-        throw new BadRequestException('Author id is required');
+  @Get('/filters')
+  async findByFilters(@Query() filters: AuthorFilters) {
+    const authors = await this.findByFiltersAuthorUseCase.execute(filters);
 
-      const isRemoved = await this.removeAuthorUseCase.execute(
-        req.params.id as string,
+    if (!authors.length)
+      throw new NotFoundException(
+        `Authors not found with filters: ${JSON.stringify(filters)}`,
       );
 
-      res.status(HttpStatus.OK).json({
-        message: isRemoved ? 'Author deleted successfully' : 'Author not found',
-      });
-    } catch (error) {
-      next(error);
-    }
+    return authors.map((author) => author.properties());
+  }
+
+  @Get('/:id')
+  async findById(@Params({ name: 'id' }) id: string) {
+    if (!id) throw new BadRequestException('Author id is required');
+
+    const author = await this.findByIdAuthorUseCase.execute(id);
+
+    return author.properties();
+  }
+
+  @Put('/:id')
+  async update(@Params({ name: 'id' }) id: string, @Body() body: unknown) {
+    if (!id) throw new BadRequestException('Author id is required');
+
+    const validationSchema = validate(UpdateAuthorSchema, body);
+    if (!validationSchema.success)
+      throw new BadRequestException(
+        `Invalid author data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`,
+      );
+
+    const updateAuthorDto: UpdateAuthorDto = validationSchema.output;
+    const author = await this.updateAuthorUseCase.execute(id, updateAuthorDto);
+
+    return author.properties();
+  }
+
+  @Delete('/:id')
+  async remove(@Params({ name: 'id' }) id: string) {
+    if (!id) throw new BadRequestException('Author id is required');
+
+    const isRemoved = await this.removeAuthorUseCase.execute(id);
+
+    return {
+      message: isRemoved ? 'Author deleted successfully' : 'Author not found',
+    };
   }
 }

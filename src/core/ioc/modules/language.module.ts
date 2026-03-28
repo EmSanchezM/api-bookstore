@@ -1,4 +1,4 @@
-import { ContainerModule } from 'inversify';
+import { ContainerModule, type ContainerModuleLoadOptions } from 'inversify';
 import { TYPES } from '@/core/common/constants/types';
 import {
   CreateLanguageUseCase,
@@ -11,13 +11,19 @@ import {
 } from '@/modules/languages/application/use-cases';
 import { SurrealLanguageRepository } from '@/modules/languages/infrastructure/repositories/surreal-language.repository';
 
-export const languageModule = new ContainerModule((bind) => {
-  bind(TYPES.LanguageRepository).to(SurrealLanguageRepository);
-  bind(TYPES.CreateLanguageUseCase).to(CreateLanguageUseCase);
-  bind(TYPES.FindAllLanguagesUseCase).to(FindAllLanguagesUseCase);
-  bind(TYPES.FindByFiltersLanguageUseCase).to(FindByFiltersLanguageUseCase);
-  bind(TYPES.FindByIdLanguageUseCase).to(FindByIdLanguageUseCase);
-  bind(TYPES.FindByIsoCodeLanguageUseCase).to(FindByIsoCodeLanguageUseCase);
-  bind(TYPES.UpdateLanguageUseCase).to(UpdateLanguageUseCase);
-  bind(TYPES.RemoveLanguageUseCase).to(RemoveLanguageUseCase);
-});
+export const languageModule = new ContainerModule(
+  (options: ContainerModuleLoadOptions) => {
+    options.bind(TYPES.LanguageRepository).to(SurrealLanguageRepository);
+    options.bind(TYPES.CreateLanguageUseCase).to(CreateLanguageUseCase);
+    options.bind(TYPES.FindAllLanguagesUseCase).to(FindAllLanguagesUseCase);
+    options
+      .bind(TYPES.FindByFiltersLanguageUseCase)
+      .to(FindByFiltersLanguageUseCase);
+    options.bind(TYPES.FindByIdLanguageUseCase).to(FindByIdLanguageUseCase);
+    options
+      .bind(TYPES.FindByIsoCodeLanguageUseCase)
+      .to(FindByIsoCodeLanguageUseCase);
+    options.bind(TYPES.UpdateLanguageUseCase).to(UpdateLanguageUseCase);
+    options.bind(TYPES.RemoveLanguageUseCase).to(RemoveLanguageUseCase);
+  },
+);

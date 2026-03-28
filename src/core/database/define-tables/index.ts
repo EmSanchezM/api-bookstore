@@ -1,9 +1,8 @@
-import type Surreal from 'surrealdb';
+import type { Surreal } from 'surrealdb';
 
 export const defineTables = async (db: Surreal) => {
   try {
     await db.query(`
-      BEGIN TRANSACTION;
         DEFINE TABLE IF NOT EXISTS country SCHEMAFULL
           PERMISSIONS
             FOR select FULL,
@@ -145,8 +144,6 @@ export const defineTables = async (db: Surreal) => {
 
         DEFINE FIELD in ON wrote TYPE record<author>;
         DEFINE FIELD out ON wrote TYPE record<book>;
-      
-      COMMIT TRANSACTION;
     `);
   } catch (error) {
     console.error(error);

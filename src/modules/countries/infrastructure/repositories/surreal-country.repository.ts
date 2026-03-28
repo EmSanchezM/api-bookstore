@@ -1,7 +1,7 @@
 import { logger } from 'core/config/logger';
 import { inject, injectable } from 'inversify';
-import type Surreal from 'surrealdb';
-import { type RecordId, ResponseError } from 'surrealdb';
+import type { Surreal } from 'surrealdb';
+import { type RecordId, ResponseError, Table } from 'surrealdb';
 import { TYPES } from '@/core/common/constants/types';
 import { Country } from '@/modules/countries/domain/entities';
 import type { CountryRepository } from '@/modules/countries/domain/repositories';
@@ -59,12 +59,14 @@ export class SurrealCountryRepository implements CountryRepository {
 
   async getAllCountries(): Promise<Country[]> {
     try {
-      const response = await this.db.select<CountryRecord>('country');
+      const response = await this.db.select<CountryRecord>(
+        new Table('country'),
+      );
 
       if (!response?.length) return [];
 
-      return response.map((country: CountryRecord) =>
-        this.mapToCountry(country),
+      return response.map((country) =>
+        this.mapToCountry(country as unknown as Record<string, unknown>),
       );
     } catch (error) {
       this.handleError(error, 'getAllCountries');
@@ -129,8 +131,8 @@ export class SurrealCountryRepository implements CountryRepository {
 
       if (!Array.isArray(response)) return [];
 
-      return response.map((country: CountryRecord) =>
-        this.mapToCountry(country),
+      return response.map((country) =>
+        this.mapToCountry(country as unknown as Record<string, unknown>),
       );
     } catch (error) {
       this.handleError(error, 'getAllCountries');
@@ -142,10 +144,9 @@ export class SurrealCountryRepository implements CountryRepository {
       const properties = country.propertiesToDatabase();
       const countryRecordId = toRecordId('country', properties.id as string);
 
-      const newCountryRecord = await this.db.create(
-        countryRecordId,
-        properties,
-      );
+      const newCountryRecord = await this.db
+        .create(countryRecordId)
+        .content(properties);
 
       if (!newCountryRecord) return null;
 
@@ -172,10 +173,9 @@ export class SurrealCountryRepository implements CountryRepository {
         if (payload[key] === undefined) delete payload[key];
       });
 
-      const updatedCountryRecord = await this.db.update(
-        countryRecordId,
-        payload,
-      );
+      const updatedCountryRecord = await this.db
+        .update(countryRecordId)
+        .merge(payload);
 
       if (!updatedCountryRecord) return null;
 
@@ -208,7 +208,7 @@ export class SurrealCountryRepository implements CountryRepository {
 
       if (!currentCountry) return false;
 
-      const updatedCountryRecord = await this.db.update(countryRecordId, {
+      const updatedCountryRecord = await this.db.update(countryRecordId).merge({
         is_active: !currentCountry.is_active,
         updated_at: new Date(),
       });

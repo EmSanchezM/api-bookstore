@@ -1,5 +1,5 @@
 import { ContainerModule, type ContainerModuleLoadOptions } from 'inversify';
-import type Surreal from 'surrealdb';
+import type { Surreal } from 'surrealdb';
 import { TYPES } from '@/core/common/constants/types';
 import { Database } from '@/core/database';
 

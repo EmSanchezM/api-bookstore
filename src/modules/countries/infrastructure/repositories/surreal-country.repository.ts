@@ -88,7 +88,7 @@ export class SurrealCountryRepository implements CountryRepository {
 
     if (filters.isActive !== undefined) {
       conditions.push('is_active = $is_active');
-      params.is_active = filters.isActive;
+      params.is_active = String(filters.isActive) === 'true';
     }
 
     if (filters.name) {
@@ -111,8 +111,10 @@ export class SurrealCountryRepository implements CountryRepository {
     const sortBy = filters.sortBy ?? 'desc';
     query += ` ORDER BY ${orderBy} ${sortBy}`;
 
-    if (filters.skip && filters.limit) {
-      query += ` LIMIT ${filters.limit} START ${filters.skip}`;
+    const skip = Number(filters.skip);
+    const limit = Number(filters.limit);
+    if (!isNaN(skip) && !isNaN(limit) && limit > 0) {
+      query += ` LIMIT ${limit} START ${skip}`;
     }
 
     return {

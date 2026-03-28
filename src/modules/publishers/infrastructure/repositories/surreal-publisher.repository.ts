@@ -1,7 +1,7 @@
 import { logger } from 'core/config/logger';
 import { inject, injectable } from 'inversify';
-import type Surreal from 'surrealdb';
-import { type RecordId, ResponseError } from 'surrealdb';
+import type { Surreal } from 'surrealdb';
+import { type RecordId, ResponseError, Table } from 'surrealdb';
 import { TYPES } from '@/core/common/constants/types';
 import { Publisher } from '@/modules/publishers/domain/entities';
 import type { PublisherRepository } from '@/modules/publishers/domain/repositories';
@@ -40,12 +40,14 @@ export class SurrealPublisherRepository implements PublisherRepository {
 
   async getAllPublishers(): Promise<Publisher[]> {
     try {
-      const response = await this.db.select<PublisherRecord>('publisher');
+      const response = await this.db.select<PublisherRecord>(
+        new Table('publisher'),
+      );
 
       if (!response?.length) return [];
 
-      return response.map((publisher: PublisherRecord) =>
-        this.mapToPublisher(publisher),
+      return response.map((publisher) =>
+        this.mapToPublisher(publisher as unknown as Record<string, unknown>),
       );
     } catch (error) {
       this.handleError(error, 'getAllLanguages');
@@ -106,8 +108,8 @@ export class SurrealPublisherRepository implements PublisherRepository {
 
       if (!Array.isArray(response)) return [];
 
-      return response.map((publisher: PublisherRecord) =>
-        this.mapToPublisher(publisher),
+      return response.map((publisher) =>
+        this.mapToPublisher(publisher as unknown as Record<string, unknown>),
       );
     } catch (error) {
       this.handleError(error, 'getPublishersByFilters');
@@ -122,10 +124,9 @@ export class SurrealPublisherRepository implements PublisherRepository {
         properties.id as string,
       );
 
-      const newPublisherRecord = await this.db.create(
-        publisherRecordId,
-        properties,
-      );
+      const newPublisherRecord = await this.db
+        .create(publisherRecordId)
+        .content(properties);
 
       if (!newPublisherRecord) return null;
 
@@ -155,10 +156,9 @@ export class SurrealPublisherRepository implements PublisherRepository {
         if (payload[key] === undefined) delete payload[key];
       });
 
-      const updatedPublisherRecord = await this.db.update(
-        publisherRecordId,
-        payload,
-      );
+      const updatedPublisherRecord = await this.db
+        .update(publisherRecordId)
+        .merge(payload);
 
       if (!updatedPublisherRecord) return null;
 
@@ -191,10 +191,12 @@ export class SurrealPublisherRepository implements PublisherRepository {
 
       if (!currentPublisher) return false;
 
-      const updatedPublisherRecord = await this.db.update(publisherRecordId, {
-        is_active: !currentPublisher.is_active,
-        updated_at: new Date(),
-      });
+      const updatedPublisherRecord = await this.db
+        .update(publisherRecordId)
+        .merge({
+          is_active: !currentPublisher.is_active,
+          updated_at: new Date(),
+        });
 
       if (!updatedPublisherRecord) return false;
 

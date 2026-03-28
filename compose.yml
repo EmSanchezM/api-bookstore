@@ -40,7 +40,7 @@ services:
       - TIKV_ADVERTISE_ADDR=${TIKV_ADVERTISE_ADDR}
     restart: unless-stopped
   surrealdb:
-    image: surrealdb/surrealdb:latest
+    image: surrealdb/surrealdb:v2.2.1
     container_name: surrealdb_database
     depends_on:
       - tikv

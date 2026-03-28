@@ -1,7 +1,7 @@
 import { logger } from 'core/config/logger';
 import { inject, injectable } from 'inversify';
-import type Surreal from 'surrealdb';
-import { RecordId, ResponseError, surql } from 'surrealdb';
+import type { Surreal } from 'surrealdb';
+import { RecordId, ResponseError } from 'surrealdb';
 import { TYPES } from '@/core/common/constants/types';
 import { Author } from '@/modules/authors/domain/entities';
 import { Book } from '@/modules/books/domain/entities';
@@ -62,7 +62,7 @@ export class SurrealBookRepository implements BookRepository {
 
   async getAllBooks(): Promise<Book[]> {
     try {
-      const query = surql`SELECT 
+      const query = `SELECT
           id,
           title,
           isbn,
@@ -191,7 +191,7 @@ export class SurrealBookRepository implements BookRepository {
       };
       delete payload.id;
 
-      const newBookRecord = await this.db.create(bookRecordId, payload);
+      const newBookRecord = await this.db.create(bookRecordId).content(payload);
 
       if (!newBookRecord) return null;
 
@@ -230,10 +230,9 @@ export class SurrealBookRepository implements BookRepository {
         value,
       }));
 
-      const updatedBookRecord = await this.db.patch<BookRecord>(
-        bookRecordId,
-        patches,
-      );
+      const updatedBookRecord = await this.db
+        .update<BookRecord>(bookRecordId)
+        .patch(patches);
 
       if (!updatedBookRecord) return null;
 
@@ -264,7 +263,7 @@ export class SurrealBookRepository implements BookRepository {
 
       if (!currentBook) return false;
 
-      const updatedBookRecord = await this.db.update(bookRecordId, {
+      const updatedBookRecord = await this.db.update(bookRecordId).merge({
         is_active: !currentBook.is_active,
         updated_at: new Date(),
       });

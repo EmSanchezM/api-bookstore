@@ -1,7 +1,7 @@
 import { logger } from 'core/config/logger';
 import { inject, injectable } from 'inversify';
-import type Surreal from 'surrealdb';
-import { type RecordId, ResponseError } from 'surrealdb';
+import type { Surreal } from 'surrealdb';
+import { type RecordId, ResponseError, Table } from 'surrealdb';
 import { TYPES } from '@/core/common/constants/types';
 import { Author } from '@/modules/authors/domain/entities';
 import type { AuthorRepository } from '@/modules/authors/domain/repositories';
@@ -52,11 +52,13 @@ export class SurrealAuthorRepository implements AuthorRepository {
 
   async getAllAuthors(): Promise<Author[]> {
     try {
-      const response = await this.db.select<AuthorRecord>('author');
+      const response = await this.db.select<AuthorRecord>(new Table('author'));
 
       if (!response?.length) return [];
 
-      return response.map((author: AuthorRecord) => this.mapToAuthor(author));
+      return response.map((author) =>
+        this.mapToAuthor(author as unknown as Record<string, unknown>),
+      );
     } catch (error) {
       this.handleError(error, 'getAllAuthors');
     }
@@ -122,7 +124,9 @@ export class SurrealAuthorRepository implements AuthorRepository {
 
       if (!Array.isArray(response)) return [];
 
-      return response.map((author: AuthorRecord) => this.mapToAuthor(author));
+      return response.map((author) =>
+        this.mapToAuthor(author as unknown as Record<string, unknown>),
+      );
     } catch (error) {
       this.handleError(error, 'getAuthorsByFilters');
     }
@@ -133,7 +137,9 @@ export class SurrealAuthorRepository implements AuthorRepository {
       const properties = Author.propertiesToDatabase();
       const authorRecordId = toRecordId('author', properties.id as string);
 
-      const newAuthorRecord = await this.db.create(authorRecordId, properties);
+      const newAuthorRecord = await this.db
+        .create(authorRecordId)
+        .content(properties);
 
       if (!newAuthorRecord) return null;
 
@@ -169,7 +175,9 @@ export class SurrealAuthorRepository implements AuthorRepository {
         if (payload[key] === undefined) delete payload[key];
       });
 
-      const updatedAuthorRecord = await this.db.update(authorRecordId, payload);
+      const updatedAuthorRecord = await this.db
+        .update(authorRecordId)
+        .merge(payload);
 
       if (!updatedAuthorRecord) return null;
 
@@ -201,7 +209,7 @@ export class SurrealAuthorRepository implements AuthorRepository {
 
       if (!currentAuthor) return false;
 
-      const updatedAuthorRecord = await this.db.update(authorRecordId, {
+      const updatedAuthorRecord = await this.db.update(authorRecordId).merge({
         is_active: !currentAuthor.is_active,
         updated_at: new Date(),
       });

@@ -19,9 +19,7 @@ export class RemoveLanguageUseCase {
 
     if (!language) throw new NotFoundException('Language not found');
 
-    const deletedLanguage = await this.languageRepository.deleteLanguage(
-      language.properties().id!,
-    );
+    const deletedLanguage = await this.languageRepository.deleteLanguage(id);
 
     if (!deletedLanguage)
       throw new InternalServerErrorException('Error deleting language');

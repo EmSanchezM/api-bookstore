@@ -7,7 +7,7 @@ import { Publisher } from '@/modules/publishers/domain/entities';
 import type { PublisherRepository } from '@/modules/publishers/domain/repositories';
 import type { PublisherFilters } from '@/modules/publishers/infrastructure/types/publisher.filters';
 import { DatabaseErrorException } from '@/modules/shared/exceptions';
-import { SurrealRecordIdMapper } from '@/modules/shared/mappers';
+import { fromRecordId, toRecordId } from '@/modules/shared/mappers';
 
 interface PublisherRecord {
   id: RecordId | string;
@@ -25,10 +25,7 @@ export class SurrealPublisherRepository implements PublisherRepository {
 
   async getPublisherById(id: string): Promise<Publisher | null> {
     try {
-      const publisherRecordId = SurrealRecordIdMapper.toRecordId(
-        'publisher',
-        id,
-      );
+      const publisherRecordId = toRecordId('publisher', id);
 
       const publisherRecord =
         await this.db.select<PublisherRecord>(publisherRecordId);
@@ -47,7 +44,9 @@ export class SurrealPublisherRepository implements PublisherRepository {
 
       if (!response?.length) return [];
 
-      return response.map((Language: any) => this.mapToPublisher(Language));
+      return response.map((publisher: PublisherRecord) =>
+        this.mapToPublisher(publisher),
+      );
     } catch (error) {
       this.handleError(error, 'getAllLanguages');
     }
@@ -118,9 +117,9 @@ export class SurrealPublisherRepository implements PublisherRepository {
   async createPublisher(publisher: Publisher): Promise<Publisher | null> {
     try {
       const properties = publisher.propertiesToDatabase();
-      const publisherRecordId = SurrealRecordIdMapper.toRecordId(
+      const publisherRecordId = toRecordId(
         'publisher',
-        properties.id!,
+        properties.id as string,
       );
 
       const newPublisherRecord = await this.db.create(
@@ -141,10 +140,7 @@ export class SurrealPublisherRepository implements PublisherRepository {
     publisher: Publisher,
   ): Promise<Publisher | null> {
     try {
-      const publisherRecordId = SurrealRecordIdMapper.toRecordId(
-        'publisher',
-        id,
-      );
+      const publisherRecordId = toRecordId('publisher', id);
       const properties = publisher.properties();
 
       const payload: Partial<PublisherRecord> = {
@@ -174,16 +170,13 @@ export class SurrealPublisherRepository implements PublisherRepository {
 
   async deletePublisher(id: string): Promise<boolean> {
     try {
-      const publisherRecordId = SurrealRecordIdMapper.toRecordId(
-        'publisher',
-        id,
-      );
+      const publisherRecordId = toRecordId('publisher', id);
       const removedPublisherRecord =
         await this.db.delete<PublisherRecord>(publisherRecordId);
 
       if (!removedPublisherRecord) return false;
 
-      return removedPublisherRecord.id ? true : false;
+      return !!removedPublisherRecord.id;
     } catch (error: unknown) {
       this.handleError(error, 'deletePublisher');
     }
@@ -191,10 +184,7 @@ export class SurrealPublisherRepository implements PublisherRepository {
 
   async togglePublisherStatus(id: string): Promise<boolean> {
     try {
-      const publisherRecordId = SurrealRecordIdMapper.toRecordId(
-        'publisher',
-        id,
-      );
+      const publisherRecordId = toRecordId('publisher', id);
 
       const currentPublisher =
         await this.db.select<PublisherRecord>(publisherRecordId);
@@ -225,14 +215,15 @@ export class SurrealPublisherRepository implements PublisherRepository {
     throw new DatabaseErrorException(error);
   }
 
-  private mapToPublisher(record: any): Publisher {
+  private mapToPublisher(record: Record<string, unknown>): Publisher {
+    const r = record as PublisherRecord;
     return new Publisher({
-      id: SurrealRecordIdMapper.fromRecordId(record.id),
-      name: record.name,
-      website: record.website,
-      isActive: record.is_active,
-      createdAt: new Date(record.created_at),
-      updatedAt: new Date(record.updated_at),
+      id: fromRecordId(r.id),
+      name: r.name,
+      website: r.website,
+      isActive: r.is_active,
+      createdAt: new Date(r.created_at as string),
+      updatedAt: new Date(r.updated_at as string),
     });
   }
 }

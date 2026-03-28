@@ -1,7 +1,7 @@
-import { safeParse } from 'valibot';
+import { type BaseIssue, type BaseSchema, safeParse } from 'valibot';
 
-export class ValidationService {
-  static validate(schema: any, data: unknown) {
-    return safeParse(schema, data);
-  }
+export function validate<
+  T extends BaseSchema<unknown, unknown, BaseIssue<unknown>>,
+>(schema: T, data: unknown) {
+  return safeParse(schema, data);
 }

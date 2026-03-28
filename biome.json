@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.3.8/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.4.9/schema.json",
   "vcs": {
     "enabled": false,
     "clientKind": "git",
@@ -37,6 +37,19 @@
       "includes": ["test", "dist"],
       "linter": {
         "enabled": false
+      }
+    },
+    {
+      "includes": ["src/modules/shared/exceptions/**"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noExplicitAny": "off"
+          },
+          "style": {
+            "noNonNullAssertion": "off"
+          }
+        }
       }
     }
   ]

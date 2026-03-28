@@ -10,7 +10,7 @@ import type { BookFilters } from '@/modules/books/infrastructure/types/book.filt
 import { Language } from '@/modules/languages/domain/entities';
 import { Publisher } from '@/modules/publishers/domain/entities';
 import { DatabaseErrorException } from '@/modules/shared/exceptions';
-import { SurrealRecordIdMapper } from '@/modules/shared/mappers';
+import { fromRecordId, toRecordId } from '@/modules/shared/mappers';
 
 interface BookRecord {
   id: RecordId | string;
@@ -32,7 +32,7 @@ export class SurrealBookRepository implements BookRepository {
 
   async getBookById(id: string): Promise<Book | null> {
     try {
-      const bookRecordId = SurrealRecordIdMapper.toRecordId('book', id);
+      const bookRecordId = toRecordId('book', id);
 
       const query = `SELECT 
           id,
@@ -54,7 +54,7 @@ export class SurrealBookRepository implements BookRepository {
 
       if (!response?.length) return null;
 
-      return this.mapToBook(response[0]);
+      return this.mapToBook(response[0] as Record<string, unknown>);
     } catch (error) {
       this.handleError(error, 'getBookById');
     }
@@ -79,7 +79,7 @@ export class SurrealBookRepository implements BookRepository {
 
       if (!Array.isArray(response)) return [];
 
-      return response.map((book: any) => this.mapToBook(book));
+      return response.map((book: BookRecord) => this.mapToBook(book));
     } catch (error) {
       this.handleError(error, 'getAllBooks');
     }
@@ -164,10 +164,7 @@ export class SurrealBookRepository implements BookRepository {
   async createBook(book: Book): Promise<Book | null> {
     try {
       const properties = book.propertiesToDatabase();
-      const bookRecordId = SurrealRecordIdMapper.toRecordId(
-        'book',
-        properties.id!,
-      );
+      const bookRecordId = toRecordId('book', properties.id as string);
 
       if (
         properties.authors &&
@@ -183,17 +180,12 @@ export class SurrealBookRepository implements BookRepository {
 
       const payload = {
         ...properties,
-        publisher: SurrealRecordIdMapper.toRecordId(
-          'publisher',
-          properties.publisher!,
+        publisher: toRecordId('publisher', properties.publisher as string),
+        authors: properties.authors?.map((authorId) =>
+          toRecordId('author', authorId),
         ),
-        authors:
-          properties.authors &&
-          properties.authors.map((authorId) =>
-            SurrealRecordIdMapper.toRecordId('author', authorId),
-          ),
         languages: properties.languages.map((langId) =>
-          SurrealRecordIdMapper.toRecordId('language', langId),
+          toRecordId('language', langId),
         ),
         is_active: properties.is_active,
       };
@@ -213,10 +205,10 @@ export class SurrealBookRepository implements BookRepository {
 
   async updateBook(id: string, book: Book): Promise<Book | null> {
     try {
-      const bookRecordId = SurrealRecordIdMapper.toRecordId('book', id);
+      const bookRecordId = toRecordId('book', id);
       const properties = book.properties();
 
-      const updateData: Record<string, any> = {
+      const updateData: Record<string, unknown> = {
         updated_at: new Date(),
       };
 
@@ -253,12 +245,12 @@ export class SurrealBookRepository implements BookRepository {
 
   async deleteBook(id: string): Promise<boolean> {
     try {
-      const bookRecordId = SurrealRecordIdMapper.toRecordId('book', id);
+      const bookRecordId = toRecordId('book', id);
       const removedBookRecord = await this.db.delete<BookRecord>(bookRecordId);
 
       if (!removedBookRecord) return false;
 
-      return removedBookRecord.id ? true : false;
+      return !!removedBookRecord.id;
     } catch (error: unknown) {
       this.handleError(error, 'deleteBook');
     }
@@ -266,7 +258,7 @@ export class SurrealBookRepository implements BookRepository {
 
   async toggleBookStatus(id: string): Promise<boolean> {
     try {
-      const bookRecordId = SurrealRecordIdMapper.toRecordId('book', id);
+      const bookRecordId = toRecordId('book', id);
 
       const currentBook = await this.db.select<BookRecord>(bookRecordId);
 
@@ -296,68 +288,70 @@ export class SurrealBookRepository implements BookRepository {
     throw new DatabaseErrorException(error, `Error ${methodName} database`);
   }
 
-  private mapToBook(record: any): Book {
+  private mapToBook(record: Record<string, unknown>): Book {
+    const r = record as BookRecord;
     return new Book({
-      id: SurrealRecordIdMapper.fromRecordId(record.id),
-      title: record.title,
-      isbn: record.isbn,
-      publicationDate: new Date(record.publication_date),
-      publisher: this.mapToPublisher(record.publisher),
-      authors: Array.isArray(record.authors)
-        ? record.authors.map((author: any) => this.mapToAuthor(author))
-        : record.authors,
-      languages: Array.isArray(record.languages)
-        ? record.languages.map((language: any) => this.mapToLanguage(language))
-        : record.languages,
-      isActive: record.is_active,
+      id: fromRecordId(r.id),
+      title: r.title,
+      isbn: r.isbn,
+      publicationDate: new Date(r.publication_date),
+      publisher: this.mapToPublisher(r.publisher),
+      authors: Array.isArray(r.authors)
+        ? (r.authors.map((author) => this.mapToAuthor(author)) as string[])
+        : (r.authors as string[]),
+      languages: Array.isArray(r.languages)
+        ? (r.languages.map((language) =>
+            this.mapToLanguage(language),
+          ) as string[])
+        : (r.languages as string[]),
+      isActive: r.is_active,
     });
   }
 
-  private mapToPublisher(publisher: any): Publisher | string {
+  private mapToPublisher(
+    publisher: string | { [key: string]: unknown },
+  ): Publisher | string {
     if (typeof publisher === 'string') return publisher;
 
-    if (publisher instanceof RecordId)
-      return SurrealRecordIdMapper.fromRecordId(publisher);
+    if (publisher instanceof RecordId) return fromRecordId(publisher);
 
     return new Publisher({
-      id: SurrealRecordIdMapper.fromRecordId(publisher.id),
-      name: publisher.name,
-      website: publisher.website,
-      isActive: publisher.is_active,
+      id: fromRecordId(publisher.id as string),
+      name: publisher.name as string,
+      website: publisher.website as string,
+      isActive: publisher.is_active as boolean,
     });
   }
 
-  private mapToAuthor(author: any): Author | string | null {
-    if (!author) return null;
-
+  private mapToAuthor(
+    author: string | { [key: string]: unknown },
+  ): Author | string {
     if (typeof author === 'string') return author;
 
-    if (author instanceof RecordId)
-      return SurrealRecordIdMapper.fromRecordId(author);
+    if (author instanceof RecordId) return fromRecordId(author);
 
     return new Author({
-      id: SurrealRecordIdMapper.fromRecordId(author.id),
-      firstName: author.first_name,
-      lastName: author.last_name,
-      nationality: author.nationality,
-      birthDate: new Date(author.birth_date),
-      isActive: author.is_active,
+      id: fromRecordId(author.id as string),
+      firstName: author.first_name as string,
+      lastName: author.last_name as string,
+      nationality: author.nationality as string,
+      birthDate: new Date(author.birth_date as string),
+      isActive: author.is_active as boolean,
     });
   }
 
-  private mapToLanguage(language: any): Language | string | null {
-    if (!language) return null;
-
+  private mapToLanguage(
+    language: string | { [key: string]: unknown },
+  ): Language | string {
     if (typeof language === 'string') return language;
 
-    if (language instanceof RecordId)
-      return SurrealRecordIdMapper.fromRecordId(language);
+    if (language instanceof RecordId) return fromRecordId(language);
 
     return new Language({
-      id: SurrealRecordIdMapper.fromRecordId(language.id),
-      isoCode: language.iso_code,
-      name: language.name,
-      isActive: language.is_active,
+      id: fromRecordId(language.id as string),
+      isoCode: language.iso_code as string,
+      name: language.name as string,
+      isActive: language.is_active as boolean,
     });
   }
 }

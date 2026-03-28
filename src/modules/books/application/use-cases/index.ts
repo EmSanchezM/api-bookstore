@@ -8,10 +8,10 @@ import { UpdateBookUseCase } from './update-book';
 
 export {
   CreateBookUseCase,
-  UpdateBookUseCase,
   FindAllBooksUseCase,
   FindByFiltersBookUseCase,
   FindByIdBookUseCase,
   RemoveBookUseCase,
   ToggleStatusBookUseCase,
+  UpdateBookUseCase,
 };

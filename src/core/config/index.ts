@@ -8,4 +8,4 @@ import { createServer } from './server';
 
 const envVariables = getEnvironmentVariables();
 
-export { logger, envVariables, createServer, getEnvironmentVariables };
+export { createServer, envVariables, getEnvironmentVariables, logger };

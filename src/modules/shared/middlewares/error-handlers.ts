@@ -5,7 +5,12 @@ import { HttpException, HttpStatus } from '../exceptions';
 
 @injectable()
 export class ErrorHandlerMiddleware {
-  public handle(error: Error, req: Request, res: Response, next: NextFunction) {
+  public handle(
+    error: Error,
+    _req: Request,
+    res: Response,
+    _next: NextFunction,
+  ) {
     if (error instanceof HttpException) {
       return res.status(error.getStatus()).json({
         status: error.getStatus(),

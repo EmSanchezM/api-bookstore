@@ -53,9 +53,9 @@ export class Book {
       throw new DatabaseErrorException('Book publicationDate is required');
     if (!properties.publisher)
       throw new DatabaseErrorException('Book publisher is required');
-    if (!properties.authors || !properties.authors.length)
+    if (!properties.authors?.length)
       throw new DatabaseErrorException('Book authors is required');
-    if (!properties.languages || !properties.languages.length)
+    if (!properties.languages?.length)
       throw new DatabaseErrorException('Book languages is required');
     if (!properties.isActive)
       throw new DatabaseErrorException('Book isActive is required');

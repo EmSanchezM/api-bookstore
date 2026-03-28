@@ -26,7 +26,7 @@ export class UpdatePublisherUseCase {
     });
 
     const updatedPublisher = await this.publisherRepository.updatePublisher(
-      existingPublisher.properties().id!,
+      id,
       existingPublisher,
     );
 

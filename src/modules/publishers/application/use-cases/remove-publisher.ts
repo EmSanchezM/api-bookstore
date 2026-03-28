@@ -19,9 +19,7 @@ export class RemovePublisherUseCase {
 
     if (!publisher) throw new NotFoundException('Publisher not found');
 
-    const deletedPublisher = await this.PublisherRepository.deletePublisher(
-      publisher.properties().id!,
-    );
+    const deletedPublisher = await this.PublisherRepository.deletePublisher(id);
 
     if (!deletedPublisher)
       throw new InternalServerErrorException('Error deleting publisher');

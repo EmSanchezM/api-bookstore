@@ -23,14 +23,13 @@ import type {
   RemoveCountryUseCase,
   UpdateCountryUseCase,
 } from '@/modules/countries/application/use-cases';
-import { Country } from '@/modules/countries/domain/entities';
 import type { CountryFilters } from '@/modules/countries/infrastructure/types/country.filters';
 import {
   BadRequestException,
   HttpStatus,
   NotFoundException,
 } from '@/modules/shared/exceptions';
-import { ValidationService } from '@/modules/shared/validation/validator-service';
+import { validate } from '@/modules/shared/validation/validator-service';
 
 @controller('/api/v1/countries')
 export class CountryController {
@@ -54,10 +53,7 @@ export class CountryController {
   @httpPost('/')
   async create(req: Request, res: Response, next: NextFunction) {
     try {
-      const validationSchema = ValidationService.validate(
-        CreateCountrySchema,
-        req.body,
-      );
+      const validationSchema = validate(CreateCountrySchema, req.body);
 
       if (!validationSchema.success)
         throw new BadRequestException(
@@ -74,7 +70,7 @@ export class CountryController {
   }
 
   @httpGet('/')
-  async findAll(req: Request, res: Response, next: NextFunction) {
+  async findAll(_req: Request, res: Response, next: NextFunction) {
     try {
       const countries = await this.findAllCountriesUseCase.execute();
 
@@ -113,7 +109,9 @@ export class CountryController {
       if (!req.params.id)
         throw new BadRequestException('Country id is required');
 
-      const country = await this.findByIdCountryUseCase.execute(req.params.id);
+      const country = await this.findByIdCountryUseCase.execute(
+        req.params.id as string,
+      );
 
       res.status(HttpStatus.OK).json(country.properties());
     } catch (error) {
@@ -128,7 +126,7 @@ export class CountryController {
         throw new BadRequestException('Country iso code is required');
 
       const country = await this.findByIsoCodeCountryUseCase.execute(
-        req.params.isoCode,
+        req.params.isoCode as string,
       );
 
       res.status(HttpStatus.OK).json(country.properties());
@@ -143,10 +141,7 @@ export class CountryController {
       if (!req.params.id)
         throw new BadRequestException('Country id is required');
 
-      const validationSchema = ValidationService.validate(
-        UpdateCountrySchema,
-        req.body,
-      );
+      const validationSchema = validate(UpdateCountrySchema, req.body);
       if (!validationSchema.success)
         throw new BadRequestException(
           `Invalid country data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`,
@@ -154,7 +149,7 @@ export class CountryController {
 
       const updateCountryDto: UpdateCountryDto = validationSchema.output;
       const country = await this.updateCountryUseCase.execute(
-        req.params.id,
+        req.params.id as string,
         updateCountryDto,
       );
 
@@ -170,7 +165,9 @@ export class CountryController {
       if (!req.params.id)
         throw new BadRequestException('Country id is required');
 
-      const isRemoved = await this.removeCountryUseCase.execute(req.params.id);
+      const isRemoved = await this.removeCountryUseCase.execute(
+        req.params.id as string,
+      );
 
       res.status(HttpStatus.OK).json({
         message: isRemoved

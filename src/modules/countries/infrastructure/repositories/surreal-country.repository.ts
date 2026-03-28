@@ -6,7 +6,7 @@ import { TYPES } from '@/core/common/constants/types';
 import { Country } from '@/modules/countries/domain/entities';
 import type { CountryRepository } from '@/modules/countries/domain/repositories';
 import { DatabaseErrorException } from '@/modules/shared/exceptions';
-import { SurrealRecordIdMapper } from '@/modules/shared/mappers';
+import { fromRecordId, toRecordId } from '@/modules/shared/mappers';
 import type { CountryFilters } from '../types/country.filters';
 
 interface CountryRecord {
@@ -25,7 +25,7 @@ export class SurrealCountryRepository implements CountryRepository {
 
   async getCountryById(id: string): Promise<Country | null> {
     try {
-      const countryRecordId = SurrealRecordIdMapper.toRecordId('country', id);
+      const countryRecordId = toRecordId('country', id);
 
       const countryRecord =
         await this.db.select<CountryRecord>(countryRecordId);
@@ -49,7 +49,7 @@ export class SurrealCountryRepository implements CountryRepository {
 
       if (!response[0]) return null;
 
-      const countryRecord = response[0];
+      const countryRecord = response[0] as Record<string, unknown>;
 
       return this.mapToCountry(countryRecord);
     } catch (error) {
@@ -63,7 +63,9 @@ export class SurrealCountryRepository implements CountryRepository {
 
       if (!response?.length) return [];
 
-      return response.map((country: any) => this.mapToCountry(country));
+      return response.map((country: CountryRecord) =>
+        this.mapToCountry(country),
+      );
     } catch (error) {
       this.handleError(error, 'getAllCountries');
     }
@@ -138,10 +140,7 @@ export class SurrealCountryRepository implements CountryRepository {
   async createCountry(country: Country): Promise<Country | null> {
     try {
       const properties = country.propertiesToDatabase();
-      const countryRecordId = SurrealRecordIdMapper.toRecordId(
-        'country',
-        properties.id!,
-      );
+      const countryRecordId = toRecordId('country', properties.id as string);
 
       const newCountryRecord = await this.db.create(
         countryRecordId,
@@ -158,7 +157,7 @@ export class SurrealCountryRepository implements CountryRepository {
 
   async updateCountry(id: string, country: Country): Promise<Country | null> {
     try {
-      const countryRecordId = SurrealRecordIdMapper.toRecordId('country', id);
+      const countryRecordId = toRecordId('country', id);
       const properties = country.properties();
 
       const payload: Partial<CountryRecord> = {
@@ -188,13 +187,13 @@ export class SurrealCountryRepository implements CountryRepository {
 
   async deleteCountry(id: string): Promise<boolean> {
     try {
-      const countryRecordId = SurrealRecordIdMapper.toRecordId('country', id);
+      const countryRecordId = toRecordId('country', id);
       const removedCountryRecord =
         await this.db.delete<CountryRecord>(countryRecordId);
 
       if (!removedCountryRecord) return false;
 
-      return removedCountryRecord.id ? true : false;
+      return !!removedCountryRecord.id;
     } catch (error: unknown) {
       this.handleError(error, 'deleteCountry');
     }
@@ -202,7 +201,7 @@ export class SurrealCountryRepository implements CountryRepository {
 
   async toggleCountryStatus(id: string): Promise<boolean> {
     try {
-      const countryRecordId = SurrealRecordIdMapper.toRecordId('country', id);
+      const countryRecordId = toRecordId('country', id);
 
       const currentCountry =
         await this.db.select<CountryRecord>(countryRecordId);
@@ -233,14 +232,15 @@ export class SurrealCountryRepository implements CountryRepository {
     throw new DatabaseErrorException(error);
   }
 
-  private mapToCountry(record: any): Country {
+  private mapToCountry(record: Record<string, unknown>): Country {
+    const r = record as CountryRecord;
     return new Country({
-      id: SurrealRecordIdMapper.fromRecordId(record.id),
-      name: record.name,
-      isoCode: record.iso_code,
-      isActive: record.is_active,
-      createdAt: new Date(record.created_at),
-      updatedAt: new Date(record.updated_at),
+      id: fromRecordId(r.id),
+      name: r.name,
+      isoCode: r.iso_code,
+      isActive: r.is_active,
+      createdAt: new Date(r.created_at as string),
+      updatedAt: new Date(r.updated_at as string),
     });
   }
 }

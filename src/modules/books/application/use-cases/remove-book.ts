@@ -18,9 +18,7 @@ export class RemoveBookUseCase {
 
     if (!book) throw new NotFoundException('Book not found');
 
-    const deletedBook = await this.bookRepository.deleteBook(
-      book.properties().id!,
-    );
+    const deletedBook = await this.bookRepository.deleteBook(id);
 
     if (!deletedBook)
       throw new InternalServerErrorException('Error deleting Book');

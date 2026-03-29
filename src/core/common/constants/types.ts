@@ -73,6 +73,16 @@ export const TYPES = {
   UpdateProgressUseCase: Symbol.for('UpdateProgressUseCase'),
   RemoveProgressUseCase: Symbol.for('RemoveProgressUseCase'),
   GetUserStatsUseCase: Symbol.for('GetUserStatsUseCase'),
+  //Reviews
+  ReviewRepository: Symbol.for('ReviewRepository'),
+  CreateReviewUseCase: Symbol.for('CreateReviewUseCase'),
+  FindByIdReviewUseCase: Symbol.for('FindByIdReviewUseCase'),
+  FindByBookIdReviewUseCase: Symbol.for('FindByBookIdReviewUseCase'),
+  FindRepliesByReviewIdUseCase: Symbol.for('FindRepliesByReviewIdUseCase'),
+  FindByFiltersReviewUseCase: Symbol.for('FindByFiltersReviewUseCase'),
+  UpdateReviewUseCase: Symbol.for('UpdateReviewUseCase'),
+  RemoveReviewUseCase: Symbol.for('RemoveReviewUseCase'),
+  GetBookRatingUseCase: Symbol.for('GetBookRatingUseCase'),
   //Books
   BookRepository: Symbol.for('BookRepository'),
   CreateBookUseCase: Symbol.for('CreateBookUseCase'),

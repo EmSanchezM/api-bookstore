@@ -198,7 +198,8 @@ export const defineTables = async (db: Surreal) => {
 
         DEFINE INDEX IF NOT EXISTS idx_list_item_unique ON list_item FIELDS reading_list, book UNIQUE;
 
-        DEFINE TABLE IF NOT EXISTS added_to_list TYPE RELATION IN user OUT book SCHEMAFULL
+        REMOVE TABLE IF EXISTS added_to_list;
+        DEFINE TABLE added_to_list TYPE RELATION IN user OUT book SCHEMAFULL
           PERMISSIONS
             FOR select FULL,
             FOR create FULL,

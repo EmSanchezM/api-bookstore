@@ -6,6 +6,7 @@ import { errorHandleModule } from './error-handle.module';
 import { languageModule } from './language.module';
 import { publisherModule } from './publisher.module';
 import { readingListModule } from './reading-list.module';
+import { readingProgressModule } from './reading-progress.module';
 import { userModule } from './user.module';
 
 export {
@@ -18,4 +19,5 @@ export {
   languageModule,
   publisherModule,
   readingListModule,
+  readingProgressModule,
 };

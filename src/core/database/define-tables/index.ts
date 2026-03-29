@@ -247,6 +247,39 @@ export const defineTables = async (db: Surreal) => {
         DEFINE FIELD IF NOT EXISTS progress ON reads TYPE record<reading_progress>;
         DEFINE FIELD IF NOT EXISTS created_at ON reads TYPE datetime DEFAULT time::now();
         DEFINE FIELD IF NOT EXISTS updated_at ON reads TYPE datetime VALUE time::now();
+
+        DEFINE TABLE IF NOT EXISTS review SCHEMAFULL
+          PERMISSIONS
+            FOR select FULL,
+            FOR create FULL,
+            FOR update FULL,
+            FOR delete FULL;
+
+        DEFINE FIELD IF NOT EXISTS user ON review TYPE record<user>;
+        DEFINE FIELD IF NOT EXISTS book ON review TYPE record<book>;
+        DEFINE FIELD IF NOT EXISTS rating ON review TYPE int
+          ASSERT $value >= 1 AND $value <= 5;
+        DEFINE FIELD IF NOT EXISTS title ON review TYPE string;
+        DEFINE FIELD IF NOT EXISTS body ON review TYPE string;
+        DEFINE FIELD IF NOT EXISTS parent ON review TYPE option<record<review>>;
+        DEFINE FIELD IF NOT EXISTS is_active ON review TYPE bool DEFAULT true;
+        DEFINE FIELD IF NOT EXISTS created_at ON review TYPE datetime DEFAULT time::now();
+        DEFINE FIELD IF NOT EXISTS updated_at ON review TYPE datetime VALUE time::now();
+
+        REMOVE INDEX IF EXISTS idx_review_user_book ON review;
+        DEFINE INDEX IF NOT EXISTS idx_review_book ON review FIELDS book;
+        DEFINE INDEX IF NOT EXISTS idx_review_parent ON review FIELDS parent;
+
+        REMOVE TABLE IF EXISTS reviewed;
+        DEFINE TABLE reviewed TYPE RELATION IN user OUT book SCHEMAFULL
+          PERMISSIONS
+            FOR select FULL,
+            FOR create FULL,
+            FOR update FULL,
+            FOR delete FULL;
+        DEFINE FIELD IF NOT EXISTS rating ON reviewed TYPE int;
+        DEFINE FIELD IF NOT EXISTS review ON reviewed TYPE record<review>;
+        DEFINE FIELD IF NOT EXISTS created_at ON reviewed TYPE datetime DEFAULT time::now();
     `);
   } catch (error) {
     console.error(error);

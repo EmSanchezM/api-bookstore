@@ -63,6 +63,16 @@ export const TYPES = {
   RemoveBookFromListUseCase: Symbol.for('RemoveBookFromListUseCase'),
   GetListItemsUseCase: Symbol.for('GetListItemsUseCase'),
   UpdateListItemUseCase: Symbol.for('UpdateListItemUseCase'),
+  //Reading Progress
+  ReadingProgressRepository: Symbol.for('ReadingProgressRepository'),
+  StartReadingUseCase: Symbol.for('StartReadingUseCase'),
+  FindByIdProgressUseCase: Symbol.for('FindByIdProgressUseCase'),
+  FindByUserAndBookProgressUseCase: Symbol.for('FindByUserAndBookProgressUseCase'),
+  FindByUserIdProgressUseCase: Symbol.for('FindByUserIdProgressUseCase'),
+  FindByFiltersProgressUseCase: Symbol.for('FindByFiltersProgressUseCase'),
+  UpdateProgressUseCase: Symbol.for('UpdateProgressUseCase'),
+  RemoveProgressUseCase: Symbol.for('RemoveProgressUseCase'),
+  GetUserStatsUseCase: Symbol.for('GetUserStatsUseCase'),
   //Books
   BookRepository: Symbol.for('BookRepository'),
   CreateBookUseCase: Symbol.for('CreateBookUseCase'),

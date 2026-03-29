@@ -208,6 +208,45 @@ export const defineTables = async (db: Surreal) => {
 
         DEFINE FIELD IF NOT EXISTS reading_list ON added_to_list TYPE record<reading_list>;
         DEFINE FIELD IF NOT EXISTS created_at ON added_to_list TYPE datetime DEFAULT time::now();
+
+        DEFINE TABLE IF NOT EXISTS reading_progress SCHEMAFULL
+          PERMISSIONS
+            FOR select FULL,
+            FOR create FULL,
+            FOR update FULL,
+            FOR delete FULL;
+
+        DEFINE FIELD IF NOT EXISTS user ON reading_progress TYPE record<user>;
+        DEFINE FIELD IF NOT EXISTS book ON reading_progress TYPE record<book>;
+        DEFINE FIELD IF NOT EXISTS status ON reading_progress TYPE string
+          ASSERT $value IN ['want_to_read', 'reading', 'finished', 'abandoned'];
+        DEFINE FIELD IF NOT EXISTS current_page ON reading_progress TYPE int DEFAULT 0;
+        DEFINE FIELD IF NOT EXISTS total_pages ON reading_progress TYPE int;
+        DEFINE FIELD IF NOT EXISTS percentage ON reading_progress TYPE float DEFAULT 0;
+        DEFINE FIELD IF NOT EXISTS started_at ON reading_progress TYPE option<datetime>;
+        DEFINE FIELD IF NOT EXISTS finished_at ON reading_progress TYPE option<datetime>;
+        DEFINE FIELD IF NOT EXISTS last_read_at ON reading_progress TYPE datetime DEFAULT time::now();
+        DEFINE FIELD IF NOT EXISTS is_active ON reading_progress TYPE bool DEFAULT true;
+        DEFINE FIELD IF NOT EXISTS created_at ON reading_progress TYPE datetime DEFAULT time::now();
+        DEFINE FIELD IF NOT EXISTS updated_at ON reading_progress TYPE datetime VALUE time::now();
+
+        DEFINE INDEX IF NOT EXISTS idx_progress_user_book ON reading_progress FIELDS user, book UNIQUE;
+        DEFINE INDEX IF NOT EXISTS idx_progress_user ON reading_progress FIELDS user;
+        DEFINE INDEX IF NOT EXISTS idx_progress_status ON reading_progress FIELDS status;
+
+        DEFINE TABLE IF NOT EXISTS reads SCHEMAFULL
+          PERMISSIONS
+            FOR select FULL,
+            FOR create FULL,
+            FOR update FULL,
+            FOR delete FULL;
+
+        DEFINE FIELD IF NOT EXISTS in ON reads TYPE record<user>;
+        DEFINE FIELD IF NOT EXISTS out ON reads TYPE record<book>;
+        DEFINE FIELD IF NOT EXISTS status ON reads TYPE string;
+        DEFINE FIELD IF NOT EXISTS progress ON reads TYPE record<reading_progress>;
+        DEFINE FIELD IF NOT EXISTS created_at ON reads TYPE datetime DEFAULT time::now();
+        DEFINE FIELD IF NOT EXISTS updated_at ON reads TYPE datetime VALUE time::now();
     `);
   } catch (error) {
     console.error(error);

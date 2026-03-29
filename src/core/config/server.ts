@@ -10,6 +10,7 @@ import { CountryController } from '@/modules/countries/presentation/controllers/
 import { LanguageController } from '@/modules/languages/presentation/controllers/language.controller';
 import { PublisherController } from '@/modules/publishers/presentation/controllers/publisher.controller';
 import { ReadingListController } from '@/modules/reading-lists/presentation/controllers/reading-list.controller';
+import { ReadingProgressController } from '@/modules/reading-progress/presentation/controllers/reading-progress.controller';
 import { GlobalErrorFilter } from '@/modules/shared/middlewares/error-handlers';
 import { AuthController } from '@/modules/users/presentation/controllers/auth.controller';
 import { UserController } from '@/modules/users/presentation/controllers/user.controller';
@@ -35,6 +36,7 @@ export const createServer = async () => {
     container.bind(LanguageController).toSelf().inSingletonScope();
     container.bind(PublisherController).toSelf().inSingletonScope();
     container.bind(ReadingListController).toSelf().inSingletonScope();
+    container.bind(ReadingProgressController).toSelf().inSingletonScope();
     container.bind(AuthController).toSelf().inSingletonScope();
     container.bind(UserController).toSelf().inSingletonScope();
 

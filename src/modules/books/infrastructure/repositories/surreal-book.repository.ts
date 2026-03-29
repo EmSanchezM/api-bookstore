@@ -117,13 +117,15 @@ export class SurrealBookRepository implements BookRepository {
 
     if (filters.title) {
       conditions.push(
-        'string::contains(string::lowercase(title), string::lowercase($title))',
+        'title IS NOT NONE AND string::contains(string::lowercase(title), string::lowercase($title))',
       );
       params.title = filters.title;
     }
 
     if (filters.isbn) {
-      conditions.push('isbn = $isbn');
+      conditions.push(
+        'isbn IS NOT NONE AND string::contains(string::lowercase(isbn), string::lowercase($isbn))',
+      );
       params.isbn = filters.isbn;
     }
 
@@ -131,7 +133,10 @@ export class SurrealBookRepository implements BookRepository {
       query += ` WHERE ${conditions.join(' AND ')}`;
     }
 
-    const orderBy = filters.orderBy ?? 'created_at';
+    const orderBy = (filters.orderBy ?? 'created_at').replace(
+      /[A-Z]/g,
+      (c) => `_${c.toLowerCase()}`,
+    );
     const sortBy = filters.sortBy ?? 'desc';
     query += ` ORDER BY ${orderBy} ${sortBy}`;
 

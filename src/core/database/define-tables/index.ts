@@ -100,6 +100,25 @@ export const defineTables = async (db: Surreal) => {
         DEFINE FIELD IF NOT EXISTS created_at ON book TYPE datetime DEFAULT time::now();
         DEFINE FIELD IF NOT EXISTS updated_at ON book TYPE datetime VALUE time::now();
 
+        DEFINE TABLE IF NOT EXISTS user SCHEMAFULL
+          PERMISSIONS
+            FOR select FULL,
+            FOR create FULL,
+            FOR update FULL,
+            FOR delete FULL;
+
+        DEFINE FIELD first_name ON user TYPE string;
+        DEFINE FIELD last_name ON user TYPE string;
+        DEFINE FIELD email ON user TYPE string;
+        DEFINE FIELD password_hash ON user TYPE string;
+        DEFINE FIELD avatar ON user TYPE option<string>;
+        DEFINE FIELD bio ON user TYPE option<string>;
+        DEFINE FIELD is_active ON user TYPE bool DEFAULT true;
+        DEFINE FIELD created_at ON user TYPE datetime DEFAULT time::now();
+        DEFINE FIELD updated_at ON user TYPE datetime VALUE time::now();
+
+        DEFINE INDEX idx_user_email ON user FIELDS email UNIQUE;
+
         DEFINE TABLE IF NOT EXISTS customer SCHEMAFULL
           PERMISSIONS
             FOR select FULL,

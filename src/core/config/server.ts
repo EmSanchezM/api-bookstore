@@ -10,6 +10,8 @@ import { CountryController } from '@/modules/countries/presentation/controllers/
 import { LanguageController } from '@/modules/languages/presentation/controllers/language.controller';
 import { PublisherController } from '@/modules/publishers/presentation/controllers/publisher.controller';
 import { GlobalErrorFilter } from '@/modules/shared/middlewares/error-handlers';
+import { AuthController } from '@/modules/users/presentation/controllers/auth.controller';
+import { UserController } from '@/modules/users/presentation/controllers/user.controller';
 import { database } from '../database';
 import { logger } from './logger';
 
@@ -31,6 +33,8 @@ export const createServer = async () => {
     container.bind(CountryController).toSelf().inSingletonScope();
     container.bind(LanguageController).toSelf().inSingletonScope();
     container.bind(PublisherController).toSelf().inSingletonScope();
+    container.bind(AuthController).toSelf().inSingletonScope();
+    container.bind(UserController).toSelf().inSingletonScope();
 
     const adapter = new InversifyExpressHttpAdapter(container);
     adapter.useGlobalFilters(GlobalErrorFilter);

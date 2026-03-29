@@ -83,19 +83,22 @@ export class SurrealUserRepository implements UserRepository {
 
     if (filters.isActive !== undefined) {
       conditions.push('is_active = $is_active');
-      params.is_active = filters.isActive;
+      params.is_active =
+        typeof filters.isActive === 'string'
+          ? filters.isActive === 'true'
+          : filters.isActive;
     }
 
     if (filters.name) {
       conditions.push(
-        '(string::contains(string::lowercase(first_name), string::lowercase($name)) OR string::contains(string::lowercase(last_name), string::lowercase($name)))',
+        '(first_name IS NOT NONE AND string::contains(string::lowercase(first_name), string::lowercase($name)) OR last_name IS NOT NONE AND string::contains(string::lowercase(last_name), string::lowercase($name)))',
       );
       params.name = filters.name;
     }
 
     if (filters.email) {
       conditions.push(
-        'string::contains(string::lowercase(email), string::lowercase($email))',
+        'email IS NOT NONE AND string::contains(string::lowercase(email), string::lowercase($email))',
       );
       params.email = filters.email;
     }
@@ -104,12 +107,17 @@ export class SurrealUserRepository implements UserRepository {
       query += ` WHERE ${conditions.join(' AND ')}`;
     }
 
-    const orderBy = filters.orderBy ?? 'created_at';
+    const orderBy = (filters.orderBy ?? 'created_at').replace(
+      /[A-Z]/g,
+      (c) => `_${c.toLowerCase()}`,
+    );
     const sortBy = filters.sortBy ?? 'desc';
     query += ` ORDER BY ${orderBy} ${sortBy}`;
 
-    if (filters.skip && filters.limit) {
-      query += ` LIMIT ${filters.limit} START ${filters.skip}`;
+    if (filters.limit !== undefined) {
+      const limit = Number(filters.limit);
+      const skip = Number(filters.skip ?? 0);
+      query += ` LIMIT ${limit} START ${skip}`;
     }
 
     return {

@@ -82,7 +82,10 @@ export class SurrealPublisherRepository implements PublisherRepository {
       query += ` WHERE ${conditions.join(' AND ')}`;
     }
 
-    const orderBy = filters.orderBy ?? 'created_at';
+    const orderBy = (filters.orderBy ?? 'created_at').replace(
+      /[A-Z]/g,
+      (c) => `_${c.toLowerCase()}`,
+    );
     const sortBy = filters.sortBy ?? 'desc';
     query += ` ORDER BY ${orderBy} ${sortBy}`;
 

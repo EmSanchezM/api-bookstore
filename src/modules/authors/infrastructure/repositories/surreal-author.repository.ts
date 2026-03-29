@@ -84,14 +84,14 @@ export class SurrealAuthorRepository implements AuthorRepository {
 
     if (filters.name) {
       conditions.push(
-        'string::contains(string::lowercase(name), string::lowercase($name))',
+        '(first_name IS NOT NONE AND string::contains(string::lowercase(first_name), string::lowercase($name)) OR last_name IS NOT NONE AND string::contains(string::lowercase(last_name), string::lowercase($name)))',
       );
       params.name = filters.name;
     }
 
     if (filters.nationality) {
       conditions.push(
-        'string::contains(string::lowercase(nationality), string::lowercase($nationality))',
+        'nationality IS NOT NONE AND string::contains(string::lowercase(nationality), string::lowercase($nationality))',
       );
       params.nationality = filters.nationality;
     }
@@ -100,7 +100,10 @@ export class SurrealAuthorRepository implements AuthorRepository {
       query += ` WHERE ${conditions.join(' AND ')}`;
     }
 
-    const orderBy = filters.orderBy ?? 'created_at';
+    const orderBy = (filters.orderBy ?? 'created_at').replace(
+      /[A-Z]/g,
+      (c) => `_${c.toLowerCase()}`,
+    );
     const sortBy = filters.sortBy ?? 'desc';
     query += ` ORDER BY ${orderBy} ${sortBy}`;
 

@@ -107,17 +107,17 @@ export const defineTables = async (db: Surreal) => {
             FOR update FULL,
             FOR delete FULL;
 
-        DEFINE FIELD first_name ON user TYPE string;
-        DEFINE FIELD last_name ON user TYPE string;
-        DEFINE FIELD email ON user TYPE string;
-        DEFINE FIELD password_hash ON user TYPE string;
-        DEFINE FIELD avatar ON user TYPE option<string>;
-        DEFINE FIELD bio ON user TYPE option<string>;
-        DEFINE FIELD is_active ON user TYPE bool DEFAULT true;
-        DEFINE FIELD created_at ON user TYPE datetime DEFAULT time::now();
-        DEFINE FIELD updated_at ON user TYPE datetime VALUE time::now();
+        DEFINE FIELD IF NOT EXISTS first_name ON user TYPE string;
+        DEFINE FIELD IF NOT EXISTS last_name ON user TYPE string;
+        DEFINE FIELD IF NOT EXISTS email ON user TYPE string;
+        DEFINE FIELD IF NOT EXISTS password_hash ON user TYPE string;
+        DEFINE FIELD IF NOT EXISTS avatar ON user TYPE option<string>;
+        DEFINE FIELD IF NOT EXISTS bio ON user TYPE option<string>;
+        DEFINE FIELD IF NOT EXISTS is_active ON user TYPE bool DEFAULT true;
+        DEFINE FIELD IF NOT EXISTS created_at ON user TYPE datetime DEFAULT time::now();
+        DEFINE FIELD IF NOT EXISTS updated_at ON user TYPE datetime VALUE time::now();
 
-        DEFINE INDEX idx_user_email ON user FIELDS email UNIQUE;
+        DEFINE INDEX IF NOT EXISTS idx_user_email ON user FIELDS email UNIQUE;
 
         DEFINE TABLE IF NOT EXISTS customer SCHEMAFULL
           PERMISSIONS
@@ -163,6 +163,51 @@ export const defineTables = async (db: Surreal) => {
 
         DEFINE FIELD IF NOT EXISTS in ON wrote TYPE record<author>;
         DEFINE FIELD IF NOT EXISTS out ON wrote TYPE record<book>;
+
+        DEFINE TABLE IF NOT EXISTS reading_list SCHEMAFULL
+          PERMISSIONS
+            FOR select FULL,
+            FOR create FULL,
+            FOR update FULL,
+            FOR delete FULL;
+
+        DEFINE FIELD IF NOT EXISTS user ON reading_list TYPE record<user>;
+        DEFINE FIELD IF NOT EXISTS name ON reading_list TYPE string;
+        DEFINE FIELD IF NOT EXISTS description ON reading_list TYPE option<string>;
+        DEFINE FIELD IF NOT EXISTS category ON reading_list TYPE string;
+        DEFINE FIELD IF NOT EXISTS is_public ON reading_list TYPE bool DEFAULT true;
+        DEFINE FIELD IF NOT EXISTS is_active ON reading_list TYPE bool DEFAULT true;
+        DEFINE FIELD IF NOT EXISTS created_at ON reading_list TYPE datetime DEFAULT time::now();
+        DEFINE FIELD IF NOT EXISTS updated_at ON reading_list TYPE datetime VALUE time::now();
+
+        DEFINE INDEX IF NOT EXISTS idx_reading_list_user ON reading_list FIELDS user;
+        DEFINE INDEX IF NOT EXISTS idx_reading_list_category ON reading_list FIELDS category;
+
+        DEFINE TABLE IF NOT EXISTS list_item SCHEMAFULL
+          PERMISSIONS
+            FOR select FULL,
+            FOR create FULL,
+            FOR update FULL,
+            FOR delete FULL;
+
+        DEFINE FIELD IF NOT EXISTS reading_list ON list_item TYPE record<reading_list>;
+        DEFINE FIELD IF NOT EXISTS book ON list_item TYPE record<book>;
+        DEFINE FIELD IF NOT EXISTS position ON list_item TYPE int DEFAULT 0;
+        DEFINE FIELD IF NOT EXISTS notes ON list_item TYPE option<string>;
+        DEFINE FIELD IF NOT EXISTS added_at ON list_item TYPE datetime DEFAULT time::now();
+
+        DEFINE INDEX IF NOT EXISTS idx_list_item_unique ON list_item FIELDS reading_list, book UNIQUE;
+
+        REMOVE TABLE IF EXISTS added_to_list;
+        DEFINE TABLE added_to_list TYPE RELATION IN user OUT book SCHEMAFULL
+          PERMISSIONS
+            FOR select FULL,
+            FOR create FULL,
+            FOR update FULL,
+            FOR delete FULL;
+
+        DEFINE FIELD IF NOT EXISTS reading_list ON added_to_list TYPE record<reading_list>;
+        DEFINE FIELD IF NOT EXISTS created_at ON added_to_list TYPE datetime DEFAULT time::now();
     `);
   } catch (error) {
     console.error(error);

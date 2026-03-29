@@ -92,8 +92,8 @@ export class ReadingProgress {
       current_page: this.currentPage,
       total_pages: this.totalPages,
       percentage: this.percentage,
-      started_at: this.startedAt,
-      finished_at: this.finishedAt,
+      started_at: this.startedAt ?? undefined,
+      finished_at: this.finishedAt ?? undefined,
       last_read_at: this.lastReadAt,
       is_active: this.isActive,
     };

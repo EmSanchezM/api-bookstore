@@ -181,13 +181,19 @@ export class SurrealReadingProgressRepository
       const userRecordId = toRecordId('user', properties.user);
       const bookRecordId = toRecordId('book', properties.book);
 
+      const content: Record<string, unknown> = {
+        ...properties,
+        user: userRecordId,
+        book: bookRecordId,
+      };
+
+      Object.keys(content).forEach((key) => {
+        if (content[key] === undefined) delete content[key];
+      });
+
       const newRecord = await this.db
         .create(recordId)
-        .content({
-          ...properties,
-          user: userRecordId,
-          book: bookRecordId,
-        });
+        .content(content);
 
       if (!newRecord) return null;
 

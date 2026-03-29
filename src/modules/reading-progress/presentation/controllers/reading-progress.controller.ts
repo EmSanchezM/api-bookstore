@@ -15,10 +15,7 @@ import type express from 'express';
 import { inject } from 'inversify';
 
 import { TYPES } from '@/core/common/constants/types';
-import {
-  BadRequestException,
-  NotFoundException,
-} from '@/modules/shared/exceptions';
+import { BadRequestException } from '@/modules/shared/exceptions';
 import { validate } from '@/modules/shared/validation/validator-service';
 import {
   type StartReadingDto,
@@ -111,10 +108,7 @@ export class ReadingProgressController {
     const progressList =
       await this.findByFiltersProgressUseCase.execute(filters);
 
-    if (!progressList.length)
-      throw new NotFoundException(
-        `Reading progress not found with filters: ${JSON.stringify(filters)}`,
-      );
+    if (!progressList.length) return [];
 
     return progressList.map((p) => p.properties());
   }

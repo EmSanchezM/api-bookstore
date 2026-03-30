@@ -5,13 +5,23 @@ import { databaseModule } from './database.module';
 import { errorHandleModule } from './error-handle.module';
 import { languageModule } from './language.module';
 import { publisherModule } from './publisher.module';
+import { readingListModule } from './reading-list.module';
+import { readingProgressModule } from './reading-progress.module';
+import { recommendationModule } from './recommendation.module';
+import { reviewModule } from './review.module';
+import { userModule } from './user.module';
 
 export {
-  databaseModule,
-  errorHandleModule,
-  countryModule,
-  languageModule,
-  publisherModule,
   authorModule,
   bookModule,
+  userModule,
+  countryModule,
+  databaseModule,
+  errorHandleModule,
+  languageModule,
+  publisherModule,
+  readingListModule,
+  readingProgressModule,
+  recommendationModule,
+  reviewModule,
 };

@@ -4,7 +4,7 @@
 A REST API for managing a bookstore or library system, built with Node.js, TypeScript, and SurrealDB. This API allows you to handle book inventory, customer management, sales, and library operations with features like book cataloging, borrowing tracking, and inventory management.
 
 ## Prerequisites
-- Node.js (v20.x or higher)
+- Node.js (v22.x or higher)
 - Docker and Docker Compose
 - pnpm (recommended) or npm
 

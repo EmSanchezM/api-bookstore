@@ -12,16 +12,16 @@ import { ServiceUnavailableException } from './service-unavailable.exception';
 import { UnauthorizedException } from './unauthorized.exception';
 
 export {
-  HttpStatus,
-  HttpException,
   BadGatewayException,
   BadRequestException,
-  NotFoundException,
-  UnauthorizedException,
-  ForbiddenException,
   ConflictException,
-  InternalServerErrorException,
-  ServiceUnavailableException,
-  RequestTimeoutException,
   DatabaseErrorException,
+  ForbiddenException,
+  HttpException,
+  HttpStatus,
+  InternalServerErrorException,
+  NotFoundException,
+  RequestTimeoutException,
+  ServiceUnavailableException,
+  UnauthorizedException,
 };

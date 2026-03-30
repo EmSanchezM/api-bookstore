@@ -1,15 +1,23 @@
 import 'reflect-metadata';
+import { InversifyExpressHttpAdapter } from '@inversifyjs/http-express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { json, urlencoded } from 'express';
-import { InversifyExpressServer } from 'inversify-express-utils';
+import { loadContainer } from '@/core/ioc/container';
+import { AuthorController } from '@/modules/authors/presentation/controllers/author.controller';
+import { BookController } from '@/modules/books/presentation/controllers/book.controller';
+import { CountryController } from '@/modules/countries/presentation/controllers/country.controller';
+import { LanguageController } from '@/modules/languages/presentation/controllers/language.controller';
+import { PublisherController } from '@/modules/publishers/presentation/controllers/publisher.controller';
+import { ReadingListController } from '@/modules/reading-lists/presentation/controllers/reading-list.controller';
+import { ReadingProgressController } from '@/modules/reading-progress/presentation/controllers/reading-progress.controller';
+import { RecommendationController } from '@/modules/recommendations/presentation/controllers/recommendation.controller';
+import { ReviewController } from '@/modules/reviews/presentation/controllers/review.controller';
+import { GlobalErrorFilter } from '@/modules/shared/middlewares/error-handlers';
+import { AuthController } from '@/modules/users/presentation/controllers/auth.controller';
+import { UserController } from '@/modules/users/presentation/controllers/user.controller';
 import { database } from '../database';
 import { logger } from './logger';
-
-import '@/core/ioc/registry';
-import { TYPES } from '@/core/common/constants/types';
-import { loadContainer } from '@/core/ioc/container';
-import type { ErrorHandlerMiddleware } from '@/modules/shared/middlewares/error-handlers';
 
 export const createServer = async () => {
   try {
@@ -23,22 +31,29 @@ export const createServer = async () => {
     }
 
     const container = await loadContainer();
-    const server = new InversifyExpressServer(container);
 
-    server.setConfig((app) => {
-      app.use(json());
-      app.use(urlencoded({ extended: true }));
-      app.use(cors());
-    });
+    container.bind(AuthorController).toSelf().inSingletonScope();
+    container.bind(BookController).toSelf().inSingletonScope();
+    container.bind(CountryController).toSelf().inSingletonScope();
+    container.bind(LanguageController).toSelf().inSingletonScope();
+    container.bind(PublisherController).toSelf().inSingletonScope();
+    container.bind(ReadingListController).toSelf().inSingletonScope();
+    container.bind(ReadingProgressController).toSelf().inSingletonScope();
+    container.bind(RecommendationController).toSelf().inSingletonScope();
+    container.bind(ReviewController).toSelf().inSingletonScope();
+    container.bind(AuthController).toSelf().inSingletonScope();
+    container.bind(UserController).toSelf().inSingletonScope();
 
-    server.setErrorConfig((app) => {
-      const errorHandlerMiddleware = container.get<ErrorHandlerMiddleware>(
-        TYPES.ErrorHandlerMiddleware,
-      );
-      app.use(errorHandlerMiddleware.catchAll.bind(errorHandlerMiddleware));
-    });
+    const adapter = new InversifyExpressHttpAdapter(container);
+    adapter.useGlobalFilters(GlobalErrorFilter);
 
-    return server.build();
+    const app = await adapter.build();
+
+    app.use(json());
+    app.use(urlencoded({ extended: true }));
+    app.use(cors());
+
+    return app;
   } catch (error) {
     logger.error('Failed to create server:', error);
     throw error;

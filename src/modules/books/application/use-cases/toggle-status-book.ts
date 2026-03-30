@@ -18,9 +18,7 @@ export class ToggleStatusBookUseCase {
 
     if (!book) throw new NotFoundException('Book not found');
 
-    const deletedBook = await this.bookRepository.toggleBookStatus(
-      book.properties().id!,
-    );
+    const deletedBook = await this.bookRepository.toggleBookStatus(id);
 
     if (!deletedBook)
       throw new InternalServerErrorException('Error deleting Book');

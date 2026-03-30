@@ -1,12 +1,15 @@
-import type { NextFunction, Request, Response } from 'express';
-import { inject } from 'inversify';
 import {
-  controller,
-  httpDelete,
-  httpGet,
-  httpPost,
-  httpPut,
-} from 'inversify-express-utils';
+  Body,
+  Controller,
+  CreatedHttpResponse,
+  Delete,
+  Get,
+  Params,
+  Post,
+  Put,
+  Query,
+} from '@inversifyjs/http-core';
+import { inject } from 'inversify';
 
 import { TYPES } from '@/core/common/constants/types';
 import {
@@ -27,12 +30,11 @@ import type {
 import type { LanguageFilters } from '@/modules/languages/infrastructure/types/language.filters';
 import {
   BadRequestException,
-  HttpStatus,
   NotFoundException,
 } from '@/modules/shared/exceptions';
-import { ValidationService } from '@/modules/shared/validation/validator-service';
+import { validate } from '@/modules/shared/validation/validator-service';
 
-@controller('/api/v1/languages')
+@Controller('/api/v1/languages')
 export class LanguageController {
   constructor(
     @inject(TYPES.CreateLanguageUseCase)
@@ -51,138 +53,91 @@ export class LanguageController {
     private removeLanguageUseCase: RemoveLanguageUseCase,
   ) {}
 
-  @httpPost('/')
-  async create(req: Request, res: Response, next: NextFunction) {
-    try {
-      const validationSchema = ValidationService.validate(
-        CreateLanguageSchema,
-        req.body,
+  @Post('/')
+  async create(@Body() body: unknown): Promise<CreatedHttpResponse> {
+    const validationSchema = validate(CreateLanguageSchema, body);
+
+    if (!validationSchema.success)
+      throw new BadRequestException(
+        `Invalid language data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`,
       );
 
-      if (!validationSchema.success)
-        throw new BadRequestException(
-          `Invalid language data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`,
-        );
+    const createLanguageDto: CreateLanguageDto = validationSchema.output;
+    const language =
+      await this.createLanguageUseCase.execute(createLanguageDto);
 
-      const createLanguageDto: CreateLanguageDto = validationSchema.output;
-      const language =
-        await this.createLanguageUseCase.execute(createLanguageDto);
-
-      res.status(HttpStatus.CREATED).json(language.properties());
-    } catch (error: unknown) {
-      next(error);
-    }
+    return new CreatedHttpResponse(language.properties());
   }
 
-  @httpGet('/')
-  async findAll(req: Request, res: Response, next: NextFunction) {
-    try {
-      const languages = await this.findAllLanguagesUseCase.execute();
+  @Get('/')
+  async findAll() {
+    const languages = await this.findAllLanguagesUseCase.execute();
 
-      if (!languages.length) return res.status(HttpStatus.OK).json([]);
+    if (!languages.length) return [];
 
-      res
-        .status(HttpStatus.OK)
-        .json(languages.map((language) => language.properties()));
-    } catch (error) {
-      next(error);
-    }
+    return languages.map((language) => language.properties());
   }
 
-  @httpGet('/filters')
-  async findByFilters(req: Request, res: Response, next: NextFunction) {
-    try {
-      const filters = req.query as LanguageFilters;
-      const languages =
-        await this.findByFiltersLanguageUseCase.execute(filters);
+  @Get('/filters')
+  async findByFilters(@Query() filters: LanguageFilters) {
+    const languages = await this.findByFiltersLanguageUseCase.execute(filters);
 
-      if (!languages.length)
-        throw new NotFoundException(
-          `Languages not found with filters: ${JSON.stringify(filters)}`,
-        );
-
-      res
-        .status(HttpStatus.OK)
-        .json(languages.map((language) => language.properties()));
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  @httpGet('/:id')
-  async findById(req: Request, res: Response, next: NextFunction) {
-    try {
-      if (!req.params.id)
-        throw new BadRequestException('Language id is required');
-
-      const language = await this.findByIdLanguageUseCase.execute(
-        req.params.id,
+    if (!languages.length)
+      throw new NotFoundException(
+        `Languages not found with filters: ${JSON.stringify(filters)}`,
       );
 
-      res.status(HttpStatus.OK).json(language.properties());
-    } catch (error) {
-      next(error);
-    }
+    return languages.map((language) => language.properties());
   }
 
-  @httpGet('/iso-code/:isoCode')
-  async findByIsoCode(req: Request, res: Response, next: NextFunction) {
-    try {
-      if (!req.params.isoCode)
-        throw new BadRequestException('Language iso code is required');
+  @Get('/:id')
+  async findById(@Params({ name: 'id' }) id: string) {
+    if (!id) throw new BadRequestException('Language id is required');
 
-      const language = await this.findByIsoCodeLanguageUseCase.execute(
-        req.params.isoCode,
-      );
+    const language = await this.findByIdLanguageUseCase.execute(id);
 
-      res.status(HttpStatus.OK).json(language.properties());
-    } catch (error) {
-      next(error);
-    }
+    return language.properties();
   }
 
-  @httpPut('/:id')
-  async update(req: Request, res: Response, next: NextFunction) {
-    try {
-      if (!req.params.id)
-        throw new BadRequestException('Language id is required');
+  @Get('/iso-code/:isoCode')
+  async findByIsoCode(@Params({ name: 'isoCode' }) isoCode: string) {
+    if (!isoCode)
+      throw new BadRequestException('Language iso code is required');
 
-      const validationSchema = ValidationService.validate(
-        UpdateLanguageSchema,
-        req.body,
-      );
-      if (!validationSchema.success)
-        throw new BadRequestException(
-          `Invalid language data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`,
-        );
+    const language = await this.findByIsoCodeLanguageUseCase.execute(isoCode);
 
-      const updateLanguageDto: UpdateLanguageDto = validationSchema.output;
-      const language = await this.updateLanguageUseCase.execute(
-        req.params.id,
-        updateLanguageDto,
-      );
-
-      res.status(HttpStatus.OK).json(language.properties());
-    } catch (error: unknown) {
-      next(error);
-    }
+    return language.properties();
   }
 
-  @httpDelete('/:id')
-  async remove(req: Request, res: Response, next: NextFunction) {
-    try {
-      if (!req.params.id)
-        throw new BadRequestException('Language id is required');
+  @Put('/:id')
+  async update(@Params({ name: 'id' }) id: string, @Body() body: unknown) {
+    if (!id) throw new BadRequestException('Language id is required');
 
-      const isRemoved = await this.removeLanguageUseCase.execute(req.params.id);
+    const validationSchema = validate(UpdateLanguageSchema, body);
+    if (!validationSchema.success)
+      throw new BadRequestException(
+        `Invalid language data: ${validationSchema.issues.map((issue) => issue.message).join(', ')}`,
+      );
 
-      res.status(HttpStatus.OK).json({
-        message: isRemoved
-          ? 'Language deleted successfully'
-          : 'Language not found',
-      });
-    } catch (error) {
-      next(error);
-    }
+    const updateLanguageDto: UpdateLanguageDto = validationSchema.output;
+    const language = await this.updateLanguageUseCase.execute(
+      id,
+      updateLanguageDto,
+    );
+
+    return language.properties();
+  }
+
+  @Delete('/:id')
+  async remove(@Params({ name: 'id' }) id: string) {
+    if (!id) throw new BadRequestException('Language id is required');
+
+    const isRemoved = await this.removeLanguageUseCase.execute(id);
+
+    return {
+      message: isRemoved
+        ? 'Language deleted successfully'
+        : 'Language not found',
+    };
   }
 }

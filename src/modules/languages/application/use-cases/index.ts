@@ -8,10 +8,10 @@ import { UpdateLanguageUseCase } from './update-language';
 
 export {
   CreateLanguageUseCase,
-  UpdateLanguageUseCase,
   FindAllLanguagesUseCase,
   FindByFiltersLanguageUseCase,
   FindByIdLanguageUseCase,
   FindByIsoCodeLanguageUseCase,
   RemoveLanguageUseCase,
+  UpdateLanguageUseCase,
 };

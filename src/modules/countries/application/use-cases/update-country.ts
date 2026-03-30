@@ -26,7 +26,7 @@ export class UpdateCountryUseCase {
     });
 
     const updatedCountry = await this.countryRepositoty.updateCountry(
-      existingCountry.properties().id!,
+      id,
       existingCountry,
     );
 

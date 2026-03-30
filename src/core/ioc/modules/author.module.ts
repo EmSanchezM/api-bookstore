@@ -1,4 +1,4 @@
-import { ContainerModule } from 'inversify';
+import { ContainerModule, type ContainerModuleLoadOptions } from 'inversify';
 import { TYPES } from '@/core/common/constants/types';
 import {
   CreateAuthorUseCase,
@@ -10,12 +10,16 @@ import {
 } from '@/modules/authors/application/use-cases';
 import { SurrealAuthorRepository } from '@/modules/authors/infrastructure/repositories/surreal-author.repository';
 
-export const authorModule = new ContainerModule((bind) => {
-  bind(TYPES.AuthorRepository).to(SurrealAuthorRepository);
-  bind(TYPES.CreateAuthorUseCase).to(CreateAuthorUseCase);
-  bind(TYPES.UpdateAuthorUseCase).to(UpdateAuthorUseCase);
-  bind(TYPES.FindAllAuthorsUseCase).to(FindAllAuthorsUseCase);
-  bind(TYPES.FindByFiltersAuthorUseCase).to(FindByFiltersAuthorUseCase);
-  bind(TYPES.FindByIdAuthorUseCase).to(FindByIdAuthorUseCase);
-  bind(TYPES.RemoveAuthorUseCase).to(RemoveAuthorUseCase);
-});
+export const authorModule = new ContainerModule(
+  (options: ContainerModuleLoadOptions) => {
+    options.bind(TYPES.AuthorRepository).to(SurrealAuthorRepository);
+    options.bind(TYPES.CreateAuthorUseCase).to(CreateAuthorUseCase);
+    options.bind(TYPES.UpdateAuthorUseCase).to(UpdateAuthorUseCase);
+    options.bind(TYPES.FindAllAuthorsUseCase).to(FindAllAuthorsUseCase);
+    options
+      .bind(TYPES.FindByFiltersAuthorUseCase)
+      .to(FindByFiltersAuthorUseCase);
+    options.bind(TYPES.FindByIdAuthorUseCase).to(FindByIdAuthorUseCase);
+    options.bind(TYPES.RemoveAuthorUseCase).to(RemoveAuthorUseCase);
+  },
+);

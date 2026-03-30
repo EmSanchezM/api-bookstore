@@ -19,9 +19,7 @@ export class RemoveCountryUseCase {
 
     if (!country) throw new NotFoundException('Country not found');
 
-    const deletedCountry = await this.countryRepositoty.deleteCountry(
-      country.properties().id!,
-    );
+    const deletedCountry = await this.countryRepositoty.deleteCountry(id);
 
     if (!deletedCountry)
       throw new InternalServerErrorException('Error deleting country');

@@ -1,13 +1,13 @@
 import { logger } from 'core/config/logger';
 import { inject, injectable } from 'inversify';
-import type Surreal from 'surrealdb';
-import { type RecordId, ResponseError } from 'surrealdb';
+import type { Surreal } from 'surrealdb';
+import { type RecordId, ResponseError, Table } from 'surrealdb';
 import { TYPES } from '@/core/common/constants/types';
 import { Publisher } from '@/modules/publishers/domain/entities';
 import type { PublisherRepository } from '@/modules/publishers/domain/repositories';
 import type { PublisherFilters } from '@/modules/publishers/infrastructure/types/publisher.filters';
 import { DatabaseErrorException } from '@/modules/shared/exceptions';
-import { SurrealRecordIdMapper } from '@/modules/shared/mappers';
+import { fromRecordId, toRecordId } from '@/modules/shared/mappers';
 
 interface PublisherRecord {
   id: RecordId | string;
@@ -25,10 +25,7 @@ export class SurrealPublisherRepository implements PublisherRepository {
 
   async getPublisherById(id: string): Promise<Publisher | null> {
     try {
-      const publisherRecordId = SurrealRecordIdMapper.toRecordId(
-        'publisher',
-        id,
-      );
+      const publisherRecordId = toRecordId('publisher', id);
 
       const publisherRecord =
         await this.db.select<PublisherRecord>(publisherRecordId);
@@ -43,11 +40,15 @@ export class SurrealPublisherRepository implements PublisherRepository {
 
   async getAllPublishers(): Promise<Publisher[]> {
     try {
-      const response = await this.db.select<PublisherRecord>('publisher');
+      const response = await this.db.select<PublisherRecord>(
+        new Table('publisher'),
+      );
 
       if (!response?.length) return [];
 
-      return response.map((Language: any) => this.mapToPublisher(Language));
+      return response.map((publisher) =>
+        this.mapToPublisher(publisher as unknown as Record<string, unknown>),
+      );
     } catch (error) {
       this.handleError(error, 'getAllLanguages');
     }
@@ -63,11 +64,11 @@ export class SurrealPublisherRepository implements PublisherRepository {
       sortBy?: string;
     } = {};
     const conditions: string[] = [];
-    let query = 'SELECT * FROM language';
+    let query = 'SELECT * FROM publisher';
 
     if (filters.isActive !== undefined) {
       conditions.push('is_active = $is_active');
-      params.is_active = filters.isActive;
+      params.is_active = String(filters.isActive) === 'true';
     }
 
     if (filters.name) {
@@ -81,12 +82,17 @@ export class SurrealPublisherRepository implements PublisherRepository {
       query += ` WHERE ${conditions.join(' AND ')}`;
     }
 
-    const orderBy = filters.orderBy ?? 'created_at';
+    const orderBy = (filters.orderBy ?? 'created_at').replace(
+      /[A-Z]/g,
+      (c) => `_${c.toLowerCase()}`,
+    );
     const sortBy = filters.sortBy ?? 'desc';
     query += ` ORDER BY ${orderBy} ${sortBy}`;
 
-    if (filters.skip && filters.limit) {
-      query += ` LIMIT ${filters.limit} START ${filters.skip}`;
+    const skip = Number(filters.skip);
+    const limit = Number(filters.limit);
+    if (!isNaN(skip) && !isNaN(limit) && limit > 0) {
+      query += ` LIMIT ${limit} START ${skip}`;
     }
 
     return {
@@ -107,8 +113,8 @@ export class SurrealPublisherRepository implements PublisherRepository {
 
       if (!Array.isArray(response)) return [];
 
-      return response.map((publisher: PublisherRecord) =>
-        this.mapToPublisher(publisher),
+      return response.map((publisher) =>
+        this.mapToPublisher(publisher as unknown as Record<string, unknown>),
       );
     } catch (error) {
       this.handleError(error, 'getPublishersByFilters');
@@ -118,15 +124,14 @@ export class SurrealPublisherRepository implements PublisherRepository {
   async createPublisher(publisher: Publisher): Promise<Publisher | null> {
     try {
       const properties = publisher.propertiesToDatabase();
-      const publisherRecordId = SurrealRecordIdMapper.toRecordId(
+      const publisherRecordId = toRecordId(
         'publisher',
-        properties.id!,
+        properties.id as string,
       );
 
-      const newPublisherRecord = await this.db.create(
-        publisherRecordId,
-        properties,
-      );
+      const newPublisherRecord = await this.db
+        .create(publisherRecordId)
+        .content(properties);
 
       if (!newPublisherRecord) return null;
 
@@ -141,10 +146,7 @@ export class SurrealPublisherRepository implements PublisherRepository {
     publisher: Publisher,
   ): Promise<Publisher | null> {
     try {
-      const publisherRecordId = SurrealRecordIdMapper.toRecordId(
-        'publisher',
-        id,
-      );
+      const publisherRecordId = toRecordId('publisher', id);
       const properties = publisher.properties();
 
       const payload: Partial<PublisherRecord> = {
@@ -159,10 +161,9 @@ export class SurrealPublisherRepository implements PublisherRepository {
         if (payload[key] === undefined) delete payload[key];
       });
 
-      const updatedPublisherRecord = await this.db.update(
-        publisherRecordId,
-        payload,
-      );
+      const updatedPublisherRecord = await this.db
+        .update(publisherRecordId)
+        .merge(payload);
 
       if (!updatedPublisherRecord) return null;
 
@@ -174,16 +175,13 @@ export class SurrealPublisherRepository implements PublisherRepository {
 
   async deletePublisher(id: string): Promise<boolean> {
     try {
-      const publisherRecordId = SurrealRecordIdMapper.toRecordId(
-        'publisher',
-        id,
-      );
+      const publisherRecordId = toRecordId('publisher', id);
       const removedPublisherRecord =
         await this.db.delete<PublisherRecord>(publisherRecordId);
 
       if (!removedPublisherRecord) return false;
 
-      return removedPublisherRecord.id ? true : false;
+      return !!removedPublisherRecord.id;
     } catch (error: unknown) {
       this.handleError(error, 'deletePublisher');
     }
@@ -191,20 +189,19 @@ export class SurrealPublisherRepository implements PublisherRepository {
 
   async togglePublisherStatus(id: string): Promise<boolean> {
     try {
-      const publisherRecordId = SurrealRecordIdMapper.toRecordId(
-        'publisher',
-        id,
-      );
+      const publisherRecordId = toRecordId('publisher', id);
 
       const currentPublisher =
         await this.db.select<PublisherRecord>(publisherRecordId);
 
       if (!currentPublisher) return false;
 
-      const updatedPublisherRecord = await this.db.update(publisherRecordId, {
-        is_active: !currentPublisher.is_active,
-        updated_at: new Date(),
-      });
+      const updatedPublisherRecord = await this.db
+        .update(publisherRecordId)
+        .merge({
+          is_active: !currentPublisher.is_active,
+          updated_at: new Date(),
+        });
 
       if (!updatedPublisherRecord) return false;
 
@@ -225,14 +222,15 @@ export class SurrealPublisherRepository implements PublisherRepository {
     throw new DatabaseErrorException(error);
   }
 
-  private mapToPublisher(record: any): Publisher {
+  private mapToPublisher(record: Record<string, unknown>): Publisher {
+    const r = record as PublisherRecord;
     return new Publisher({
-      id: SurrealRecordIdMapper.fromRecordId(record.id),
-      name: record.name,
-      website: record.website,
-      isActive: record.is_active,
-      createdAt: new Date(record.created_at),
-      updatedAt: new Date(record.updated_at),
+      id: fromRecordId(r.id),
+      name: r.name,
+      website: r.website,
+      isActive: r.is_active,
+      createdAt: new Date(r.created_at as string),
+      updatedAt: new Date(r.updated_at as string),
     });
   }
 }

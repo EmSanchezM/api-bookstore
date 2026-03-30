@@ -10,6 +10,8 @@ export const ENVIRONMENT_VARIABLES = {
   DATABASE_NAME: 'DATABASE_NAME',
   DATABASE_USERNAME: 'DATABASE_USERNAME',
   DATABASE_PASSWORD: 'DATABASE_PASSWORD',
+  JWT_SECRET: 'JWT_SECRET',
+  JWT_EXPIRES_IN: 'JWT_EXPIRES_IN',
 };
 
 const environmentSchema = object({
@@ -21,6 +23,8 @@ const environmentSchema = object({
   DATABASE_NAME: string(),
   DATABASE_USERNAME: string(),
   DATABASE_PASSWORD: string(),
+  JWT_SECRET: string(),
+  JWT_EXPIRES_IN: string(),
 });
 
 export const getEnvironmentVariables = () => {

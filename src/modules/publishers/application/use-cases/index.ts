@@ -7,9 +7,9 @@ import { UpdatePublisherUseCase } from './update-publisher';
 
 export {
   CreatePublisherUseCase,
-  UpdatePublisherUseCase,
   FindAllPublishersUseCase,
   FindByFiltersPublisherUseCase,
   FindByIdPublisherUseCase,
   RemovePublisherUseCase,
+  UpdatePublisherUseCase,
 };

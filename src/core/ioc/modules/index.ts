@@ -7,6 +7,7 @@ import { languageModule } from './language.module';
 import { publisherModule } from './publisher.module';
 import { readingListModule } from './reading-list.module';
 import { readingProgressModule } from './reading-progress.module';
+import { recommendationModule } from './recommendation.module';
 import { reviewModule } from './review.module';
 import { userModule } from './user.module';
 
@@ -21,5 +22,6 @@ export {
   publisherModule,
   readingListModule,
   readingProgressModule,
+  recommendationModule,
   reviewModule,
 };

@@ -11,6 +11,7 @@ import { LanguageController } from '@/modules/languages/presentation/controllers
 import { PublisherController } from '@/modules/publishers/presentation/controllers/publisher.controller';
 import { ReadingListController } from '@/modules/reading-lists/presentation/controllers/reading-list.controller';
 import { ReadingProgressController } from '@/modules/reading-progress/presentation/controllers/reading-progress.controller';
+import { RecommendationController } from '@/modules/recommendations/presentation/controllers/recommendation.controller';
 import { ReviewController } from '@/modules/reviews/presentation/controllers/review.controller';
 import { GlobalErrorFilter } from '@/modules/shared/middlewares/error-handlers';
 import { AuthController } from '@/modules/users/presentation/controllers/auth.controller';
@@ -38,6 +39,7 @@ export const createServer = async () => {
     container.bind(PublisherController).toSelf().inSingletonScope();
     container.bind(ReadingListController).toSelf().inSingletonScope();
     container.bind(ReadingProgressController).toSelf().inSingletonScope();
+    container.bind(RecommendationController).toSelf().inSingletonScope();
     container.bind(ReviewController).toSelf().inSingletonScope();
     container.bind(AuthController).toSelf().inSingletonScope();
     container.bind(UserController).toSelf().inSingletonScope();

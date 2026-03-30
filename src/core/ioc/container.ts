@@ -10,6 +10,7 @@ import {
   publisherModule,
   readingListModule,
   readingProgressModule,
+  recommendationModule,
   reviewModule,
   userModule,
 } from './modules';
@@ -27,6 +28,7 @@ export const loadContainer = async () => {
     userModule,
     readingListModule,
     readingProgressModule,
+    recommendationModule,
     reviewModule,
     errorHandleModule,
   );

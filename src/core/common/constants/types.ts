@@ -83,6 +83,13 @@ export const TYPES = {
   UpdateReviewUseCase: Symbol.for('UpdateReviewUseCase'),
   RemoveReviewUseCase: Symbol.for('RemoveReviewUseCase'),
   GetBookRatingUseCase: Symbol.for('GetBookRatingUseCase'),
+  //Recommendations
+  RecommendationRepository: Symbol.for('RecommendationRepository'),
+  GetCollaborativeRecommendationsUseCase: Symbol.for('GetCollaborativeRecommendationsUseCase'),
+  GetPersonalRecommendationsUseCase: Symbol.for('GetPersonalRecommendationsUseCase'),
+  GetPopularByCategoryUseCase: Symbol.for('GetPopularByCategoryUseCase'),
+  GetTrendingUseCase: Symbol.for('GetTrendingUseCase'),
+  GetSimilarBooksUseCase: Symbol.for('GetSimilarBooksUseCase'),
   //Books
   BookRepository: Symbol.for('BookRepository'),
   CreateBookUseCase: Symbol.for('CreateBookUseCase'),

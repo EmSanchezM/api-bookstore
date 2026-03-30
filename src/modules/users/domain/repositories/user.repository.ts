@@ -9,4 +9,5 @@ export interface UserRepository {
   createUser(user: User): Promise<User | null>;
   updateUser(id: string, user: User): Promise<User | null>;
   deleteUser(id: string): Promise<boolean>;
+  getUsersByRole(role: string): Promise<User[]>;
 }

@@ -10,6 +10,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@/modules/shared/exceptions';
+import { type UserRole, ROLES } from '@/modules/shared/security/interfaces';
 
 @injectable()
 export class RemoveBookFromListUseCase {
@@ -20,13 +21,13 @@ export class RemoveBookFromListUseCase {
     private listItemRepository: ListItemRepository,
   ) {}
 
-  async execute(listId: string, bookId: string, userId: string) {
+  async execute(listId: string, bookId: string, userId: string, role?: UserRole) {
     const readingList =
       await this.readingListRepository.getReadingListById(listId);
 
     if (!readingList) throw new NotFoundException('Reading list not found');
 
-    if (readingList.properties().userId !== userId)
+    if (role !== ROLES.ADMIN && readingList.properties().userId !== userId)
       throw new ForbiddenException(
         'No tienes permiso para quitar libros de esta lista',
       );

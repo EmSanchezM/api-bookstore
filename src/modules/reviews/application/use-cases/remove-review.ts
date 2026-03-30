@@ -7,6 +7,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@/modules/shared/exceptions';
+import { type UserRole, ROLES } from '@/modules/shared/security/interfaces';
 
 @injectable()
 export class RemoveReviewUseCase {
@@ -15,12 +16,12 @@ export class RemoveReviewUseCase {
     private reviewRepository: ReviewRepository,
   ) {}
 
-  async execute(id: string, userId: string) {
+  async execute(id: string, userId: string, role?: UserRole) {
     const existing = await this.reviewRepository.getReviewById(id);
 
     if (!existing) throw new NotFoundException('Review not found');
 
-    if (existing.properties().userId !== userId)
+    if (role !== ROLES.ADMIN && existing.properties().userId !== userId)
       throw new ForbiddenException(
         'No tienes permiso para eliminar esta review',
       );

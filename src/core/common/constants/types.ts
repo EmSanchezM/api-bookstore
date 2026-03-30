@@ -49,6 +49,10 @@ export const TYPES = {
   PasswordHasher: Symbol.for('PasswordHasher'),
   TokenProvider: Symbol.for('TokenProvider'),
   AuthGuard: Symbol.for('AuthGuard'),
+  AdminGuard: Symbol.for('AdminGuard'),
+  AdminOrEditorGuard: Symbol.for('AdminOrEditorGuard'),
+  SeedAdminUseCase: Symbol.for('SeedAdminUseCase'),
+  AssignRoleUseCase: Symbol.for('AssignRoleUseCase'),
   //Reading Lists
   ReadingListRepository: Symbol.for('ReadingListRepository'),
   ListItemRepository: Symbol.for('ListItemRepository'),

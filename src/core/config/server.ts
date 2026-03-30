@@ -3,7 +3,9 @@ import { InversifyExpressHttpAdapter } from '@inversifyjs/http-express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { json, urlencoded } from 'express';
+import { TYPES } from '@/core/common/constants/types';
 import { loadContainer } from '@/core/ioc/container';
+import type { SeedAdminUseCase } from '@/modules/users/application/use-cases';
 import { AuthorController } from '@/modules/authors/presentation/controllers/author.controller';
 import { BookController } from '@/modules/books/presentation/controllers/book.controller';
 import { CountryController } from '@/modules/countries/presentation/controllers/country.controller';
@@ -43,6 +45,10 @@ export const createServer = async () => {
     container.bind(ReviewController).toSelf().inSingletonScope();
     container.bind(AuthController).toSelf().inSingletonScope();
     container.bind(UserController).toSelf().inSingletonScope();
+
+    const seedAdmin =
+      container.get<SeedAdminUseCase>(TYPES.SeedAdminUseCase);
+    await seedAdmin.execute();
 
     const adapter = new InversifyExpressHttpAdapter(container);
     adapter.useGlobalFilters(GlobalErrorFilter);

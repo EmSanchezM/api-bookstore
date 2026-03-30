@@ -11,6 +11,7 @@ import {
   ForbiddenException,
   NotFoundException,
 } from '@/modules/shared/exceptions';
+import { type UserRole, ROLES } from '@/modules/shared/security/interfaces';
 
 @injectable()
 export class UpdateListItemUseCase {
@@ -26,13 +27,14 @@ export class UpdateListItemUseCase {
     bookId: string,
     userId: string,
     updateListItemDto: UpdateListItemDto,
+    role?: UserRole,
   ) {
     const readingList =
       await this.readingListRepository.getReadingListById(listId);
 
     if (!readingList) throw new NotFoundException('Reading list not found');
 
-    if (readingList.properties().userId !== userId)
+    if (role !== ROLES.ADMIN && readingList.properties().userId !== userId)
       throw new ForbiddenException(
         'No tienes permiso para actualizar esta lista',
       );

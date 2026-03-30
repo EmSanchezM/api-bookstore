@@ -31,6 +31,7 @@ export class LoginUserUseCase {
     const token = await this.tokenProvider.sign({
       id: user.properties().id!,
       email: user.properties().email,
+      role: user.properties().role,
     });
 
     return { token, user };

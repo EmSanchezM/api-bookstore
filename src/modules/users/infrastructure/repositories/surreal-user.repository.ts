@@ -5,6 +5,7 @@ import { type RecordId, ResponseError, Table } from 'surrealdb';
 import { TYPES } from '@/core/common/constants/types';
 import { DatabaseErrorException } from '@/modules/shared/exceptions';
 import { fromRecordId, toRecordId } from '@/modules/shared/mappers';
+import { ROLES } from '@/modules/shared/security/interfaces';
 import { User } from '@/modules/users/domain/entities';
 import type { UserRepository } from '@/modules/users/domain/repositories';
 import type { UserFilters } from '@/modules/users/infrastructure/types/user.filters';
@@ -18,6 +19,7 @@ interface UserRecord {
   avatar: string | undefined;
   bio: string | undefined;
   is_active: boolean;
+  role: string | undefined;
   created_at: string | Date;
   updated_at: string | Date;
   [key: string]: unknown;
@@ -171,6 +173,7 @@ export class SurrealUserRepository implements UserRepository {
         avatar: properties.avatar,
         bio: properties.bio,
         is_active: properties.isActive,
+        role: properties.role,
         created_at: properties.createdAt,
         updated_at: new Date(),
       };
@@ -215,6 +218,23 @@ export class SurrealUserRepository implements UserRepository {
     throw new DatabaseErrorException(error);
   }
 
+  async getUsersByRole(role: string): Promise<User[]> {
+    try {
+      const [response] = await this.db.query<UserRecord[]>(
+        'SELECT * FROM user WHERE role = $role',
+        { role },
+      );
+
+      if (!response?.length) return [];
+
+      if (!Array.isArray(response)) return [];
+
+      return response.map((user: UserRecord) => this.mapToUser(user));
+    } catch (error) {
+      this.handleError(error, 'getUsersByRole');
+    }
+  }
+
   private mapToUser(record: any): User {
     return new User({
       id: fromRecordId(record.id),
@@ -225,6 +245,7 @@ export class SurrealUserRepository implements UserRepository {
       avatar: record.avatar,
       bio: record.bio,
       isActive: record.is_active,
+      role: record.role ?? ROLES.USER,
       createdAt: new Date(record.created_at),
       updatedAt: new Date(record.updated_at),
     });

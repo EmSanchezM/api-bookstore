@@ -1,4 +1,5 @@
 import { DatabaseErrorException } from '@/modules/shared/exceptions';
+import type { UserRole } from '@/modules/shared/security/interfaces';
 
 export interface UserEssentials {
   firstName: string;
@@ -6,6 +7,7 @@ export interface UserEssentials {
   email: string;
   passwordHash: string;
   isActive: boolean;
+  role: UserRole;
 }
 
 export interface UserOptionals {
@@ -35,6 +37,7 @@ export class User {
   private avatar: string | undefined;
   private bio: string | undefined;
   private isActive!: boolean;
+  private role!: UserRole;
   private readonly createdAt: Date;
   private updatedAt: Date | undefined;
 
@@ -68,6 +71,7 @@ export class User {
       avatar: this.avatar,
       bio: this.bio,
       isActive: this.isActive,
+      role: this.role,
       createdAt: this.createdAt ?? new Date(),
       updatedAt: this.updatedAt,
     };
@@ -88,11 +92,17 @@ export class User {
       avatar: this.avatar,
       bio: this.bio,
       is_active: this.isActive,
+      role: this.role,
     };
   }
 
   public update(properties: Partial<UserUpdate>) {
     Object.assign(this, properties);
+    this.updatedAt = new Date();
+  }
+
+  public assignRole(role: UserRole) {
+    this.role = role;
     this.updatedAt = new Date();
   }
 }

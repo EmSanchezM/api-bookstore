@@ -98,6 +98,10 @@
 							{
 								"key": "Content-Type",
 								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
 							}
 						],
 						"body": {
@@ -106,10 +110,14 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/authors",
-							"host": ["{{baseUrl}}"],
-							"path": ["authors"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"authors"
+							]
 						},
-						"description": "Crea un nuevo autor. Todos los campos son requeridos excepto dateOfDeath."
+						"description": "Crea un nuevo autor. Todos los campos son requeridos excepto dateOfDeath. Requiere rol admin o editor."
 					}
 				},
 				{
@@ -119,8 +127,12 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/authors",
-							"host": ["{{baseUrl}}"],
-							"path": ["authors"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"authors"
+							]
 						},
 						"description": "Obtiene la lista de todos los autores."
 					}
@@ -132,8 +144,13 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/authors/{{authorId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["authors", "{{authorId}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"authors",
+								"{{authorId}}"
+							]
 						},
 						"description": "Obtiene un autor por su ID."
 					}
@@ -145,8 +162,13 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/authors/filters?name=Gabriel&nationality=Colombiana&isActive=true&skip=0&limit=10&orderBy=firstName&sortBy=asc",
-							"host": ["{{baseUrl}}"],
-							"path": ["authors", "filters"],
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"authors",
+								"filters"
+							],
 							"query": [
 								{
 									"key": "name",
@@ -196,6 +218,10 @@
 							{
 								"key": "Content-Type",
 								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
 							}
 						],
 						"body": {
@@ -204,27 +230,42 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/authors/{{authorId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["authors", "{{authorId}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"authors",
+								"{{authorId}}"
+							]
 						},
-						"description": "Actualiza un autor. Todos los campos son opcionales (partial update)."
+						"description": "Actualiza un autor. Todos los campos son opcionales (partial update). Requiere rol admin o editor."
 					}
 				},
 				{
 					"name": "Delete Author (Soft Delete)",
 					"request": {
 						"method": "DELETE",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
 						"url": {
 							"raw": "{{baseUrl}}/authors/{{authorId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["authors", "{{authorId}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"authors",
+								"{{authorId}}"
+							]
 						},
-						"description": "Elimina un autor (soft delete - cambia estado a inactivo)."
+						"description": "Elimina un autor (soft delete - cambia estado a inactivo). Requiere rol admin o editor."
 					}
 				}
 			],
-			"description": "Endpoints para la gestión de autores."
+			"description": "Endpoints para la gestión de autores. Requiere autenticación (admin/editor) para crear, actualizar y eliminar."
 		},
 		{
 			"name": "Books",
@@ -256,6 +297,10 @@
 							{
 								"key": "Content-Type",
 								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
 							}
 						],
 						"body": {
@@ -264,10 +309,14 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/books",
-							"host": ["{{baseUrl}}"],
-							"path": ["books"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"books"
+							]
 						},
-						"description": "Crea un nuevo libro. Los campos publisher, authors y languages reciben IDs de los recursos correspondientes."
+						"description": "Crea un nuevo libro. Los campos publisher, authors y languages reciben IDs de los recursos correspondientes. Requiere rol admin o editor."
 					}
 				},
 				{
@@ -277,8 +326,12 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/books",
-							"host": ["{{baseUrl}}"],
-							"path": ["books"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"books"
+							]
 						},
 						"description": "Obtiene la lista de todos los libros."
 					}
@@ -290,8 +343,13 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/books/{{bookId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["books", "{{bookId}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"books",
+								"{{bookId}}"
+							]
 						},
 						"description": "Obtiene un libro por su ID."
 					}
@@ -303,8 +361,13 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/books/filters?title=Cien&isbn=978&isActive=true&skip=0&limit=10&orderBy=title&sortBy=asc",
-							"host": ["{{baseUrl}}"],
-							"path": ["books", "filters"],
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"books",
+								"filters"
+							],
 							"query": [
 								{
 									"key": "title",
@@ -354,6 +417,10 @@
 							{
 								"key": "Content-Type",
 								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
 							}
 						],
 						"body": {
@@ -362,40 +429,66 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/books/{{bookId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["books", "{{bookId}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"books",
+								"{{bookId}}"
+							]
 						},
-						"description": "Actualiza un libro. Todos los campos son opcionales (partial update)."
+						"description": "Actualiza un libro. Todos los campos son opcionales (partial update). Requiere rol admin o editor."
 					}
 				},
 				{
 					"name": "Delete Book (Soft Delete)",
 					"request": {
 						"method": "DELETE",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
 						"url": {
 							"raw": "{{baseUrl}}/books/{{bookId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["books", "{{bookId}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"books",
+								"{{bookId}}"
+							]
 						},
-						"description": "Elimina un libro (soft delete - cambia estado a inactivo)."
+						"description": "Elimina un libro (soft delete - cambia estado a inactivo). Requiere rol admin o editor."
 					}
 				},
 				{
 					"name": "Hard Delete Book",
 					"request": {
 						"method": "DELETE",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
 						"url": {
 							"raw": "{{baseUrl}}/books/{{bookId}}/hard-delete",
-							"host": ["{{baseUrl}}"],
-							"path": ["books", "{{bookId}}", "hard-delete"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"books",
+								"{{bookId}}",
+								"hard-delete"
+							]
 						},
-						"description": "Elimina permanentemente un libro de la base de datos."
+						"description": "Elimina permanentemente un libro de la base de datos. Requiere rol admin."
 					}
 				}
 			],
-			"description": "Endpoints para la gestión de libros."
+			"description": "Endpoints para la gestión de libros. Requiere autenticación (admin/editor) para crear, actualizar y eliminar."
 		},
 		{
 			"name": "Countries",
@@ -427,6 +520,10 @@
 							{
 								"key": "Content-Type",
 								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
 							}
 						],
 						"body": {
@@ -435,10 +532,14 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/countries",
-							"host": ["{{baseUrl}}"],
-							"path": ["countries"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"countries"
+							]
 						},
-						"description": "Crea un nuevo país."
+						"description": "Crea un nuevo país. Requiere rol admin o editor."
 					}
 				},
 				{
@@ -448,8 +549,12 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/countries",
-							"host": ["{{baseUrl}}"],
-							"path": ["countries"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"countries"
+							]
 						},
 						"description": "Obtiene la lista de todos los países."
 					}
@@ -461,8 +566,13 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/countries/{{countryId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["countries", "{{countryId}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"countries",
+								"{{countryId}}"
+							]
 						},
 						"description": "Obtiene un país por su ID."
 					}
@@ -474,8 +584,14 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/countries/iso-code/CO",
-							"host": ["{{baseUrl}}"],
-							"path": ["countries", "iso-code", "CO"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"countries",
+								"iso-code",
+								"CO"
+							]
 						},
 						"description": "Obtiene un país por su código ISO."
 					}
@@ -487,8 +603,13 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/countries/filters?name=Colombia&isoCode=CO&isActive=true&skip=0&limit=10&orderBy=name&sortBy=asc",
-							"host": ["{{baseUrl}}"],
-							"path": ["countries", "filters"],
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"countries",
+								"filters"
+							],
 							"query": [
 								{
 									"key": "name",
@@ -538,6 +659,10 @@
 							{
 								"key": "Content-Type",
 								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
 							}
 						],
 						"body": {
@@ -546,27 +671,42 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/countries/{{countryId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["countries", "{{countryId}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"countries",
+								"{{countryId}}"
+							]
 						},
-						"description": "Actualiza un país. Todos los campos son opcionales (partial update)."
+						"description": "Actualiza un país. Todos los campos son opcionales (partial update). Requiere rol admin o editor."
 					}
 				},
 				{
 					"name": "Delete Country (Soft Delete)",
 					"request": {
 						"method": "DELETE",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
 						"url": {
 							"raw": "{{baseUrl}}/countries/{{countryId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["countries", "{{countryId}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"countries",
+								"{{countryId}}"
+							]
 						},
-						"description": "Elimina un país (soft delete - cambia estado a inactivo)."
+						"description": "Elimina un país (soft delete - cambia estado a inactivo). Requiere rol admin o editor."
 					}
 				}
 			],
-			"description": "Endpoints para la gestión de países."
+			"description": "Endpoints para la gestión de países. Requiere autenticación (admin/editor) para crear, actualizar y eliminar."
 		},
 		{
 			"name": "Languages",
@@ -598,6 +738,10 @@
 							{
 								"key": "Content-Type",
 								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
 							}
 						],
 						"body": {
@@ -606,10 +750,14 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/languages",
-							"host": ["{{baseUrl}}"],
-							"path": ["languages"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"languages"
+							]
 						},
-						"description": "Crea un nuevo idioma."
+						"description": "Crea un nuevo idioma. Requiere rol admin o editor."
 					}
 				},
 				{
@@ -619,8 +767,12 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/languages",
-							"host": ["{{baseUrl}}"],
-							"path": ["languages"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"languages"
+							]
 						},
 						"description": "Obtiene la lista de todos los idiomas."
 					}
@@ -632,8 +784,13 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/languages/{{languageId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["languages", "{{languageId}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"languages",
+								"{{languageId}}"
+							]
 						},
 						"description": "Obtiene un idioma por su ID."
 					}
@@ -645,8 +802,14 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/languages/iso-code/ES",
-							"host": ["{{baseUrl}}"],
-							"path": ["languages", "iso-code", "ES"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"languages",
+								"iso-code",
+								"ES"
+							]
 						},
 						"description": "Obtiene un idioma por su código ISO."
 					}
@@ -658,8 +821,13 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/languages/filters?name=Español&isoCode=ES&isActive=true&skip=0&limit=10&orderBy=name&sortBy=asc",
-							"host": ["{{baseUrl}}"],
-							"path": ["languages", "filters"],
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"languages",
+								"filters"
+							],
 							"query": [
 								{
 									"key": "name",
@@ -709,6 +877,10 @@
 							{
 								"key": "Content-Type",
 								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
 							}
 						],
 						"body": {
@@ -717,27 +889,42 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/languages/{{languageId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["languages", "{{languageId}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"languages",
+								"{{languageId}}"
+							]
 						},
-						"description": "Actualiza un idioma. Todos los campos son opcionales (partial update)."
+						"description": "Actualiza un idioma. Todos los campos son opcionales (partial update). Requiere rol admin o editor."
 					}
 				},
 				{
 					"name": "Delete Language (Soft Delete)",
 					"request": {
 						"method": "DELETE",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
 						"url": {
 							"raw": "{{baseUrl}}/languages/{{languageId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["languages", "{{languageId}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"languages",
+								"{{languageId}}"
+							]
 						},
-						"description": "Elimina un idioma (soft delete - cambia estado a inactivo)."
+						"description": "Elimina un idioma (soft delete - cambia estado a inactivo). Requiere rol admin o editor."
 					}
 				}
 			],
-			"description": "Endpoints para la gestión de idiomas."
+			"description": "Endpoints para la gestión de idiomas. Requiere autenticación (admin/editor) para crear, actualizar y eliminar."
 		},
 		{
 			"name": "Publishers",
@@ -769,6 +956,10 @@
 							{
 								"key": "Content-Type",
 								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
 							}
 						],
 						"body": {
@@ -777,10 +968,14 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/publishers",
-							"host": ["{{baseUrl}}"],
-							"path": ["publishers"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"publishers"
+							]
 						},
-						"description": "Crea una nueva editorial."
+						"description": "Crea una nueva editorial. Requiere rol admin o editor."
 					}
 				},
 				{
@@ -790,8 +985,12 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/publishers",
-							"host": ["{{baseUrl}}"],
-							"path": ["publishers"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"publishers"
+							]
 						},
 						"description": "Obtiene la lista de todas las editoriales."
 					}
@@ -803,8 +1002,13 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/publishers/{{publisherId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["publishers", "{{publisherId}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"publishers",
+								"{{publisherId}}"
+							]
 						},
 						"description": "Obtiene una editorial por su ID."
 					}
@@ -816,8 +1020,13 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/publishers/filters?name=Sudamericana&isActive=true&skip=0&limit=10&orderBy=name&sortBy=asc",
-							"host": ["{{baseUrl}}"],
-							"path": ["publishers", "filters"],
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"publishers",
+								"filters"
+							],
 							"query": [
 								{
 									"key": "name",
@@ -862,6 +1071,10 @@
 							{
 								"key": "Content-Type",
 								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
 							}
 						],
 						"body": {
@@ -870,27 +1083,42 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/publishers/{{publisherId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["publishers", "{{publisherId}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"publishers",
+								"{{publisherId}}"
+							]
 						},
-						"description": "Actualiza una editorial. Todos los campos son opcionales (partial update)."
+						"description": "Actualiza una editorial. Todos los campos son opcionales (partial update). Requiere rol admin o editor."
 					}
 				},
 				{
 					"name": "Delete Publisher (Soft Delete)",
 					"request": {
 						"method": "DELETE",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
 						"url": {
 							"raw": "{{baseUrl}}/publishers/{{publisherId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["publishers", "{{publisherId}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"publishers",
+								"{{publisherId}}"
+							]
 						},
-						"description": "Elimina una editorial (soft delete - cambia estado a inactivo)."
+						"description": "Elimina una editorial (soft delete - cambia estado a inactivo). Requiere rol admin o editor."
 					}
 				}
 			],
-			"description": "Endpoints para la gestión de editoriales."
+			"description": "Endpoints para la gestión de editoriales. Requiere autenticación (admin/editor) para crear, actualizar y eliminar."
 		},
 		{
 			"name": "Auth",
@@ -930,8 +1158,13 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/auth/register",
-							"host": ["{{baseUrl}}"],
-							"path": ["auth", "register"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
 						},
 						"description": "Registra un nuevo usuario. La contraseña debe tener mínimo 8 caracteres, al menos 1 mayúscula, 1 minúscula y 1 número."
 					}
@@ -974,8 +1207,13 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/auth/login",
-							"host": ["{{baseUrl}}"],
-							"path": ["auth", "login"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
 						},
 						"description": "Inicia sesión y retorna un JWT. El token se guarda automáticamente en la variable authToken."
 					}
@@ -992,8 +1230,13 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/auth/me",
-							"host": ["{{baseUrl}}"],
-							"path": ["auth", "me"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"me"
+							]
 						},
 						"description": "Obtiene el perfil del usuario autenticado. Requiere token JWT."
 					}
@@ -1018,8 +1261,13 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/auth/me",
-							"host": ["{{baseUrl}}"],
-							"path": ["auth", "me"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"me"
+							]
 						},
 						"description": "Actualiza el perfil del usuario autenticado. Todos los campos son opcionales. Requiere token JWT."
 					}
@@ -1042,8 +1290,12 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/users",
-							"host": ["{{baseUrl}}"],
-							"path": ["users"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users"
+							]
 						},
 						"description": "Obtiene la lista de todos los usuarios. Requiere token JWT."
 					}
@@ -1060,8 +1312,13 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/users/filters?name=Elvin&email=bookworm&isActive=true&skip=0&limit=10&orderBy=created_at&sortBy=desc",
-							"host": ["{{baseUrl}}"],
-							"path": ["users", "filters"],
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"filters"
+							],
 							"query": [
 								{
 									"key": "name",
@@ -1115,8 +1372,13 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/users/{{userId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["users", "{{userId}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"{{userId}}"
+							]
 						},
 						"description": "Obtiene un usuario por su ID. Requiere token JWT."
 					}
@@ -1133,14 +1395,51 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/users/{{userId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["users", "{{userId}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"{{userId}}"
+							]
 						},
 						"description": "Elimina un usuario permanentemente. Requiere token JWT."
 					}
+				},
+				{
+					"name": "Assign Role",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"role\": \"editor\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/{{userId}}/role",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"{{userId}}",
+								"role"
+							]
+						},
+						"description": "Asigna un rol a un usuario. Roles disponibles: admin, editor, user. Requiere rol admin. No permite remover el último administrador."
+					}
 				}
 			],
-			"description": "Endpoints para la gestión de usuarios. Todos requieren autenticación JWT."
+			"description": "Endpoints para la gestión de usuarios. Todos requieren autenticación JWT y rol admin."
 		},
 		{
 			"name": "Reading Lists",
@@ -1184,8 +1483,12 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/reading-lists",
-							"host": ["{{baseUrl}}"],
-							"path": ["reading-lists"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reading-lists"
+							]
 						},
 						"description": "Crea una nueva reading list. Requiere autenticación. El campo isPublic es opcional (default: true)."
 					}
@@ -1197,8 +1500,12 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/reading-lists",
-							"host": ["{{baseUrl}}"],
-							"path": ["reading-lists"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reading-lists"
+							]
 						},
 						"description": "Obtiene todas las reading lists públicas. No requiere autenticación."
 					}
@@ -1210,8 +1517,13 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/reading-lists/filters?category=favorites&isPublic=true&isActive=true&name=favoritos&skip=0&limit=10&orderBy=createdAt&sortBy=desc",
-							"host": ["{{baseUrl}}"],
-							"path": ["reading-lists", "filters"],
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reading-lists",
+								"filters"
+							],
 							"query": [
 								{
 									"key": "category",
@@ -1270,8 +1582,13 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/reading-lists/me",
-							"host": ["{{baseUrl}}"],
-							"path": ["reading-lists", "me"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reading-lists",
+								"me"
+							]
 						},
 						"description": "Obtiene todas las reading lists del usuario autenticado (públicas y privadas). Requiere token JWT."
 					}
@@ -1283,8 +1600,14 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/reading-lists/user/{{userId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["reading-lists", "user", "{{userId}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reading-lists",
+								"user",
+								"{{userId}}"
+							]
 						},
 						"description": "Obtiene las reading lists públicas de un usuario específico. No requiere autenticación."
 					}
@@ -1301,8 +1624,13 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/reading-lists/{{readingListId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["reading-lists", "{{readingListId}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reading-lists",
+								"{{readingListId}}"
+							]
 						},
 						"description": "Obtiene una reading list por su ID. Requiere autenticación. Listas públicas son visibles para cualquier usuario autenticado; las privadas solo para su dueño."
 					}
@@ -1327,8 +1655,13 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/reading-lists/{{readingListId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["reading-lists", "{{readingListId}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reading-lists",
+								"{{readingListId}}"
+							]
 						},
 						"description": "Actualiza una reading list propia. Solo el dueño puede actualizar (ownership check). Todos los campos son opcionales."
 					}
@@ -1345,8 +1678,13 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/reading-lists/{{readingListId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["reading-lists", "{{readingListId}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reading-lists",
+								"{{readingListId}}"
+							]
 						},
 						"description": "Elimina una reading list propia. Limpia los list_items y edges added_to_list asociados. Solo el dueño puede eliminar."
 					}
@@ -1371,8 +1709,14 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/reading-lists/{{readingListId}}/books",
-							"host": ["{{baseUrl}}"],
-							"path": ["reading-lists", "{{readingListId}}", "books"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reading-lists",
+								"{{readingListId}}",
+								"books"
+							]
 						},
 						"description": "Agrega un libro a una reading list propia. Crea el list_item y el graph edge added_to_list. Los campos position y notes son opcionales."
 					}
@@ -1389,8 +1733,14 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/reading-lists/{{readingListId}}/books",
-							"host": ["{{baseUrl}}"],
-							"path": ["reading-lists", "{{readingListId}}", "books"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reading-lists",
+								"{{readingListId}}",
+								"books"
+							]
 						},
 						"description": "Obtiene todos los libros de una reading list ordenados por posición. Requiere autenticación. Listas públicas son visibles para cualquier usuario autenticado; las privadas solo para su dueño."
 					}
@@ -1415,8 +1765,15 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/reading-lists/{{readingListId}}/books/{{bookId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["reading-lists", "{{readingListId}}", "books", "{{bookId}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reading-lists",
+								"{{readingListId}}",
+								"books",
+								"{{bookId}}"
+							]
 						},
 						"description": "Actualiza la posición y/o notas de un libro en una reading list. Ambos campos son opcionales. Solo el dueño puede actualizar."
 					}
@@ -1433,8 +1790,15 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/reading-lists/{{readingListId}}/books/{{bookId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["reading-lists", "{{readingListId}}", "books", "{{bookId}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reading-lists",
+								"{{readingListId}}",
+								"books",
+								"{{bookId}}"
+							]
 						},
 						"description": "Quita un libro de una reading list. Elimina el list_item y el graph edge added_to_list. Solo el dueño puede quitar libros."
 					}
@@ -1484,8 +1848,12 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/reading-progress",
-							"host": ["{{baseUrl}}"],
-							"path": ["reading-progress"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reading-progress"
+							]
 						},
 						"description": "Inicia el tracking de un libro. Crea un registro de progreso. Si ya existe un progreso para el mismo user+book, devuelve 409 Conflict. Status válidos: want_to_read, reading, finished, abandoned."
 					}
@@ -1502,8 +1870,13 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/reading-progress/me",
-							"host": ["{{baseUrl}}"],
-							"path": ["reading-progress", "me"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reading-progress",
+								"me"
+							]
 						},
 						"description": "Obtiene todos los progresos de lectura del usuario autenticado (su estantería). Ordenados por last_read_at descendente."
 					}
@@ -1520,8 +1893,14 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/reading-progress/me/stats",
-							"host": ["{{baseUrl}}"],
-							"path": ["reading-progress", "me", "stats"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reading-progress",
+								"me",
+								"stats"
+							]
 						},
 						"description": "Obtiene las estadísticas de lectura del usuario: total de libros, terminados, leyendo, por leer, abandonados."
 					}
@@ -1538,8 +1917,13 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/reading-progress/filters?status=reading&isActive=true&skip=0&limit=10&orderBy=lastReadAt&sortBy=desc",
-							"host": ["{{baseUrl}}"],
-							"path": ["reading-progress", "filters"],
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reading-progress",
+								"filters"
+							],
 							"query": [
 								{
 									"key": "status",
@@ -1588,8 +1972,13 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/reading-progress/{{readingProgressId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["reading-progress", "{{readingProgressId}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reading-progress",
+								"{{readingProgressId}}"
+							]
 						},
 						"description": "Obtiene un progreso de lectura por su ID."
 					}
@@ -1606,8 +1995,14 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/reading-progress/book/{{bookId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["reading-progress", "book", "{{bookId}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reading-progress",
+								"book",
+								"{{bookId}}"
+							]
 						},
 						"description": "Obtiene el progreso de lectura del usuario autenticado para un libro específico."
 					}
@@ -1632,8 +2027,13 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/reading-progress/{{readingProgressId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["reading-progress", "{{readingProgressId}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reading-progress",
+								"{{readingProgressId}}"
+							]
 						},
 						"description": "Actualiza el progreso de lectura. Campos opcionales: currentPage, totalPages, status. El percentage se calcula automáticamente. Cambiar status a 'reading' setea startedAt, cambiar a 'finished' setea finishedAt y currentPage=totalPages. Solo el dueño puede actualizar."
 					}
@@ -1650,8 +2050,13 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/reading-progress/{{readingProgressId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["reading-progress", "{{readingProgressId}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reading-progress",
+								"{{readingProgressId}}"
+							]
 						},
 						"description": "Elimina un progreso de lectura. Solo el dueño puede eliminar."
 					}
@@ -1701,8 +2106,12 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/reviews",
-							"host": ["{{baseUrl}}"],
-							"path": ["reviews"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reviews"
+							]
 						},
 						"description": "Crea una nueva review para un libro. Requiere autenticación. Solo se permite una review por usuario por libro. Rating de 1 a 5. Título entre 2-200 caracteres, body entre 10-5000 caracteres."
 					}
@@ -1746,8 +2155,12 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/reviews",
-							"host": ["{{baseUrl}}"],
-							"path": ["reviews"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reviews"
+							]
 						},
 						"description": "Crea una respuesta threaded a una review existente. Incluye parentId para indicar a qué review responde. Las replies no crean el graph edge 'reviewed'."
 					}
@@ -1759,8 +2172,13 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/reviews/{{reviewId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["reviews", "{{reviewId}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reviews",
+								"{{reviewId}}"
+							]
 						},
 						"description": "Obtiene una review por su ID. No requiere autenticación."
 					}
@@ -1772,8 +2190,14 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/reviews/book/{{bookId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["reviews", "book", "{{bookId}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reviews",
+								"book",
+								"{{bookId}}"
+							]
 						},
 						"description": "Obtiene todas las reviews top-level de un libro (sin replies). No requiere autenticación."
 					}
@@ -1785,8 +2209,15 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/reviews/book/{{bookId}}/rating",
-							"host": ["{{baseUrl}}"],
-							"path": ["reviews", "book", "{{bookId}}", "rating"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reviews",
+								"book",
+								"{{bookId}}",
+								"rating"
+							]
 						},
 						"description": "Obtiene el rating promedio y la cantidad total de reviews de un libro. No requiere autenticación."
 					}
@@ -1798,8 +2229,14 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/reviews/{{reviewId}}/replies",
-							"host": ["{{baseUrl}}"],
-							"path": ["reviews", "{{reviewId}}", "replies"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reviews",
+								"{{reviewId}}",
+								"replies"
+							]
 						},
 						"description": "Obtiene las respuestas threaded de una review. No requiere autenticación."
 					}
@@ -1811,8 +2248,14 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/reviews/user/{{userId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["reviews", "user", "{{userId}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reviews",
+								"user",
+								"{{userId}}"
+							]
 						},
 						"description": "Obtiene todas las reviews de un usuario. No requiere autenticación."
 					}
@@ -1824,8 +2267,13 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/reviews/filters?bookId={{bookId}}&rating=5&limit=10&skip=0&orderBy=created_at&sortBy=desc",
-							"host": ["{{baseUrl}}"],
-							"path": ["reviews", "filters"],
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reviews",
+								"filters"
+							],
 							"query": [
 								{
 									"key": "bookId",
@@ -1882,8 +2330,13 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/reviews/{{reviewId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["reviews", "{{reviewId}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reviews",
+								"{{reviewId}}"
+							]
 						},
 						"description": "Actualiza una review existente. Solo el dueño puede actualizar. Campos opcionales: rating, title, body. No se puede cambiar el libro ni el parent."
 					}
@@ -1900,8 +2353,13 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/reviews/{{reviewId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["reviews", "{{reviewId}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reviews",
+								"{{reviewId}}"
+							]
 						},
 						"description": "Soft-delete de una review (toggle is_active). Solo el dueño puede eliminar. También elimina el graph edge 'reviewed'."
 					}
@@ -1924,8 +2382,13 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/recommendations/personal?limit=10",
-							"host": ["{{baseUrl}}"],
-							"path": ["recommendations", "personal"],
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"recommendations",
+								"personal"
+							],
 							"query": [
 								{
 									"key": "limit",
@@ -1944,8 +2407,15 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/recommendations/book/{{bookId}}/similar?limit=10",
-							"host": ["{{baseUrl}}"],
-							"path": ["recommendations", "book", "{{bookId}}", "similar"],
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"recommendations",
+								"book",
+								"{{bookId}}",
+								"similar"
+							],
 							"query": [
 								{
 									"key": "limit",
@@ -1969,8 +2439,15 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/recommendations/book/{{bookId}}/because-you-read?limit=10",
-							"host": ["{{baseUrl}}"],
-							"path": ["recommendations", "book", "{{bookId}}", "because-you-read"],
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"recommendations",
+								"book",
+								"{{bookId}}",
+								"because-you-read"
+							],
 							"query": [
 								{
 									"key": "limit",
@@ -1989,8 +2466,14 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/recommendations/category/ficcion?limit=10",
-							"host": ["{{baseUrl}}"],
-							"path": ["recommendations", "category", "ficcion"],
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"recommendations",
+								"category",
+								"ficcion"
+							],
 							"query": [
 								{
 									"key": "limit",
@@ -2009,8 +2492,13 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/recommendations/trending?limit=10&days=30",
-							"host": ["{{baseUrl}}"],
-							"path": ["recommendations", "trending"],
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"recommendations",
+								"trending"
+							],
 							"query": [
 								{
 									"key": "limit",

@@ -8,6 +8,7 @@ import {
   ForbiddenException,
   NotFoundException,
 } from '@/modules/shared/exceptions';
+import { type UserRole, ROLES } from '@/modules/shared/security/interfaces';
 
 @injectable()
 export class UpdateProgressUseCase {
@@ -20,13 +21,14 @@ export class UpdateProgressUseCase {
     id: string,
     userId: string,
     updateProgressDto: UpdateProgressDto,
+    role?: UserRole,
   ) {
     const existing =
       await this.readingProgressRepository.getProgressById(id);
 
     if (!existing) throw new NotFoundException('Reading progress not found');
 
-    if (existing.properties().userId !== userId)
+    if (role !== ROLES.ADMIN && existing.properties().userId !== userId)
       throw new ForbiddenException(
         'No tienes permiso para actualizar este progreso',
       );

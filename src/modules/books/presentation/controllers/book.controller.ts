@@ -8,6 +8,7 @@ import {
   Post,
   Put,
   Query,
+  UseGuard,
 } from '@inversifyjs/http-core';
 import { inject } from 'inversify';
 
@@ -53,6 +54,7 @@ export class BookController {
     private updateBookUseCase: UpdateBookUseCase,
   ) {}
 
+  @UseGuard(TYPES.AuthGuard, TYPES.AdminOrEditorGuard)
   @Post('/')
   async create(@Body() body: unknown): Promise<CreatedHttpResponse> {
     const validationSchema = validate(CreateBookSchema, body);
@@ -98,6 +100,7 @@ export class BookController {
     return book.properties();
   }
 
+  @UseGuard(TYPES.AuthGuard, TYPES.AdminOrEditorGuard)
   @Put('/:id')
   async update(@Params({ name: 'id' }) id: string, @Body() body: unknown) {
     if (!id) throw new BadRequestException('Book id is required');
@@ -114,6 +117,7 @@ export class BookController {
     return book.properties();
   }
 
+  @UseGuard(TYPES.AuthGuard, TYPES.AdminOrEditorGuard)
   @Delete('/:id')
   async remove(@Params({ name: 'id' }) id: string) {
     if (!id) throw new BadRequestException('Book id is required');
@@ -125,6 +129,7 @@ export class BookController {
     };
   }
 
+  @UseGuard(TYPES.AuthGuard, TYPES.AdminGuard)
   @Delete('/:id/hard-delete')
   async removePermanent(@Params({ name: 'id' }) id: string) {
     if (!id) throw new BadRequestException('Book id is required');

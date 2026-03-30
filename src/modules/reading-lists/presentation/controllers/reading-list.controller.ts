@@ -173,7 +173,7 @@ export class ReadingListController {
   ) {
     if (!id) throw new BadRequestException('Reading list id is required');
 
-    const { id: userId } = (req as AuthenticatedRequest).user;
+    const { id: userId, role } = (req as AuthenticatedRequest).user;
 
     const validationSchema = validate(UpdateReadingListSchema, body);
 
@@ -188,6 +188,7 @@ export class ReadingListController {
       id,
       userId,
       updateReadingListDto,
+      role,
     );
 
     return readingList.properties();
@@ -201,9 +202,9 @@ export class ReadingListController {
   ) {
     if (!id) throw new BadRequestException('Reading list id is required');
 
-    const { id: userId } = (req as AuthenticatedRequest).user;
+    const { id: userId, role } = (req as AuthenticatedRequest).user;
 
-    const isRemoved = await this.removeReadingListUseCase.execute(id, userId);
+    const isRemoved = await this.removeReadingListUseCase.execute(id, userId, role);
 
     return {
       message: isRemoved
@@ -221,7 +222,7 @@ export class ReadingListController {
   ): Promise<CreatedHttpResponse> {
     if (!id) throw new BadRequestException('Reading list id is required');
 
-    const { id: userId } = (req as AuthenticatedRequest).user;
+    const { id: userId, role } = (req as AuthenticatedRequest).user;
 
     const validationSchema = validate(AddBookToListSchema, body);
 
@@ -235,6 +236,7 @@ export class ReadingListController {
       id,
       userId,
       addBookToListDto,
+      role,
     );
 
     return new CreatedHttpResponse(listItem.properties());
@@ -267,7 +269,7 @@ export class ReadingListController {
     if (!id) throw new BadRequestException('Reading list id is required');
     if (!bookId) throw new BadRequestException('Book id is required');
 
-    const { id: userId } = (req as AuthenticatedRequest).user;
+    const { id: userId, role } = (req as AuthenticatedRequest).user;
 
     const validationSchema = validate(UpdateListItemSchema, body);
 
@@ -282,6 +284,7 @@ export class ReadingListController {
       bookId,
       userId,
       updateListItemDto,
+      role,
     );
 
     return listItem.properties();
@@ -297,12 +300,13 @@ export class ReadingListController {
     if (!id) throw new BadRequestException('Reading list id is required');
     if (!bookId) throw new BadRequestException('Book id is required');
 
-    const { id: userId } = (req as AuthenticatedRequest).user;
+    const { id: userId, role } = (req as AuthenticatedRequest).user;
 
     const isRemoved = await this.removeBookFromListUseCase.execute(
       id,
       bookId,
       userId,
+      role,
     );
 
     return {

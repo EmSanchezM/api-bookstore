@@ -8,6 +8,7 @@ import {
   Post,
   Put,
   Query,
+  UseGuard,
 } from '@inversifyjs/http-core';
 import { inject } from 'inversify';
 
@@ -50,6 +51,7 @@ export class PublisherController {
     private updatePublisherUseCase: UpdatePublisherUseCase,
   ) {}
 
+  @UseGuard(TYPES.AuthGuard, TYPES.AdminOrEditorGuard)
   @Post('/')
   async create(@Body() body: unknown): Promise<CreatedHttpResponse> {
     const validationSchema = validate(CreatePublisherSchema, body);
@@ -97,6 +99,7 @@ export class PublisherController {
     return publisher.properties();
   }
 
+  @UseGuard(TYPES.AuthGuard, TYPES.AdminOrEditorGuard)
   @Put('/:id')
   async update(@Params({ name: 'id' }) id: string, @Body() body: unknown) {
     if (!id) throw new BadRequestException('Publisher id is required');
@@ -116,6 +119,7 @@ export class PublisherController {
     return publisher.properties();
   }
 
+  @UseGuard(TYPES.AuthGuard, TYPES.AdminOrEditorGuard)
   @Delete('/:id')
   async remove(@Params({ name: 'id' }) id: string) {
     if (!id) throw new BadRequestException('Publisher id is required');

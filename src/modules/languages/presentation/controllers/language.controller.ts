@@ -8,6 +8,7 @@ import {
   Post,
   Put,
   Query,
+  UseGuard,
 } from '@inversifyjs/http-core';
 import { inject } from 'inversify';
 
@@ -53,6 +54,7 @@ export class LanguageController {
     private removeLanguageUseCase: RemoveLanguageUseCase,
   ) {}
 
+  @UseGuard(TYPES.AuthGuard, TYPES.AdminOrEditorGuard)
   @Post('/')
   async create(@Body() body: unknown): Promise<CreatedHttpResponse> {
     const validationSchema = validate(CreateLanguageSchema, body);
@@ -109,6 +111,7 @@ export class LanguageController {
     return language.properties();
   }
 
+  @UseGuard(TYPES.AuthGuard, TYPES.AdminOrEditorGuard)
   @Put('/:id')
   async update(@Params({ name: 'id' }) id: string, @Body() body: unknown) {
     if (!id) throw new BadRequestException('Language id is required');
@@ -128,6 +131,7 @@ export class LanguageController {
     return language.properties();
   }
 
+  @UseGuard(TYPES.AuthGuard, TYPES.AdminOrEditorGuard)
   @Delete('/:id')
   async remove(@Params({ name: 'id' }) id: string) {
     if (!id) throw new BadRequestException('Language id is required');

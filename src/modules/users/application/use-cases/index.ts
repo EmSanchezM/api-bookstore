@@ -5,3 +5,5 @@ export { FindAllUsersUseCase } from './find-all';
 export { FindByFiltersUserUseCase } from './find-by-filters';
 export { UpdateProfileUseCase } from './update-profile';
 export { RemoveUserUseCase } from './remove-user';
+export { SeedAdminUseCase } from './seed-admin';
+export { AssignRoleUseCase } from './assign-role';

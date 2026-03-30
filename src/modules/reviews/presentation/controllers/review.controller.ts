@@ -149,7 +149,7 @@ export class ReviewController {
   ) {
     if (!id) throw new BadRequestException('Review id is required');
 
-    const { id: userId } = (req as AuthenticatedRequest).user;
+    const { id: userId, role } = (req as AuthenticatedRequest).user;
 
     const validationSchema = validate(UpdateReviewSchema, body);
 
@@ -163,6 +163,7 @@ export class ReviewController {
       id,
       userId,
       updateReviewDto,
+      role,
     );
 
     return review.properties();
@@ -176,9 +177,9 @@ export class ReviewController {
   ) {
     if (!id) throw new BadRequestException('Review id is required');
 
-    const { id: userId } = (req as AuthenticatedRequest).user;
+    const { id: userId, role } = (req as AuthenticatedRequest).user;
 
-    const isRemoved = await this.removeReviewUseCase.execute(id, userId);
+    const isRemoved = await this.removeReviewUseCase.execute(id, userId, role);
 
     return {
       message: isRemoved

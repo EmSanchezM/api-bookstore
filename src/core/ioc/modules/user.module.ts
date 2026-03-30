@@ -5,12 +5,18 @@ import {
   JoseTokenProvider,
 } from '@/modules/shared/security';
 import {
+  AdminGuard,
+  AdminOrEditorGuard,
+} from '@/modules/shared/security/guards';
+import {
+  AssignRoleUseCase,
   FindAllUsersUseCase,
   FindByFiltersUserUseCase,
   FindByIdUserUseCase,
   LoginUserUseCase,
   RegisterUserUseCase,
   RemoveUserUseCase,
+  SeedAdminUseCase,
   UpdateProfileUseCase,
 } from '@/modules/users/application/use-cases';
 import { SurrealUserRepository } from '@/modules/users/infrastructure/repositories/surreal-user.repository';
@@ -21,6 +27,8 @@ export const userModule = new ContainerModule(
     options.bind(TYPES.PasswordHasher).to(Argon2PasswordHasher);
     options.bind(TYPES.TokenProvider).to(JoseTokenProvider);
     options.bind(TYPES.AuthGuard).to(AuthGuard);
+    options.bind(TYPES.AdminGuard).to(AdminGuard);
+    options.bind(TYPES.AdminOrEditorGuard).to(AdminOrEditorGuard);
     options.bind(TYPES.UserRepository).to(SurrealUserRepository);
     options.bind(TYPES.RegisterUserUseCase).to(RegisterUserUseCase);
     options.bind(TYPES.LoginUserUseCase).to(LoginUserUseCase);
@@ -29,5 +37,7 @@ export const userModule = new ContainerModule(
     options.bind(TYPES.FindByFiltersUserUseCase).to(FindByFiltersUserUseCase);
     options.bind(TYPES.UpdateProfileUseCase).to(UpdateProfileUseCase);
     options.bind(TYPES.RemoveUserUseCase).to(RemoveUserUseCase);
+    options.bind(TYPES.SeedAdminUseCase).to(SeedAdminUseCase);
+    options.bind(TYPES.AssignRoleUseCase).to(AssignRoleUseCase);
   },
 );

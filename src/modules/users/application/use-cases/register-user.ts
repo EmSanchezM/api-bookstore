@@ -8,7 +8,7 @@ import {
   ConflictException,
   InternalServerErrorException,
 } from '@/modules/shared/exceptions';
-import type { PasswordHasher } from '@/modules/shared/security/interfaces';
+import { type PasswordHasher, ROLES } from '@/modules/shared/security/interfaces';
 import { generateUUID } from '@/modules/shared/generate-uuid';
 
 @injectable()
@@ -37,6 +37,7 @@ export class RegisterUserUseCase {
       email: registerUserDto.email,
       passwordHash,
       isActive: true,
+      role: ROLES.USER,
     });
 
     const createdUser = await this.userRepository.createUser(user);

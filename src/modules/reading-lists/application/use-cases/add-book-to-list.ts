@@ -14,6 +14,7 @@ import {
   NotFoundException,
 } from '@/modules/shared/exceptions';
 import { generateUUID } from '@/modules/shared/generate-uuid';
+import { type UserRole, ROLES } from '@/modules/shared/security/interfaces';
 
 @injectable()
 export class AddBookToListUseCase {
@@ -28,13 +29,14 @@ export class AddBookToListUseCase {
     listId: string,
     userId: string,
     addBookToListDto: AddBookToListDto,
+    role?: UserRole,
   ) {
     const readingList =
       await this.readingListRepository.getReadingListById(listId);
 
     if (!readingList) throw new NotFoundException('Reading list not found');
 
-    if (readingList.properties().userId !== userId)
+    if (role !== ROLES.ADMIN && readingList.properties().userId !== userId)
       throw new ForbiddenException(
         'No tienes permiso para agregar libros a esta lista',
       );

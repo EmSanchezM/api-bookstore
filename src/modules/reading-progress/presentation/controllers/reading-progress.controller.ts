@@ -148,7 +148,7 @@ export class ReadingProgressController {
   ) {
     if (!id) throw new BadRequestException('Reading progress id is required');
 
-    const { id: userId } = (req as AuthenticatedRequest).user;
+    const { id: userId, role } = (req as AuthenticatedRequest).user;
 
     const validationSchema = validate(UpdateProgressSchema, body);
 
@@ -162,6 +162,7 @@ export class ReadingProgressController {
       id,
       userId,
       updateProgressDto,
+      role,
     );
 
     return progress.properties();
@@ -175,9 +176,9 @@ export class ReadingProgressController {
   ) {
     if (!id) throw new BadRequestException('Reading progress id is required');
 
-    const { id: userId } = (req as AuthenticatedRequest).user;
+    const { id: userId, role } = (req as AuthenticatedRequest).user;
 
-    const isRemoved = await this.removeProgressUseCase.execute(id, userId);
+    const isRemoved = await this.removeProgressUseCase.execute(id, userId, role);
 
     return {
       message: isRemoved
